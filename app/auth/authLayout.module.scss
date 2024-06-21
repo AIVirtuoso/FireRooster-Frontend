@@ -1,0 +1,33 @@
+.authWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+  height: 100vh;
+
+  .formTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 35rem;
+
+    & > * {
+      margin-bottom: 2rem;
+    }
+  }
+}
+
+.authHeader {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+}
+
+.MuiOutlinedInput-root {
+  font-size: 2rem;
+}
