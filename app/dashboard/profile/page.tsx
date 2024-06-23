@@ -21,6 +21,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
+import { useAppSelector } from "@/hooks/store.hooks";
 
 const profileSchema = z.object({
   first_name: z.string(),
@@ -97,6 +98,7 @@ const usStates = [
 ];
 
 export default function Page() {
+  const user = useAppSelector(state => state.auth.user);
   const {
     register,
     handleSubmit,
@@ -106,6 +108,7 @@ export default function Page() {
     setValue,
   } = useForm<TProfileSchema>({
     resolver: zodResolver(profileSchema),
+    defaultValues: user
   });
   const [filterState, setFilterState] = useState("");
   const [filterAlert, setFilterAlert] = useState<string[]>([]);
