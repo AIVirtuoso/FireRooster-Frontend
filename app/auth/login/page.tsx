@@ -9,6 +9,8 @@ import authService from '@/services/auth';
 import { useState } from 'react';
 import { useErrorMessage } from '@/hooks/useGlobalError';
 import { LoadingButton } from '@mui/lab';
+import { useAppDispatch } from '@/hooks/store.hooks';
+import { setUserData } from '@/store/slices/auth.slice';
 
 const loginSchema = z.object({
     email: z.string().email('Please provide a valid email'),
@@ -30,6 +32,7 @@ export default function Page() {
     });
 
     const router = useRouter();
+    const dispatch = useAppDispatch();
 
     const [openSnack, setOpenSnack] = useState(false);
     const { errorMessage, handleError, clearErrorMessage } = useErrorMessage();
@@ -41,6 +44,11 @@ export default function Page() {
             clearErrorMessage();
             const authToken = resp?.access_token;
             if (authToken) localStorage.setItem('auth', authToken);
+            const user = resp?.user;
+            if (user) {
+                localStorage.setItem('user', JSON.stringify(user));
+                dispatch(setUserData(user));
+            }
             reset();
             router.push('/dashboard/alerts');
         } catch (error) {

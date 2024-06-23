@@ -14,6 +14,7 @@ const MobileNavMenu = () => {
 
   const handleLogOut = async () => {
     localStorage.removeItem("auth");
+    localStorage.removeItem("user");
     router.push("/auth/login/");
     // await authService.logOut().then(() => {
       

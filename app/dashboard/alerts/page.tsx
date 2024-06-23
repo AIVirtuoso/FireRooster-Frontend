@@ -1,4 +1,5 @@
 "use client";
+import { useAppSelector } from "@/hooks/store.hooks";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
 import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
 import {
@@ -25,6 +26,9 @@ export default function Page() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterAlert, setFilterAlert] = useState("");
   const router = useRouter();
+  const user = useAppSelector(state => state.auth.user);
+
+  console.log({user})
 
   const { isAuth } = useCheckAuth();
   const handleChangePage = (event: unknown, newPage: number) => {
