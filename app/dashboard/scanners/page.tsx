@@ -21,7 +21,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 const usStates = [
   "Alabama",
@@ -90,8 +90,14 @@ const MenuProps = {
 export default function Page() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [filterAlert, setFilterAlert] = useState("");
   const [value, setValue] = useState('allscanners');
+  const [info, setInfo] = useState({
+    search: '',
+    state: '',
+    county: '',
+    filter: '',
+    alert: ''
+  })
 
   const router = useRouter();
 
@@ -177,9 +183,25 @@ export default function Page() {
     },
   }));
 
-  const handleFilterChange = (event: SelectChangeEvent) => {
-    setFilterAlert(event.target.value as string);
+  const handleInfoChange = (event: SelectChangeEvent) => {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setInfo({
+      ...info,
+      [name]: value
+    })
   };
+
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const name = event.target.name;
+    const value = event.target.value;
+
+    setInfo({
+      ...info,
+      [name]: value
+    })
+  }
 
   return (
     <>
@@ -189,8 +211,9 @@ export default function Page() {
         <div className="flex mt-6 gap-2">
           <div className="w-48">
             <FormControl size="small" fullWidth>
-              <InputLabel id="state-filter-label">Search scanners</InputLabel>
-              <TextField size="small" />
+              <TextField size="small" onChange={handleSearchChange} 
+                value={info.search} name="search" label="Search scanners"
+              />
             </FormControl>
           </div>
 
@@ -201,8 +224,9 @@ export default function Page() {
                 labelId="state-filter-label"
                 id="state-filter"
                 label="Select state"
-                value={filterAlert}
-                onChange={handleFilterChange}
+                name='state'
+                value={info.state}
+                onChange={handleInfoChange}
                 MenuProps={MenuProps}
               >
                 <MenuItem value={""}>All alerts</MenuItem>
@@ -227,10 +251,11 @@ export default function Page() {
               <Select
                 labelId="state-filter-label"
                 id="state-filter"
-                label="Select state"
-                value={filterAlert}
-                onChange={handleFilterChange}
+                label="Select county"
+                value={info.county}
+                onChange={handleInfoChange}
                 MenuProps={MenuProps}
+                name='county'
               >
                 <MenuItem value={""}>All alerts</MenuItem>
                 {usStates.map((state) => (
@@ -249,8 +274,9 @@ export default function Page() {
                 labelId="alert-filter-label"
                 id="alert-filter"
                 label="Select alert"
-                value={filterAlert}
-                onChange={handleFilterChange}
+                value={info.filter}
+                onChange={handleInfoChange}
+                name='filter'
               >
                 <MenuItem value={""}>All alerts</MenuItem>
                 <MenuItem value={"fire"}>
@@ -270,8 +296,9 @@ export default function Page() {
                 labelId="alert-filter-label"
                 id="alert-filter"
                 label="Select alert"
-                value={filterAlert}
-                onChange={handleFilterChange}
+                value={info.alert}
+                onChange={handleInfoChange}
+                name='alert'
               >
                 <MenuItem value={""}>All alerts</MenuItem>
                 <MenuItem value={"fire"}>
@@ -298,6 +325,9 @@ export default function Page() {
             },
             '& .MuiTab-root.Mui-selected': {
               color: 'black',
+            },
+            '& .MuiTab-root': {
+              textTransform: 'none'
             },
           }}
         >
