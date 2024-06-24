@@ -1,12 +1,16 @@
 "use client";
 import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
 import {
+  Box,
   Divider,
   FormControl,
   InputLabel,
   MenuItem,
   Paper,
+  Tab,
   TablePagination,
+  Tabs,
+  TextField,
   styled,
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -78,7 +82,7 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
+      width: 200,
     },
   },
 };
@@ -87,6 +91,8 @@ export default function Page() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterAlert, setFilterAlert] = useState("");
+  const [value, setValue] = useState('allscanners');
+
   const router = useRouter();
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -98,6 +104,10 @@ export default function Page() {
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+  };
+
+  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+    setValue(newValue);
   };
 
   function createData(
@@ -173,53 +183,129 @@ export default function Page() {
 
   return (
     <>
-      <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
+      <div className=" mb-4 p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Scanners</div>
-        <div className="w-96 flex">
-          <FormControl sx={{ marginRight: "1rem" }} size="small" fullWidth>
-            <InputLabel id="state-filter-label">Select state</InputLabel>
-            <Select
-              labelId="state-filter-label"
-              id="state-filter"
-              label="Select state"
-              value={filterAlert}
-              onChange={handleFilterChange}
-              MenuProps={MenuProps}
-            >
-              <MenuItem value={""}>All alerts</MenuItem>
-              {usStates.map((state) => (
-                <MenuItem key={state} value={state}>
-                  {state}
+
+        <div className="flex mt-6 gap-2">
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="state-filter-label">Search scanners</InputLabel>
+              <TextField size="small" />
+            </FormControl>
+          </div>
+
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="state-filter-label">Select state</InputLabel>
+              <Select
+                labelId="state-filter-label"
+                id="state-filter"
+                label="Select state"
+                value={filterAlert}
+                onChange={handleFilterChange}
+                MenuProps={MenuProps}
+              >
+                <MenuItem value={""}>All alerts</MenuItem>
+                {usStates.map((state) => (
+                  <MenuItem key={state} value={state}>
+                    {state}
+                  </MenuItem>
+                ))}
+                {/* <MenuItem value={"fire"}>
+                  Fire alert{" "}
+                  <LocalFireDepartment color="warning" className="ms-1" />
                 </MenuItem>
-              ))}
-              {/* <MenuItem value={"fire"}>
-                Fire alert{" "}
-                <LocalFireDepartment color="warning" className="ms-1" />
-              </MenuItem>
-              <MenuItem value={"police"}>Police alert</MenuItem>
-              <MenuItem value={30}>Menu 3</MenuItem> */}
-            </Select>
-          </FormControl>
-          <FormControl size="small" fullWidth>
-            <InputLabel id="alert-filter-label">Select alert</InputLabel>
-            <Select
-              labelId="alert-filter-label"
-              id="alert-filter"
-              label="Select alert"
-              value={filterAlert}
-              onChange={handleFilterChange}
-            >
-              <MenuItem value={""}>All alerts</MenuItem>
-              <MenuItem value={"fire"}>
-                Fire alert{" "}
-                <LocalFireDepartment color="warning" className="ms-1" />
-              </MenuItem>
-              <MenuItem value={"police"}>Police alert</MenuItem>
-              <MenuItem value={30}>Menu 3</MenuItem>
-            </Select>
-          </FormControl>
+                <MenuItem value={"police"}>Police alert</MenuItem>
+                <MenuItem value={30}>Menu 3</MenuItem> */}
+              </Select>
+            </FormControl>
+          </div>
+
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="state-filter-label">Select county</InputLabel>
+              <Select
+                labelId="state-filter-label"
+                id="state-filter"
+                label="Select state"
+                value={filterAlert}
+                onChange={handleFilterChange}
+                MenuProps={MenuProps}
+              >
+                <MenuItem value={""}>All alerts</MenuItem>
+                {usStates.map((state) => (
+                  <MenuItem key={state} value={state}>
+                    {state}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="alert-filter-label">Filter by state</InputLabel>
+              <Select
+                labelId="alert-filter-label"
+                id="alert-filter"
+                label="Select alert"
+                value={filterAlert}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value={""}>All alerts</MenuItem>
+                <MenuItem value={"fire"}>
+                  Fire alert{" "}
+                  <LocalFireDepartment color="warning" className="ms-1" />
+                </MenuItem>
+                <MenuItem value={"police"}>Police alert</MenuItem>
+                <MenuItem value={30}>Menu 3</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="alert-filter-label">Select alert</InputLabel>
+              <Select
+                labelId="alert-filter-label"
+                id="alert-filter"
+                label="Select alert"
+                value={filterAlert}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value={""}>All alerts</MenuItem>
+                <MenuItem value={"fire"}>
+                  Fire alert{" "}
+                  <LocalFireDepartment color="warning" className="ms-1" />
+                </MenuItem>
+                <MenuItem value={"police"}>Police alert</MenuItem>
+                <MenuItem value={30}>Menu 3</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+
         </div>
       </div>
+
+      <Box>
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          textColor="inherit"
+          sx={{
+            '& .MuiTabs-indicator': {
+              backgroundColor: 'black', 
+            },
+            '& .MuiTab-root.Mui-selected': {
+              color: 'black',
+            },
+          }}
+        >
+          <Tab value="allscanners" label="All Scanners" />
+          <Tab value="myscanners" label="My Scanners" />
+        </Tabs>
+      </Box>
+
       <Divider />
       <Paper sx={{ width: "100%" }} className="mt-6">
         <TableContainer>
