@@ -369,7 +369,7 @@ export default function Page() {
                 <StyledTableRow
                   key={row.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/scanners/${row.id}`)}
+                  onClick={() => router.push(`/dashboard/alerts/${row.id}`)}
                 >
                   <TableCell>{row.alert}</TableCell>
                   <TableCell scope="row">{row.alertName}</TableCell>
