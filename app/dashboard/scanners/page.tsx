@@ -307,11 +307,11 @@ export default function Page() {
       </Box>
 
       <Divider />
-      <Paper sx={{ width: "100%" }} className="mt-6">
+      <Paper sx={{ width: "100%", boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)" }} className="mt-8">
         <TableContainer>
           <Table
             sx={{
-              minWidth: 1450,
+              // minWidth: 1450,
               overflowX: "scroll",
               marginBottom: "20px",
             }}
@@ -323,7 +323,7 @@ export default function Page() {
                   <div className="font-bold">Receiver</div>
                 </TableCell>
                 <TableCell className="uppercase">
-                  <div className="font-bold">Metro Area</div>
+                  <div className="font-bold">Listeners</div>
                 </TableCell>
                 <TableCell className="uppercase">
                   <div className="font-bold">State</div>
