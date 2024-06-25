@@ -14,7 +14,7 @@ apiClient.interceptors.request.use(
     const authToken = localStorage.getItem("auth");
 
     if (authToken) {
-      config.headers["Authorization"] = `Token ${authToken}`;
+      config.headers["Authorization"] = `Bearer ${authToken}`;
     }
 
     return config;

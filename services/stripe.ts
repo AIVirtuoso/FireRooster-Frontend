@@ -10,9 +10,10 @@ interface CheckoutData {
 
 const stripeService = {
   async checkout(data: CheckoutData) {
-    const checkoutApi = "/api/auth/checkout/";
+    const checkoutApi = "/api/stripe/checkout";
     try {
       const response = await apiClient.post(`${checkoutApi}`, data);
+      console.log(response.data)
       return response.data;
     } catch (error) {
       throw error;

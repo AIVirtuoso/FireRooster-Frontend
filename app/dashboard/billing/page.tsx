@@ -5,30 +5,35 @@ import stripeService from "@/services/stripe";
 import { Card, CardActions, CardContent, Divider } from "@mui/material";
 import { useEffect, useState } from "react";
 
-const SILVER_ID = "price_1P0KRSLk5QNf8hoZ3n8XAd2V";
-const GOLD_ID = "price_1P0KRCLk5QNf8hoZXWozxZEK";
+const SILVER_ID = "price_1PV6UpAZfjTlvHBorhDSu5N7";
+const GOLD_ID = "price_1PV6VgAZfjTlvHBo6XIjxJUM";
+const PLATINUM_ID = "price_1PV6WHAZfjTlvHBoMdUxAcCJ";
 
 export default function Page() {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState<any>();
   useEffect(() => {
     async function getUser() {
       const response = await accountService.getProfile();
-      // console.log(response);
-      // need subscribed flag to handle the page
+      console.log(response);
+      setUser(response)
     }
 
     getUser();
   }, []);
 
   const handleCheckoutSubscription = async (stripeSubId: string) => {
+    console.log(user.user.email);
     const data = {
-      email: "test4@email.com",
+      email: user.user.email,
       plan_id: stripeSubId,
     };
-    const { checkout_session_id } = await stripeService.checkout(data);
-
-    const stripe = await getStripe();
-    await stripe.redirectToCheckout({ sessionId: checkout_session_id });
+    const checkout_session_id = await stripeService.checkout(data);
+    if (checkout_session_id) {
+      // Open the URL in a new tab
+      window.open(checkout_session_id);
+    } else {
+      console.error('No URL found in the response');
+    }    
   };
 
   return (
@@ -56,7 +61,7 @@ export default function Page() {
               <div className="title text-2xl font-bold mb-4">Silver</div>
               <div className="font-light mb-4">Some description</div>
               <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$12</span>
+                <span className="text-4xl font-bold">$100</span>
                 /month
               </div>
             </CardContent>
@@ -99,7 +104,7 @@ export default function Page() {
                 suscipit quibusdam pariatur maxime.
               </div>
               <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$24</span>
+                <span className="text-4xl font-bold">$300</span>
                 /month
               </div>
             </CardContent>
@@ -142,7 +147,7 @@ export default function Page() {
                 suscipit quibusdam pariatur maxime.
               </div>
               <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$50</span>
+                <span className="text-4xl font-bold">$500</span>
                 /month
               </div>
             </CardContent>
@@ -156,7 +161,7 @@ export default function Page() {
             >
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                onClick={() => handleCheckoutSubscription(GOLD_ID)}
+                onClick={() => handleCheckoutSubscription(PLATINUM_ID)}
               >
                 Subscribe
               </button>
