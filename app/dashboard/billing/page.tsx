@@ -1,4 +1,5 @@
 "use client";
+import { BillingModal } from "@/components/billing/BillingModal";
 import getStripe from "@/lib/get-stripe";
 import accountService from "@/services/account";
 import stripeService from "@/services/stripe";
@@ -11,6 +12,8 @@ const PLATINUM_ID = "price_1PV6WHAZfjTlvHBoMdUxAcCJ";
 
 export default function Page() {
   const [user, setUser] = useState<any>();
+  const [openModal, setOpenModal] = useState(false);
+
   useEffect(() => {
     async function getUser() {
       const response = await accountService.getProfile();
@@ -75,7 +78,8 @@ export default function Page() {
             >
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                onClick={() => handleCheckoutSubscription(SILVER_ID)}
+                // onClick={() => handleCheckoutSubscription(SILVER_ID)}
+                onClick={() => setOpenModal(true)}
               >
                 Subscribe
               </button>
@@ -118,7 +122,8 @@ export default function Page() {
             >
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                onClick={() => handleCheckoutSubscription(GOLD_ID)}
+                // onClick={() => handleCheckoutSubscription(GOLD_ID)}
+                onClick={() => setOpenModal(true)}
               >
                 Subscribe
               </button>
@@ -161,7 +166,8 @@ export default function Page() {
             >
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                onClick={() => handleCheckoutSubscription(PLATINUM_ID)}
+                // onClick={() => handleCheckoutSubscription(PLATINUM_ID)}
+                onClick={() => setOpenModal(true)}
               >
                 Subscribe
               </button>
@@ -169,6 +175,8 @@ export default function Page() {
           </Card>
         </div>
       </div>
+
+      { openModal && <BillingModal handleClose={() => setOpenModal(false)} /> }
     </>
   );
 }

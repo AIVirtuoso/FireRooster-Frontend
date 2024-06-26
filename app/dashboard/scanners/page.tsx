@@ -1,5 +1,7 @@
 "use client";
+import { billingService } from "@/services/billing";
 import { scannerService } from "@/services/scanners";
+import { State } from "@/services/types/billing.type";
 import { Scanner } from "@/services/types/scanner.type";
 import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
 import {
@@ -97,17 +99,37 @@ export default function Page() {
   const [value, setValue] = useState('allscanners');
   const [info, setInfo] = useState({
     search: '',
-    state: '',
-    county: '',
-    filter: '',
     alert: ''
   })
+  const [states, setStates] = useState<State[]>([]);
+  const [selectedState, setSelectedState] = useState<State | "">("");
+  const [selectedCounty, setSelectedCounty] = useState<string | "">("");
 
   const router = useRouter();
 
   useEffect(() => {
     fetchAllScanners();
-  }, [page, rowsPerPage])
+  }, [page, rowsPerPage, selectedCounty, selectedState])
+
+  useEffect(() => {
+    fetchStates();
+  }, [])
+
+const fetchStates = async () => {
+    const res = await billingService.getStateList();
+    setStates(res);
+}
+
+const handleStateChange = (e: SelectChangeEvent) => {
+  const id = e.target.value;
+  const state = states.find((item) => item.state_id === id) || "";
+  setSelectedState(state);
+}
+
+const handleCountyChange = (e: SelectChangeEvent) => {
+  const id = e.target.value;
+  setSelectedCounty(id);
+}
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -123,60 +145,6 @@ export default function Page() {
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
-
-  function createData(
-    id: number,
-    alert: string,
-    alertName: string,
-    address: string,
-    recorded: string,
-    type: string
-  ) {
-    return { id, alert, alertName, address, recorded, type };
-  }
-
-  const rows = [
-    createData(
-      1,
-      "Valencia County Fire",
-      "Albuquerque",
-      "New Mexico",
-      "Valencia",
-      "Details"
-    ),
-    createData(
-      2,
-      "Amarillo Police and Fire",
-      "Amarillo",
-      "Texas",
-      "Randall",
-      "Home"
-    ),
-    createData(
-      3,
-      "Atlanta Fire Resque",
-      "Atlanta (Central)",
-      "Georgia",
-      "Walton",
-      "Home"
-    ),
-    createData(
-      4,
-      "Fulton County Fire",
-      "Atlanta (Central)",
-      "Georgia",
-      "Fulton",
-      "Home"
-    ),
-    createData(
-      5,
-      "Rockdale County Sheriff and Fire",
-      "Atlanta (Eastern Suburbs)",
-      "Georgia",
-      "Walton",
-      "Home"
-    ),
-  ];
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
@@ -212,10 +180,13 @@ export default function Page() {
   }
 
   const fetchAllScanners = async () => {
-    const res = await scannerService.getAllScanners({ limit: rowsPerPage, page: page + 1 });
+    const res = await scannerService.getAllScanners({ 
+      limit: rowsPerPage, page: page + 1, 
+      ...(selectedCounty && { county_id: Number(selectedCounty) }),
+      ...(selectedState && { state_id: Number(selectedState.state_id) }),
+    });
     setTotalPage(res.pagination.total);
     setData(res.data);
-    console.log(res)
   }
 
   return (
@@ -240,22 +211,16 @@ export default function Page() {
                 id="state-filter"
                 label="Select state"
                 name='state'
-                value={info.state}
-                onChange={handleInfoChange}
+                value={selectedState && selectedState.state_id}
+                onChange={handleStateChange}
                 MenuProps={MenuProps}
               >
-                <MenuItem value={""}>All alerts</MenuItem>
-                {usStates.map((state) => (
-                  <MenuItem key={state} value={state}>
-                    {state}
+                <MenuItem value={""}>All states</MenuItem>
+                {states.map((state) => (
+                  <MenuItem key={state.state_id} value={state.state_id}>
+                    {state.state_name}
                   </MenuItem>
                 ))}
-                {/* <MenuItem value={"fire"}>
-                  Fire alert{" "}
-                  <LocalFireDepartment color="warning" className="ms-1" />
-                </MenuItem>
-                <MenuItem value={"police"}>Police alert</MenuItem>
-                <MenuItem value={30}>Menu 3</MenuItem> */}
               </Select>
             </FormControl>
           </div>
@@ -267,39 +232,18 @@ export default function Page() {
                 labelId="state-filter-label"
                 id="state-filter"
                 label="Select county"
-                value={info.county}
-                onChange={handleInfoChange}
+                value={selectedCounty && selectedCounty}
+                onChange={handleCountyChange}
                 MenuProps={MenuProps}
                 name='county'
+                disabled={!selectedState}
               >
-                <MenuItem value={""}>All alerts</MenuItem>
-                {usStates.map((state) => (
-                  <MenuItem key={state} value={state}>
-                    {state}
+                <MenuItem value={""}>All county</MenuItem>
+                {selectedState && selectedState.county_list.map((county) => (
+                  <MenuItem key={county.county_id} value={county.county_id}>
+                    {county.county_name}
                   </MenuItem>
                 ))}
-              </Select>
-            </FormControl>
-          </div>
-
-          <div className="w-48">
-            <FormControl size="small" fullWidth>
-              <InputLabel id="alert-filter-label">Filter by state</InputLabel>
-              <Select
-                labelId="alert-filter-label"
-                id="alert-filter"
-                label="Select alert"
-                value={info.filter}
-                onChange={handleInfoChange}
-                name='filter'
-              >
-                <MenuItem value={""}>All alerts</MenuItem>
-                <MenuItem value={"fire"}>
-                  Fire alert{" "}
-                  <LocalFireDepartment color="warning" className="ms-1" />
-                </MenuItem>
-                <MenuItem value={"police"}>Police alert</MenuItem>
-                <MenuItem value={30}>Menu 3</MenuItem>
               </Select>
             </FormControl>
           </div>
