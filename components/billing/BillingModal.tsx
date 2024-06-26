@@ -9,7 +9,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import { billingService } from '@/services/billing';
 import { useEffect, useState } from 'react';
-import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent } from '@mui/material';
+import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
 import { County, State } from '@/services/types/billing.type';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -38,28 +38,49 @@ const MenuProps = {
 
 export function BillingModal({ handleClose }: IBillingModal) {
     const [states, setStates] = useState<State[]>([]);
-    const [selectedState, setSelectedState] = useState<State | null>(null);
-    const [selectedCounty, setSelectedCounty] = useState<string | null>(null);
+    const [counties, setCounties] = useState<County[]>([]);
+    const [selectedStates, setSelectedStates] = useState<string[]>([]);
+    const [selectedCounties, setSelectedCounties] = useState<string[]>([]);
+    const [stateObject, setStateObject] = useState<Record<string, State>>({});
+    const [countiesObject, setCountiesObject] = useState<Record<string, County>>({});
 
     useEffect(() => {
         fetchStates();
     }, [])
 
+    useEffect(() => {
+        let countyArr: County[] = [];
+        selectedStates.map((id) => {
+            if (stateObject[id]) {
+                countyArr.push(...stateObject[id].county_list);
+            }
+        })
+
+        const obj: Record<string, County> = {};
+        countyArr.map(item => obj[item.county_id] = item);
+
+        setCounties(countyArr);
+        setCountiesObject(obj);
+    }, [selectedStates])
+
     const fetchStates = async () => {
         const res = await billingService.getStateList();
-        console.log(res);
         setStates(res);
+        const obj: Record<string, State> = {};
+        res.map((item) => {
+            obj[item.state_id] = item;
+        })
+        setStateObject(obj);
     }
 
-    const handleStateChange = (e: SelectChangeEvent) => {
-        const id = e.target.value;
-        const state = states.find((item) => item.state_id === id) || null;
-        setSelectedState(state);
+    const handleStateChange = (e: SelectChangeEvent<typeof selectedStates>) => {
+        const value = e.target.value;
+        setSelectedStates(typeof value === 'string' ? value.split(',') : value);
     }
 
-    const handleCountyChange = (e: SelectChangeEvent) => {
-        const id = e.target.value;
-        setSelectedCounty(id);
+    const handleCountiesChange = (e: SelectChangeEvent<typeof selectedCounties>) => {
+        const value = e.target.value;
+        setSelectedCounties(typeof value === 'string' ? value.split(',') : value);
     }
 
     return (
@@ -87,45 +108,49 @@ export function BillingModal({ handleClose }: IBillingModal) {
 
             <DialogContent dividers>
                 <div className='flex gap-4'>
-                    <div className="w-48">
-                        <FormControl size="small" fullWidth>
-                            <InputLabel id="state-filter-label">Select state</InputLabel>
+                    <div>
+                        <FormControl sx={{ width: 250 }}>
+                            <InputLabel id="demo-multiple-checkbox-label">Select state</InputLabel>
                             <Select
-                                labelId="state-filter-label"
-                                id="state-filter"
-                                label="Select state"
-                                name='state'
-                                value={selectedState?.state_id}
+                                labelId="demo-multiple-checkbox-label"
+                                id="demo-multiple-checkbox"
+                                multiple
+                                value={selectedStates}
                                 onChange={handleStateChange}
+                                input={<OutlinedInput label="Tag" />}
+                                renderValue={(selected) => selected.map((item) => stateObject[item].state_name).join(', ')}
                                 MenuProps={MenuProps}
                             >
-                                { states.map((state) => (
+                                {states.map((state) => (
                                     <MenuItem key={state.state_id} value={state.state_id}>
-                                        {state.state_name}
+                                        <Checkbox checked={selectedStates.some((id) => id === state.state_id)} />
+                                        <ListItemText primary={state.state_name} />
                                     </MenuItem>
-                                ))} 
+                                ))}
                             </Select>
                         </FormControl>
                     </div>
-                    
-                    <div className="w-48">
-                        <FormControl size="small" fullWidth>
-                            <InputLabel id="county-filter-label">Select county</InputLabel>
+
+                    <div>
+                        <FormControl sx={{ width: 250 }}>
+                            <InputLabel id="demo-multiple-checkbox-label">Select county</InputLabel>
                             <Select
-                                labelId="county-filter-label"
-                                id="county-filter"
-                                label="Select county"
-                                name='county'
-                                value={selectedCounty || undefined}
-                                onChange={handleCountyChange}
+                                labelId="demo-multiple-checkbox-label"
+                                id="demo-multiple-checkbox"
+                                multiple
+                                value={selectedCounties}
+                                onChange={handleCountiesChange}
+                                input={<OutlinedInput label="Tag" />}
+                                renderValue={(selected) => selected.map((item) => countiesObject[item].county_name).join(', ')}
                                 MenuProps={MenuProps}
-                                disabled={!selectedState}
+                                disabled={!counties.length}
                             >
-                                { selectedState?.county_list.map((county) => (
+                                {counties.map((county) => (
                                     <MenuItem key={county.county_id} value={county.county_id}>
-                                        {county.county_name}
+                                        <Checkbox checked={selectedCounties.some((id) => id == county.county_id)} />
+                                        <ListItemText primary={county.county_name} />
                                     </MenuItem>
-                                ))} 
+                                ))}
                             </Select>
                         </FormControl>
                     </div>

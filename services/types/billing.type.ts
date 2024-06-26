@@ -1,6 +1,6 @@
 export interface County {
     county_name: string;
-    county_id: number;
+    county_id: string;
 }
 
 export interface State {
