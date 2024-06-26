@@ -96,7 +96,7 @@ export default function Page() {
   const [totalPage, setTotalPage] = useState(10);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [data, setData] = useState<Scanner[]>([]);
-  const [value, setValue] = useState('allscanners');
+  const [value, setValue] = useState<'allscanners' | 'myscanners'>('allscanners');
   const [info, setInfo] = useState({
     search: '',
     alert: ''
@@ -112,8 +112,8 @@ export default function Page() {
   }, [page, rowsPerPage, selectedCounty, selectedState])
 
   useEffect(() => {
-    fetchStates();
-  }, [])
+    if (value === 'allscanners') fetchStates();
+  }, [value])
 
 const fetchStates = async () => {
     const res = await billingService.getStateList();
@@ -142,8 +142,12 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setPage(0);
   };
 
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: "allscanners" | 'myscanners') => {
     setValue(newValue);
+    setSelectedState("");
+    setSelectedCounty("");
+    setStates([]);
+    setPage(0);
   };
 
   const StyledTableRow = styled(TableRow)(() => ({
