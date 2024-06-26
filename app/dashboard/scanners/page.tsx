@@ -1,4 +1,6 @@
 "use client";
+import { scannerService } from "@/services/scanners";
+import { Scanner } from "@/services/types/scanner.type";
 import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
 import {
   Box,
@@ -21,7 +23,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 const usStates = [
   "Alabama",
@@ -89,7 +91,9 @@ const MenuProps = {
 
 export default function Page() {
   const [page, setPage] = useState(0);
+  const [totalPage, setTotalPage] = useState(10);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [data, setData] = useState<Scanner[]>([]);
   const [value, setValue] = useState('allscanners');
   const [info, setInfo] = useState({
     search: '',
@@ -100,6 +104,10 @@ export default function Page() {
   })
 
   const router = useRouter();
+
+  useEffect(() => {
+    fetchAllScanners();
+  }, [page, rowsPerPage])
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -201,6 +209,13 @@ export default function Page() {
       ...info,
       [name]: value
     })
+  }
+
+  const fetchAllScanners = async () => {
+    const res = await scannerService.getAllScanners({ limit: rowsPerPage, page: page + 1 });
+    setTotalPage(res.pagination.total);
+    setData(res.data);
+    console.log(res)
   }
 
   return (
@@ -338,7 +353,7 @@ export default function Page() {
 
       <Divider />
       <Paper sx={{ width: "100%", boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)" }} className="mt-8">
-        <TableContainer>
+        <TableContainer sx={{maxHeight: '50vh'}}>
           <Table
             sx={{
               // minWidth: 1450,
@@ -349,33 +364,33 @@ export default function Page() {
           >
             <TableHead>
               <StyledTableHeaderRow>
-                <TableCell className="uppercase">
+                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">Receiver</div>
                 </TableCell>
-                <TableCell className="uppercase">
+                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">Listeners</div>
                 </TableCell>
-                <TableCell className="uppercase">
+                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">State</div>
                 </TableCell>
-                <TableCell align="center" className="uppercase">
+                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">County</div>
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}></TableCell>
               </StyledTableHeaderRow>
             </TableHead>
-            <TableBody>
-              {rows.map((row) => (
+            <TableBody sx={{maxHeight: 'calc(50vh - 56px)', overflowY: 'auto'}}>
+              {data.map((item) => (
                 <StyledTableRow
-                  key={row.id}
+                  key={item.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/alerts/${row.id}`)}
+                  onClick={() => router.push(`/dashboard/alerts/${item.id}`)}
                 >
-                  <TableCell>{row.alert}</TableCell>
-                  <TableCell scope="row">{row.alertName}</TableCell>
-                  <TableCell>{row.address}</TableCell>
+                  <TableCell>{item.scanner_title}</TableCell>
+                  <TableCell scope="row">{item.listeners_count}</TableCell>
+                  <TableCell>{item.state_name}</TableCell>
                   <TableCell align="center">
-                    <div className="font-bold">{row.recorded}</div>
+                    <div className="font-bold">{item.county_name}</div>
                   </TableCell>
                   <TableCell align="center">Details</TableCell>
                 </StyledTableRow>
@@ -386,7 +401,7 @@ export default function Page() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
-          count={rows.length}
+          count={totalPage}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
