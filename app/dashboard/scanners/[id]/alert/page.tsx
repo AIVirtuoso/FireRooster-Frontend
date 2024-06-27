@@ -19,6 +19,7 @@ export default function Page() {
     const fetchAlertsData = async () => {
         const res = await alertService.getAllAlerts({limit: rowsPerPage, page: page+1, scanner_id: Number(id) });
         setData(res.data);
+        console.log(res.data)
         setTotalPages(res.pagination.total);
     }
 

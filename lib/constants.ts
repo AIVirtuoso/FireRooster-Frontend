@@ -4,6 +4,12 @@ export enum SubEnum {
     PLATINUM = 'platinum'
 }
 
+export enum PlanEnum {
+    SILVER_ID = "price_1PV6UpAZfjTlvHBorhDSu5N7",
+    GOLD_ID = "price_1PV6VgAZfjTlvHBo6XIjxJUM",
+    PLATINUM_ID = "price_1PV6WHAZfjTlvHBoMdUxAcCJ"
+}
+
 type SubValueType = {
     state: number;
     county: number;

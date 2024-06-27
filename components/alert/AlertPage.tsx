@@ -1,5 +1,4 @@
 "use client";
-import { AlertDataType } from "@/app/dashboard/alerts/page";
 import { useAppSelector } from "@/hooks/store.hooks";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
 import { Alert } from "@/services/types/alert.type";
@@ -136,7 +135,7 @@ export function AlertPage({ data, page, rowsPerPage, handleChangePage, handleCha
                 <StyledTableRow
                   key={row.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/alerts/${row.id}`)}
+                  onClick={() => router.push(`/dashboard/scanners/${row.scanner_id}/alert/${row.id}`)}
                 >
                   <TableCell>
                     <LocalFireDepartment color="warning" />

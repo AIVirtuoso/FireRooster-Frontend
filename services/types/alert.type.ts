@@ -8,6 +8,11 @@ export interface IGetAlertsPayload extends Pagination {
     scanner_id?: number;
 }
 
+export interface IGetAlertByIdPayload {
+    alert_id?: number;
+    scanner_id?: number;
+}
+
 export interface Alert {
     id: number;
     headline: string;
@@ -21,4 +26,7 @@ export interface IGetAlertsResponse {
     pagination: {
         total: number;
     }
+}
+export interface IGetAlertByIdResponse {
+    data: Alert,
 }

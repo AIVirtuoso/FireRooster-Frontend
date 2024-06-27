@@ -299,7 +299,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                 <StyledTableRow
                   key={item.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/scanners/alert/${item.id}`)}
+                  onClick={() => router.push(`/dashboard/scanners/${item.scanner_id}/alert`)}
                 >
                   <TableCell>{item.scanner_title}</TableCell>
                   <TableCell scope="row">{item.listeners_count}</TableCell>

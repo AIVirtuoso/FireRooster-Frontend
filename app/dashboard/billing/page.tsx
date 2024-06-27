@@ -1,15 +1,13 @@
 "use client";
 import { BillingModal } from "@/components/billing/BillingModal";
-import { SubEnum } from "@/lib/constants";
+import { SubEnum, PlanEnum } from "@/lib/constants";
 import getStripe from "@/lib/get-stripe";
 import accountService from "@/services/account";
 import stripeService from "@/services/stripe";
 import { Card, CardActions, CardContent, Divider } from "@mui/material";
 import { useEffect, useState } from "react";
 
-const SILVER_ID = "price_1PV6UpAZfjTlvHBorhDSu5N7";
-const GOLD_ID = "price_1PV6VgAZfjTlvHBo6XIjxJUM";
-const PLATINUM_ID = "price_1PV6WHAZfjTlvHBoMdUxAcCJ";
+
 
 export default function Page() {
   const [user, setUser] = useState<any>();
@@ -22,8 +20,9 @@ export default function Page() {
       console.log(response);
       setUser(response)
     }
-
+    console.log("dfdff")
     getUser();
+
   }, []);
 
   const handleCheckoutSubscription = async (stripeSubId: string) => {
@@ -32,7 +31,9 @@ export default function Page() {
       email: user.user.email,
       plan_id: stripeSubId,
     };
+
     const checkout_session_id = await stripeService.checkout(data);
+
     if (checkout_session_id) {
       // Open the URL in a new tab
       window.open(checkout_session_id);
@@ -69,7 +70,13 @@ export default function Page() {
               sx={{ display: "flex", flexDirection: "column", flex: 1 }}
             >
               <div className="title text-2xl font-bold mb-4">Silver</div>
-              <div className="font-light mb-4">Some description</div>
+              <div className="font-light mb-4">
+                Only scanners from 1 state
+                <br></br>
+                Only scanners from 1 county
+                <br></br>
+                Up to 10 scanners
+              </div>
               <div className="price mt-auto font-light">
                 <span className="text-4xl font-bold">$100</span>
                 /month
@@ -83,13 +90,24 @@ export default function Page() {
                 padding: "16px",
               }}
             >
-              <button
-                className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                onClick={() => handleOpenModal(SubEnum.SILVER)}
-              >
-                Subscribe
-              </button>
+              {user && user.usertype.tier == "Silver" && (
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
+                  onClick={() => handleOpenModal(SubEnum.SILVER)}
+                >
+                  Choose Scanners
+                </button>
+              )}
+              
+              {user && user.usertype.tier != "Silver" && (
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  onClick={() => handleCheckoutSubscription(PlanEnum.SILVER_ID)}
+                >
+                  Subscribe
+                </button>
+              )}
             </CardActions>
           </Card>
           
@@ -127,13 +145,24 @@ export default function Page() {
                 padding: "16px",
               }}
             >
-              <button
-                className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                // onClick={() => handleCheckoutSubscription(GOLD_ID)}
-                onClick={() => handleOpenModal(SubEnum.GOLD)}
-              >
-                Subscribe
-              </button>
+              {user && user.usertype.tier == "Gold" && (
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
+                  onClick={() => handleOpenModal(SubEnum.SILVER)}
+                >
+                  Choose Scanners
+                </button>
+              )}
+              
+              {user && user.usertype.tier != "Gold" && (
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  onClick={() => handleCheckoutSubscription(PlanEnum.GOLD_ID)}
+                >
+                  Subscribe
+                </button>
+              )}
             </CardActions>
           </Card>
 
@@ -171,13 +200,24 @@ export default function Page() {
                 padding: "16px",
               }}
             >
-              <button
-                className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                // onClick={() => handleCheckoutSubscription(PLATINUM_ID)}
-                onClick={() => handleOpenModal(SubEnum.PLATINUM)}
-              >
-                Subscribe
-              </button>
+              {user && user.usertype.tier == "Platinum" && (
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
+                  onClick={() => handleOpenModal(SubEnum.SILVER)}
+                >
+                  Choose Scanners
+                </button>
+              )}
+              
+              {user && user.usertype.tier != "Platinum" && (
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  onClick={() => handleCheckoutSubscription(PlanEnum.PLATINUM_ID)}
+                >
+                  Subscribe
+                </button>
+              )}
             </CardActions>
           </Card>
         </div>

@@ -101,7 +101,7 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
         const value = e.target.value;
         const valueArr = typeof value === 'string' ? value.split(',') : value
         if (valueArr.length > subInfo[type].state) {
-            setErrMsg(`Cannot select morethan ${subInfo[type].state} states!`);
+            setErrMsg(`Cannot select more than ${subInfo[type].state} states!`);
         } else {
             setSelectedStates(valueArr);
         }
@@ -142,7 +142,7 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
         const scannersArr = checked ? [...selectedScanners, id] : selectedScanners.filter((item) => item !== id);
 
         if (scannersArr.length > subInfo[type].scanners) {
-            setErrMsg(`Cannot select morethan ${subInfo[type].scanners} scanners!`);
+            setErrMsg(`Cannot select more than ${subInfo[type].scanners} scanners!`);
             return;
         }
         setSelectedScanners(scannersArr);
