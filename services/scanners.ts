@@ -11,4 +11,13 @@ export const scannerService = {
       throw error;
     }
   },
+  async getMyScanners(payload: IGetScanners) {
+    const endPoint = "/api/scanners/get-my-scanners";
+    try {
+      const response = await apiClient.post<IGetScannersResponse>(`${endPoint}`, payload);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

@@ -72,7 +72,12 @@ export default function Page() {
   }, [page, rowsPerPage, selectedCounty, selectedState])
 
   useEffect(() => {
-    if (value === 'allscanners') fetchStates();
+    if (value === 'allscanners') {
+      fetchStates();
+      fetchAllScanners();
+    } else {
+      fetchMyScanners();
+    }
   }, [value])
 
 const fetchStates = async () => {
@@ -103,11 +108,13 @@ const handleCountyChange = (e: SelectChangeEvent) => {
   };
 
   const handleChange = (event: React.SyntheticEvent, newValue: "allscanners" | 'myscanners') => {
+    setData([]);
     setValue(newValue);
     setSelectedState("");
     setSelectedCounty("");
     setStates([]);
     setPage(0);
+    setTotalPage(0);
   };
 
   const handleInfoChange = (event: SelectChangeEvent) => {
@@ -138,6 +145,16 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     });
     setTotalPage(res.pagination.total);
     setData(res.data);
+  }
+
+  const fetchMyScanners = async () => {
+    const res = await scannerService.getMyScanners({
+      ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
+      ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
+    })
+    // setTotalPage(res.pagination.total);
+    // setData(res.data);
+    console.log({res})
   }
 
   return (

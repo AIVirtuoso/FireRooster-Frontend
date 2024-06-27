@@ -1,5 +1,5 @@
 import apiClient from "../axios";
-import { State } from "./types/billing.type";
+import { PurchaseScannersResponse, State } from "./types/billing.type";
 
 export const billingService = {
   async getStateList() {
@@ -14,7 +14,7 @@ export const billingService = {
   async addSelectedScanners(ids: number[]) {
     const endPoint = "/api/scanners/purchase-scanners"
     try {
-      const response = await apiClient.post(endPoint, {
+      const response = await apiClient.post<PurchaseScannersResponse>(endPoint, {
         scanner_id_list: ids
       })
       return response.data;

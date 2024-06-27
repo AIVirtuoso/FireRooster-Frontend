@@ -8,3 +8,8 @@ export interface State {
     state_id: string;
     county_list: County[];
 }
+
+export interface PurchaseScannersResponse {
+    status: boolean;
+    message: string;
+}

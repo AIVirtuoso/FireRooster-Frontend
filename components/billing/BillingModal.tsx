@@ -56,6 +56,7 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
 
     const [selectedScanners, setSelectedScanners] = useState<number[]>([]);
     const [errMsg, setErrMsg] = useState("");
+    const [successMsg, setSuccessMsg] = useState('');
 
     useEffect(() => {
         fetchStates();
@@ -149,12 +150,15 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
 
     const handleCloseSnack = () => {
         setErrMsg("");
+        setSuccessMsg("");
     }
 
     const handlePurchase = async () => {
         const res = await billingService.addSelectedScanners(selectedScanners);
-        console.log({res});
-        handleClose();
+        if (res.status) {
+            setSuccessMsg(res.message);
+            setTimeout(() => handleClose(), 1000);
+        }
     }
 
     return (
@@ -312,16 +316,16 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
         </BootstrapDialog>
 
 
-        { errMsg && <Snackbar
+        { (errMsg || successMsg) && <Snackbar
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             open
             autoHideDuration={3000}
             onClose={handleCloseSnack}
         >
-            <Alert severity="error" variant="filled" 
+            <Alert severity={errMsg ? "error": "success"} variant="filled" 
                 onClose={handleCloseSnack}
             >
-                {errMsg}
+                {errMsg || successMsg}
             </Alert>
         </Snackbar> }
         </>
