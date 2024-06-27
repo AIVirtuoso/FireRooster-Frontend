@@ -8,6 +8,7 @@ export interface Pagination {
 export interface IGetScanners extends Pagination {
     state_id?: number[];
     county_id?: number[];
+    search?: string;
 }
 
 export interface Scanner {

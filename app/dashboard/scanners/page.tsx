@@ -58,9 +58,9 @@ export default function Page() {
   const [data, setData] = useState<Scanner[]>([]);
   const [value, setValue] = useState<'allscanners' | 'myscanners'>('allscanners');
   const [info, setInfo] = useState({
-    search: '',
     alert: ''
   })
+  const [search, setSearch] = useState('');
   const [states, setStates] = useState<State[]>([]);
   const [selectedState, setSelectedState] = useState<State | "">("");
   const [selectedCounty, setSelectedCounty] = useState<string | "">("");
@@ -73,7 +73,7 @@ export default function Page() {
     } else {
       fetchMyScanners();
     }
-  }, [page, rowsPerPage, selectedCounty, selectedState])
+  }, [page, rowsPerPage, selectedCounty, selectedState, search])
 
   useEffect(() => {
     if (value === 'allscanners') {
@@ -119,6 +119,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setStates([]);
     setPage(0);
     setTotalPage(0);
+    setSearch("");
   };
 
   const handleInfoChange = (event: SelectChangeEvent) => {
@@ -132,13 +133,9 @@ const handleCountyChange = (e: SelectChangeEvent) => {
   };
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const name = event.target.name;
     const value = event.target.value;
 
-    setInfo({
-      ...info,
-      [name]: value
-    })
+    setSearch(value)
   }
 
   const fetchAllScanners = async () => {
@@ -146,6 +143,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
       limit: rowsPerPage, page: page + 1, 
       ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
       ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
+      search
     });
     setTotalPage(res.pagination.total);
     setData(res.data);
@@ -155,6 +153,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     const res = await scannerService.getMyScanners({
       ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
       ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
+      search
     })
     setTotalPage(res.pagination.total);
     setData(res.data);
@@ -170,7 +169,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
           <div className="w-48">
             <FormControl size="small" fullWidth>
               <TextField size="small" onChange={handleSearchChange} 
-                value={info.search} name="search" label="Search scanners"
+                value={search} name="search" label="Search scanners"
               />
             </FormControl>
           </div>
