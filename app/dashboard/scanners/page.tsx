@@ -159,7 +159,6 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setTotalPage(res.pagination.total);
     setData(res.data);
     setStates(res.states);
-    console.log({res})
   }
 
   return (
