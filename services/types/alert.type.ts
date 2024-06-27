@@ -4,9 +4,8 @@ export interface Pagination {
     limit?: number;
 }
 
-export interface IGetAlerts extends Pagination {
-    state_id?: number;
-    county_id?: number;
+export interface IGetAlertsPayload extends Pagination {
+    scanner_id?: number;
 }
 
 export interface Alert {

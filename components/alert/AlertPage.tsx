@@ -2,6 +2,7 @@
 import { AlertDataType } from "@/app/dashboard/alerts/page";
 import { useAppSelector } from "@/hooks/store.hooks";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
+import { Alert } from "@/services/types/alert.type";
 import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
 import {
   Divider,
@@ -23,26 +24,31 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface AlertPageProps {
-    data: AlertDataType
+    data: Alert[];
+    page: number;
+    rowsPerPage: number;
+    totalPages: number;
+    handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    handleChangePage: (event: unknown, newPage: number) => void;
 }
 
-export function AlertPage({ data }: AlertPageProps) {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+export function AlertPage({ data, page, rowsPerPage, handleChangePage, handleChangeRowsPerPage, totalPages }: AlertPageProps) {
+  // const [page, setPage] = useState(0);
+  // const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterAlert, setFilterAlert] = useState("");
   const router = useRouter();
 
   const { isAuth } = useCheckAuth();
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+  // const handleChangePage = (event: unknown, newPage: number) => {
+  //   setPage(newPage);
+  // };
 
-  const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+  // const handleChangeRowsPerPage = (
+  //   event: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   setRowsPerPage(parseInt(event.target.value, 10));
+  //   setPage(0);
+  // };
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
@@ -91,8 +97,9 @@ export function AlertPage({ data }: AlertPageProps) {
         </div>
       </div>
       <Divider />
+
       <Paper sx={{ width: "100%" }} className="mt-6">
-        <TableContainer>
+        <TableContainer sx={{maxHeight: '68vh'}}>
           <Table
             sx={{
               // minWidth: 1450,
@@ -103,38 +110,48 @@ export function AlertPage({ data }: AlertPageProps) {
           >
             <TableHead>
               <StyledTableHeaderRow>
-                <TableCell className="uppercase">
+                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">Alert</div>
                 </TableCell>
-                <TableCell></TableCell>
-                <TableCell align="center" className="uppercase">
+                <TableCell sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>Id</TableCell>
+                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                  <div className="font-bold">Headline</div>
+                </TableCell>
+                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                  <div className="font-bold">Description</div>
+                </TableCell>
+                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">Address</div>
                 </TableCell>
-                <TableCell align="center" className="uppercase">
-                  <div className="font-bold">Recorded</div>
-                </TableCell>
-                <TableCell align="center" className="uppercase">
+                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">Type</div>
                 </TableCell>
-                <TableCell align="center" className="uppercase">
+                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
                   <div className="font-bold">Source</div>
                 </TableCell>
               </StyledTableHeaderRow>
             </TableHead>
-            <TableBody>
-              {data.map((row) => (
+            <TableBody  sx={{maxHeight: 'calc(50vh - 56px)', overflowY: 'auto'}}>
+              {data.map((row, i) => (
                 <StyledTableRow
-                  key={row.alertName}
+                  key={row.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/scanners/${row.id}`)}
+                  onClick={() => router.push(`/dashboard/alerts/${row.id}`)}
                 >
                   <TableCell>
                     <LocalFireDepartment color="warning" />
                   </TableCell>
-                  <TableCell scope="row">{row.alertName}</TableCell>
-                  <TableCell align="center">{row.address}</TableCell>
+                  <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell>
                   <TableCell align="center">
-                    <div className="font-bold">{row.recorded}</div>
+                    { row.headline.length > 25 ? row.headline.slice(0, 25) + "...": row.headline }
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className="font-bold">
+                      {row.description.length > 130 ? row.description.slice(0, 130) + "...": row.description}
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className="font-bold">{row.address}</div>
                   </TableCell>
                   <TableCell align="center">
                     <House />
@@ -150,7 +167,7 @@ export function AlertPage({ data }: AlertPageProps) {
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
-          count={data.length}
+          count={totalPages}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

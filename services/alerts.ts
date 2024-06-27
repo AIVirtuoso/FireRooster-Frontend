@@ -1,9 +1,9 @@
 import apiClient from "../axios";
-import { IGetAlerts, IGetAlertsResponse } from "./types/alert.type";
+import { IGetAlertsPayload, IGetAlertsResponse } from "./types/alert.type";
 
-export const scannerService = {
-  async getAllAlerts(payload: IGetAlerts) {
-    const endPoint = "/api/scanners/get-scanners-by-filter";
+export const alertService = {
+  async getAllAlerts(payload: IGetAlertsPayload) {
+    const endPoint = "/api/alerts/get-alerts-by-filter";
     try {
       const response = await apiClient.post<IGetAlertsResponse>(`${endPoint}`, payload);
       return response.data;
@@ -12,3 +12,4 @@ export const scannerService = {
     }
   },
 };
+
