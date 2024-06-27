@@ -27,58 +27,18 @@ import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 
-const usStates = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California",
-  "Colorado",
-  "Connecticut",
-  "Delaware",
-  "Florida",
-  "Georgia",
-  "Hawaii",
-  "Idaho",
-  "Illinois",
-  "Indiana",
-  "Iowa",
-  "Kansas",
-  "Kentucky",
-  "Louisiana",
-  "Maine",
-  "Maryland",
-  "Massachusetts",
-  "Michigan",
-  "Minnesota",
-  "Mississippi",
-  "Missouri",
-  "Montana",
-  "Nebraska",
-  "Nevada",
-  "New Hampshire",
-  "New Jersey",
-  "New Mexico",
-  "New York",
-  "North Carolina",
-  "North Dakota",
-  "Ohio",
-  "Oklahoma",
-  "Oregon",
-  "Pennsylvania",
-  "Rhode Island",
-  "South Carolina",
-  "South Dakota",
-  "Tennessee",
-  "Texas",
-  "Utah",
-  "Vermont",
-  "Virginia",
-  "Washington",
-  "West Virginia",
-  "Wisconsin",
-  "Wyoming",
-];
+export const StyledTableRow = styled(TableRow)(() => ({
+  td: { backgroundColor: "white" },
+  th: { backgroundColor: "white" },
+  // "&:last-child td, &:last-child th": { borderBottom: "unset" },
+}));
+
+export const StyledTableHeaderRow = styled(TableRow)(() => ({
+  th: {
+    fontSize: ".8rem",
+    fontWeight: "bold",
+  },
+}));
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -150,19 +110,6 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setPage(0);
   };
 
-  const StyledTableRow = styled(TableRow)(() => ({
-    td: { backgroundColor: "white" },
-    th: { backgroundColor: "white" },
-    // "&:last-child td, &:last-child th": { borderBottom: "unset" },
-  }));
-
-  const StyledTableHeaderRow = styled(TableRow)(() => ({
-    th: {
-      fontSize: ".8rem",
-      fontWeight: "bold",
-    },
-  }));
-
   const handleInfoChange = (event: SelectChangeEvent) => {
     const name = event.target.name;
     const value = event.target.value;
@@ -186,8 +133,8 @@ const handleCountyChange = (e: SelectChangeEvent) => {
   const fetchAllScanners = async () => {
     const res = await scannerService.getAllScanners({ 
       limit: rowsPerPage, page: page + 1, 
-      ...(selectedCounty && { county_id: Number(selectedCounty) }),
-      ...(selectedState && { state_id: Number(selectedState.state_id) }),
+      ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
+      ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
     });
     setTotalPage(res.pagination.total);
     setData(res.data);

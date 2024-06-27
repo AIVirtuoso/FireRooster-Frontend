@@ -1,5 +1,6 @@
 "use client";
 import { BillingModal } from "@/components/billing/BillingModal";
+import { SubEnum } from "@/lib/constants";
 import getStripe from "@/lib/get-stripe";
 import accountService from "@/services/account";
 import stripeService from "@/services/stripe";
@@ -13,6 +14,7 @@ const PLATINUM_ID = "price_1PV6WHAZfjTlvHBoMdUxAcCJ";
 export default function Page() {
   const [user, setUser] = useState<any>();
   const [openModal, setOpenModal] = useState(false);
+  const [selectedSub, setSelectedSub] = useState<SubEnum>(SubEnum.SILVER);
 
   useEffect(() => {
     async function getUser() {
@@ -38,6 +40,11 @@ export default function Page() {
       console.error('No URL found in the response');
     }    
   };
+
+  const handleOpenModal = (type: SubEnum) => {
+    setSelectedSub(type);
+    setOpenModal(true);
+  }
 
   return (
     <>
@@ -79,7 +86,7 @@ export default function Page() {
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                 // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                onClick={() => setOpenModal(true)}
+                onClick={() => handleOpenModal(SubEnum.SILVER)}
               >
                 Subscribe
               </button>
@@ -123,7 +130,7 @@ export default function Page() {
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                 // onClick={() => handleCheckoutSubscription(GOLD_ID)}
-                onClick={() => setOpenModal(true)}
+                onClick={() => handleOpenModal(SubEnum.GOLD)}
               >
                 Subscribe
               </button>
@@ -167,7 +174,7 @@ export default function Page() {
               <button
                 className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                 // onClick={() => handleCheckoutSubscription(PLATINUM_ID)}
-                onClick={() => setOpenModal(true)}
+                onClick={() => handleOpenModal(SubEnum.PLATINUM)}
               >
                 Subscribe
               </button>
@@ -176,7 +183,7 @@ export default function Page() {
         </div>
       </div>
 
-      { openModal && <BillingModal handleClose={() => setOpenModal(false)} /> }
+      { openModal && <BillingModal handleClose={() => setOpenModal(false)} type={selectedSub} /> }
     </>
   );
 }

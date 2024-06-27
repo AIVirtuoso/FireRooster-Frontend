@@ -9,8 +9,12 @@ import CloseIcon from '@mui/icons-material/Close';
 import Typography from '@mui/material/Typography';
 import { billingService } from '@/services/billing';
 import { useEffect, useState } from 'react';
-import { Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
+import { Alert, Checkbox, FormControl, InputLabel, ListItemText, MenuItem, OutlinedInput, Paper, Select, SelectChangeEvent, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination } from '@mui/material';
 import { County, State } from '@/services/types/billing.type';
+import { StyledTableHeaderRow, StyledTableRow } from '@/app/dashboard/scanners/page';
+import { scannerService } from '@/services/scanners';
+import { Scanner } from '@/services/types/scanner.type';
+import { SubEnum, subInfo } from '@/lib/constants';
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogContent-root': {
@@ -18,11 +22,12 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   },
   '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
-  },
+  }
 }));
 
 interface IBillingModal {
     handleClose: () => void;
+    type: SubEnum
 }
 
 const ITEM_HEIGHT = 48;
@@ -36,13 +41,21 @@ const MenuProps = {
   },
 };
 
-export function BillingModal({ handleClose }: IBillingModal) {
+export function BillingModal({ handleClose, type }: IBillingModal) {
+    const [page, setPage] = useState(0);
+    const [totalPage, setTotalPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [data, setData] = useState<Scanner[]>([]);
+
     const [states, setStates] = useState<State[]>([]);
     const [counties, setCounties] = useState<County[]>([]);
     const [selectedStates, setSelectedStates] = useState<string[]>([]);
     const [selectedCounties, setSelectedCounties] = useState<string[]>([]);
     const [stateObject, setStateObject] = useState<Record<string, State>>({});
     const [countiesObject, setCountiesObject] = useState<Record<string, County>>({});
+
+    const [selectedScanners, setSelectedScanners] = useState<number[]>([]);
+    const [errMsg, setErrMsg] = useState("");
 
     useEffect(() => {
         fetchStates();
@@ -63,6 +76,16 @@ export function BillingModal({ handleClose }: IBillingModal) {
         setCountiesObject(obj);
     }, [selectedStates])
 
+    useEffect(() => {
+        if (!selectedStates.length && !selectedCounties.length) {
+            setData([]);
+            setPage(0);
+            setTotalPage(0);
+        } else if (selectedStates.length) {
+            fetchAllScanners();
+        }
+    }, [page, rowsPerPage, selectedStates, selectedCounties])
+
     const fetchStates = async () => {
         const res = await billingService.getStateList();
         setStates(res);
@@ -75,12 +98,63 @@ export function BillingModal({ handleClose }: IBillingModal) {
 
     const handleStateChange = (e: SelectChangeEvent<typeof selectedStates>) => {
         const value = e.target.value;
-        setSelectedStates(typeof value === 'string' ? value.split(',') : value);
+        const valueArr = typeof value === 'string' ? value.split(',') : value
+        if (valueArr.length > subInfo[type].state) {
+            setErrMsg(`Cannot select morethan ${subInfo[type].state} states!`);
+        } else {
+            setSelectedStates(valueArr);
+        }
     }
 
     const handleCountiesChange = (e: SelectChangeEvent<typeof selectedCounties>) => {
         const value = e.target.value;
-        setSelectedCounties(typeof value === 'string' ? value.split(',') : value);
+        const valueArr = typeof value === 'string' ? value.split(',') : value
+        if (valueArr.length > subInfo[type].county) {
+            setErrMsg(`Cannot select morethan ${subInfo[type].county} counties!`);
+        } else {
+            setSelectedCounties(valueArr);
+        }
+    }
+
+    const handleChangePage = (event: unknown, newPage: number) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (
+        event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const fetchAllScanners = async () => {
+      const res = await scannerService.getAllScanners({ 
+        limit: rowsPerPage, page: page + 1, 
+        ...(selectedCounties.length && { county_id: selectedCounties.map(Number) }),
+        ...(selectedStates.length && { state_id: selectedStates.map(Number) }),
+      });
+      setTotalPage(res.pagination.total);
+      setData(res.data);
+    }
+
+    const handleSelectScanner = (id: number, checked: boolean) => {
+        const scannersArr = checked ? [...selectedScanners, id] : selectedScanners.filter((item) => item !== id);
+
+        if (scannersArr.length > subInfo[type].scanners) {
+            setErrMsg(`Cannot select morethan ${subInfo[type].scanners} scanners!`);
+            return;
+        }
+        setSelectedScanners(scannersArr);
+    }
+
+    const handleCloseSnack = () => {
+        setErrMsg("");
+    }
+
+    const handlePurchase = async () => {
+        const res = await billingService.addSelectedScanners(selectedScanners);
+        console.log({res});
+        handleClose();
     }
 
     return (
@@ -89,6 +163,8 @@ export function BillingModal({ handleClose }: IBillingModal) {
             onClose={handleClose}
             aria-labelledby="customized-dialog-title"
             open
+            maxWidth="lg"
+            fullWidth
         >
             <DialogTitle sx={{ m: 0, p: 2, textAlign: 'center' }} id="customized-dialog-title">
                 Billing
@@ -106,7 +182,10 @@ export function BillingModal({ handleClose }: IBillingModal) {
                 <CloseIcon />
             </IconButton>
 
-            <DialogContent dividers>
+            <DialogContent dividers sx={{
+                maxHeight: '100vh',
+                height: '100%'
+            }}>
                 <div className='flex gap-4'>
                     <div>
                         <FormControl sx={{ width: 250 }}>
@@ -155,16 +234,96 @@ export function BillingModal({ handleClose }: IBillingModal) {
                         </FormControl>
                     </div>
                 </div>
+
+                { data.length ? <Paper sx={{ width: "100%", boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)" }} className="mt-8">
+                    <TableContainer sx={{maxHeight: '50vh'}}>
+                        <Table
+                            sx={{
+                                // minWidth: 1450,
+                                overflowX: "scroll",
+                                marginBottom: "20px",
+                            }}
+                            aria-label="simple table"
+                        >
+                            <TableHead>
+                                <StyledTableHeaderRow>
+                                    <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                                        <div className="font-bold">Receiver</div>
+                                    </TableCell>
+                                    <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                                        <div className="font-bold">Listeners</div>
+                                    </TableCell>
+                                    <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                                        <div className="font-bold">State</div>
+                                    </TableCell>
+                                    <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                                        <div className="font-bold">County</div>
+                                    </TableCell>
+                                    <TableCell sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}></TableCell>
+                                </StyledTableHeaderRow>
+                            </TableHead>
+
+                            <TableBody sx={{maxHeight: 'calc(50vh - 56px)', overflowY: 'auto'}}>
+                                {data.map((item) => (
+                                    <StyledTableRow
+                                        key={item.id}
+                                        className="cursor-pointer"
+                                    >
+                                        <TableCell>{item.scanner_title}</TableCell>
+                                        <TableCell scope="row">{item.listeners_count}</TableCell>
+                                        <TableCell>{item.state_name}</TableCell>
+                                        <TableCell align="center">
+                                            <div className="font-bold">{item.county_name}</div>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Checkbox checked={selectedScanners.includes(item.id)}
+                                                onChange={(e, checked) => handleSelectScanner(item.id, checked)}
+                                                sx={{ p: 0}}
+                                            />
+                                        </TableCell>
+                                    </StyledTableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+
+                    <TablePagination
+                        rowsPerPageOptions={[5, 10, 15]}
+                        component="div"
+                        count={totalPage}
+                        rowsPerPage={rowsPerPage}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                </Paper> : null }
             </DialogContent>
 
             <DialogActions>
-                <Button autoFocus onClick={handleClose}
-                    variant='contained'
-                >
-                    Purchase
-                </Button>
+                <div>
+                    <button
+                        className="w-full bg-gray-700 hover:bg-gray-600 py-2 px-4 text-white rounded-md"
+                        onClick={handlePurchase}
+                    >
+                        Subscribe
+                    </button>
+              </div>
             </DialogActions>
         </BootstrapDialog>
+
+
+        { errMsg && <Snackbar
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            open
+            autoHideDuration={3000}
+            onClose={handleCloseSnack}
+        >
+            <Alert severity="error" variant="filled" 
+                onClose={handleCloseSnack}
+            >
+                {errMsg}
+            </Alert>
+        </Snackbar> }
         </>
     );
 }

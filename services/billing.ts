@@ -11,4 +11,15 @@ export const billingService = {
       throw error;
     }
   },
+  async addSelectedScanners(ids: number[]) {
+    const endPoint = "/api/scanners/purchase-scanners"
+    try {
+      const response = await apiClient.post(endPoint, {
+        scanner_id_list: ids
+      })
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
