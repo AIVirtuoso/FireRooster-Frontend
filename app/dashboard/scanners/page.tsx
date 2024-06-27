@@ -68,7 +68,11 @@ export default function Page() {
   const router = useRouter();
 
   useEffect(() => {
-    fetchAllScanners();
+    if (value === 'allscanners') {
+      fetchAllScanners();
+    } else {
+      fetchMyScanners();
+    }
   }, [page, rowsPerPage, selectedCounty, selectedState])
 
   useEffect(() => {
@@ -152,8 +156,9 @@ const handleCountyChange = (e: SelectChangeEvent) => {
       ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
       ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
     })
-    // setTotalPage(res.pagination.total);
-    // setData(res.data);
+    setTotalPage(res.pagination.total);
+    setData(res.data);
+    setStates(res.states);
     console.log({res})
   }
 

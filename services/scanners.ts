@@ -1,5 +1,5 @@
 import apiClient from "../axios";
-import { IGetScanners, IGetScannersResponse } from "./types/scanner.type";
+import { IGetMyScannerResponse, IGetScanners, IGetScannersResponse } from "./types/scanner.type";
 
 export const scannerService = {
   async getAllScanners(payload: IGetScanners) {
@@ -14,7 +14,7 @@ export const scannerService = {
   async getMyScanners(payload: IGetScanners) {
     const endPoint = "/api/scanners/get-my-scanners";
     try {
-      const response = await apiClient.post<IGetScannersResponse>(`${endPoint}`, payload);
+      const response = await apiClient.post<IGetMyScannerResponse>(`${endPoint}`, payload);
       return response.data;
     } catch (error) {
       throw error;

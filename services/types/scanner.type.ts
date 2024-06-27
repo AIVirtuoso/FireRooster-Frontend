@@ -1,3 +1,4 @@
+import { State } from "./billing.type";
 
 export interface Pagination {
     page?: number;
@@ -25,4 +26,8 @@ export interface IGetScannersResponse {
     pagination: {
         total: number;
     }
+}
+
+export interface IGetMyScannerResponse extends IGetScannersResponse {
+    states: State[]
 }
