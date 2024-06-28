@@ -280,8 +280,8 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
                                             <div className="font-bold">{item.county_name}</div>
                                         </TableCell>
                                         <TableCell align="center">
-                                            <Checkbox checked={selectedScanners.includes(item.id)}
-                                                onChange={(e, checked) => handleSelectScanner(item.id, checked)}
+                                            <Checkbox checked={selectedScanners.includes(item.scanner_id)}
+                                                onChange={(e, checked) => handleSelectScanner(item.scanner_id, checked)}
                                                 sx={{ p: 0}}
                                             />
                                         </TableCell>
