@@ -78,7 +78,7 @@ export default function Page() {
                 Up to 10 scanners
               </div>
               <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$100</span>
+                <span className="text-4xl font-bold">$800</span>
                 /month
               </div>
             </CardContent>
@@ -90,7 +90,7 @@ export default function Page() {
                 padding: "16px",
               }}
             >
-              {user && user.usertype.tier == "Silver" && (
+              {user?.usertype?.tier == "Silver" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                   // onClick={() => handleCheckoutSubscription(SILVER_ID)}
@@ -100,7 +100,7 @@ export default function Page() {
                 </button>
               )}
               
-              {user && user.usertype.tier != "Silver" && (
+              {user?.usertype?.tier != "Silver" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                   onClick={() => handleCheckoutSubscription(PlanEnum.SILVER_ID)}
@@ -128,12 +128,14 @@ export default function Page() {
             >
               <div className="title text-2xl font-bold mb-4">Gold</div>
               <div className="font-light mb-8">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut
-                laboriosam error tenetur? Accusamus ullam quisquam mollitia
-                suscipit quibusdam pariatur maxime.
+                Only scanners from 1 state
+                <br></br>
+                Scanners from 2 counties
+                <br></br>
+                Up to 20 scanners
               </div>
               <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$300</span>
+                <span className="text-4xl font-bold">$1500</span>
                 /month
               </div>
             </CardContent>
@@ -145,17 +147,17 @@ export default function Page() {
                 padding: "16px",
               }}
             >
-              {user && user.usertype.tier == "Gold" && (
+              {user?.usertype?.tier == "Gold" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                   // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                  onClick={() => handleOpenModal(SubEnum.SILVER)}
+                  onClick={() => handleOpenModal(SubEnum.GOLD)}
                 >
                   Choose Scanners
                 </button>
               )}
               
-              {user && user.usertype.tier != "Gold" && (
+              {user?.usertype?.tier != "Gold" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                   onClick={() => handleCheckoutSubscription(PlanEnum.GOLD_ID)}
@@ -183,12 +185,14 @@ export default function Page() {
             >
               <div className="title text-2xl font-bold mb-4">Platinum</div>
               <div className="font-light mb-8">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Aut
-                laboriosam error tenetur? Accusamus ullam quisquam mollitia
-                suscipit quibusdam pariatur maxime.
+                Scanners from 2 states
+                <br></br>
+                Scanners from 2 counties
+                <br></br>
+                Up to 30 scanners (15 scanners / county)
               </div>
               <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$500</span>
+                <span className="text-4xl font-bold">$2000</span>
                 /month
               </div>
             </CardContent>
@@ -200,17 +204,17 @@ export default function Page() {
                 padding: "16px",
               }}
             >
-              {user && user.usertype.tier == "Platinum" && (
+              {user?.usertype?.tier == "Platinum" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                   // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                  onClick={() => handleOpenModal(SubEnum.SILVER)}
+                  onClick={() => handleOpenModal(SubEnum.PLATINUM)}
                 >
                   Choose Scanners
                 </button>
               )}
               
-              {user && user.usertype.tier != "Platinum" && (
+              {user?.usertype?.tier != "Platinum" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
                   onClick={() => handleCheckoutSubscription(PlanEnum.PLATINUM_ID)}
@@ -220,6 +224,56 @@ export default function Page() {
               )}
             </CardActions>
           </Card>
+
+          {user?.usertype?.tier == "Administrator" && (
+            <Card
+              className="sm:me-4 bg-gray-900 text-white"
+              variant="outlined"
+              sx={{
+                backgroundColor: "rgb(21,24,39)",
+                color: "white",
+                display: "flex",
+                flexDirection: "column",
+                marginBottom: "20px",
+                padding: "20px",
+              }}
+            >
+              <CardContent
+                sx={{ display: "flex", flexDirection: "column", flex: 1 }}
+              >
+                <div className="title text-2xl font-bold mb-1">Administrator</div>
+                <div className="title text-xl font-bold mb-4">(Only visiable for Administrator)</div>
+                <div className="font-light mb-8">
+                  All states
+                  <br></br>
+                  All counties
+                  <br></br>
+                  All scanners
+                </div>
+                <div className="price mt-auto font-light">
+                  <span className="text-4xl font-bold">$100000</span>
+                </div>
+              </CardContent>
+              <CardActions
+                sx={{
+                  marginTop: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                  padding: "16px",
+                }}
+              >
+                <button
+                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
+                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
+                  onClick={() => handleOpenModal(SubEnum.ADMINISTRATOR)}
+                >
+                  Choose Scanners
+                </button>
+              </CardActions>
+            </Card>
+            )
+          }
+
         </div>
       </div>
 

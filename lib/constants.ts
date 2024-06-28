@@ -1,7 +1,8 @@
 export enum SubEnum {
     SILVER = 'silver',
     GOLD = 'gold',
-    PLATINUM = 'platinum'
+    PLATINUM = 'platinum',
+    ADMINISTRATOR = "administrator"
 }
 
 export enum PlanEnum {
@@ -32,4 +33,9 @@ export const subInfo: Record<SubEnum, SubValueType> = {
         county: 2,
         scanners: 30
     },
+    administrator: {
+        state: 60,
+        county: 10000,
+        scanners: 10000
+    }
 }
