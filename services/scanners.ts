@@ -12,6 +12,7 @@ export const scannerService = {
     }
   },
   async getMyScanners(payload: IGetScanners) {
+    console.log("payload: ", payload)
     const endPoint = "/api/scanners/get-my-scanners";
     try {
       const response = await apiClient.post<IGetMyScannerResponse>(`${endPoint}`, payload);

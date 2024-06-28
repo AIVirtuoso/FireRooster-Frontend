@@ -101,6 +101,9 @@ const handleCountyChange = (e: SelectChangeEvent) => {
 }
 
   const handleChangePage = (event: unknown, newPage: number) => {
+
+    console.log("newPage: ", newPage);
+
     setPage(newPage);
   };
 
@@ -151,6 +154,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
 
   const fetchMyScanners = async () => {
     const res = await scannerService.getMyScanners({
+      limit: rowsPerPage, page: page + 1, 
       ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
       ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
       search
