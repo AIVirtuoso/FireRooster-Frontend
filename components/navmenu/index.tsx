@@ -20,7 +20,10 @@ const Navmenu = () => {
 
   return (
     <div className="nav-menu hidden lg:flex max-w-xs w-80 bg-gray-900 text-white flex flex-col p-8">
-      <div className="pb-4 mb-8">Company logo</div>
+      <div className="pb-4 mb-8">
+        Company logo
+        
+      </div>
       <p className="mb-2 text-gray-600">Application</p>
       <ul className="mb-8">
         <li>

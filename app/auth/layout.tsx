@@ -7,7 +7,9 @@ export default function AuthLayout({
 }) {
   return (
     <div className={styles.authWrapper}>
-      <div className={styles.authHeader}>Company logo</div>
+      <div className={styles.authHeader}>
+        Company logo
+      </div>
       {children}
     </div>
   );
