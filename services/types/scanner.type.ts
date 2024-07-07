@@ -32,3 +32,11 @@ export interface IGetScannersResponse {
 export interface IGetMyScannerResponse extends IGetScannersResponse {
     states: State[]
 }
+
+export interface IDeleteScanner {
+    scanner_id: number;
+}
+export interface IDeleteScannerResponse {
+    status: boolean;
+    message: string;
+}

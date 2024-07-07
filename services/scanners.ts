@@ -1,5 +1,5 @@
 import apiClient from "../axios";
-import { IGetMyScannerResponse, IGetScanners, IGetScannersResponse } from "./types/scanner.type";
+import { IGetMyScannerResponse, IGetScanners, IDeleteScanner,IDeleteScannerResponse, IGetScannersResponse } from "./types/scanner.type";
 
 export const scannerService = {
   async getAllScanners(payload: IGetScanners) {
@@ -21,4 +21,14 @@ export const scannerService = {
       throw error;
     }
   },
+
+  async deletePurchasedScanner(payload: IDeleteScanner) {
+    const endPoint = "/api/scanners/delete-purchased-scanner";
+    try {
+      const response = await apiClient.post<IDeleteScannerResponse>(`${endPoint}`, payload);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };

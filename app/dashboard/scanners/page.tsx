@@ -26,6 +26,9 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
+
 
 export const StyledTableRow = styled(TableRow)(() => ({
   td: { backgroundColor: "white" },
@@ -162,6 +165,17 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setTotalPage(res.pagination.total);
     setData(res.data);
     setStates(res.states);
+  }
+
+  const handleDelete = async (scanner_id: number) => {
+    const res = await scannerService.deletePurchasedScanner({
+      scanner_id: scanner_id
+    })
+    fetchMyScanners()
+  }
+
+  const handleClickRow = async (scanner_id: number) => {
+    router.push(`/dashboard/scanners/${scanner_id}/alert`)
   }
 
   return (
@@ -303,15 +317,43 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                 <StyledTableRow
                   key={item.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/scanners/${item.scanner_id}/alert`)}
+                  
                 >
-                  <TableCell>{item.scanner_title}</TableCell>
-                  <TableCell scope="row">{item.listeners_count}</TableCell>
-                  <TableCell>{item.state_name}</TableCell>
-                  <TableCell align="center">
+                  <TableCell
+                    onClick={() => handleClickRow(item.scanner_id)}>{item.scanner_title}
+                  </TableCell>
+                  <TableCell
+                    scope="row"
+                    onClick={() => handleClickRow(item.scanner_id)}
+                  >
+                      {item.listeners_count}
+                  </TableCell>
+                  <TableCell onClick={() => handleClickRow(item.scanner_id)}>{item.state_name}</TableCell>
+                  <TableCell align="center" onClick={() => handleClickRow(item.scanner_id)}>
                     <div className="font-bold">{item.county_name}</div>
                   </TableCell>
-                  <TableCell align="center">Details</TableCell>
+                  <TableCell align="center" style={{width: "100px"}} onClick={() => handleClickRow(item.scanner_id)}>
+                    {
+                      (value === 'allscanners' && 
+                        <span onClick={() => handleClickRow(item.scanner_id)}> 
+                        Details
+                        </span>
+                      )
+                    }
+                    {
+                      (value === 'myscanners' && 
+                        <IconButton
+                          aria-label="delete"
+                          onClick={(e) => {
+                            handleDelete(item.scanner_id);
+                          }}
+                        >
+                          <DeleteIcon sx={{ color: 'black' }} />
+                        </IconButton>
+                      )
+                    }
+                      
+                  </TableCell>
                 </StyledTableRow>
               ))}
             </TableBody>
