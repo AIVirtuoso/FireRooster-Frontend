@@ -131,7 +131,7 @@ export function AlertPage({ data, page, rowsPerPage, handleChangePage, handleCha
               </StyledTableHeaderRow>
             </TableHead>
             <TableBody  sx={{maxHeight: 'calc(50vh - 56px)', overflowY: 'auto'}}>
-              {data.map((row, i) => (
+              {data?.map((row, i) => (
                 <StyledTableRow
                   key={row.id}
                   className="cursor-pointer"
