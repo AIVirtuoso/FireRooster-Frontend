@@ -21,8 +21,14 @@ export interface Alert {
     address: string;
 }
 
+export interface AlertObject {
+    alert: Alert;
+    addresses: string[]
+}
+
+
 export interface IGetAlertsResponse {
-    data: Alert[],
+    alerts: AlertObject[],
     pagination: {
         total: number;
     }

@@ -1,12 +1,12 @@
 "use client"
 import { AlertPage } from "@/components/alert/AlertPage";
 import { alertService } from "@/services/alerts";
-import { Alert } from "@/services/types/alert.type";
+import { AlertObject } from "@/services/types/alert.type";
 import { useEffect, useState } from "react";
 
 
 export default function Page() {
-    const [data, setData] = useState<Alert[]>([]);
+    const [data, setData] = useState<AlertObject[]>([]);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [totalPages, setTotalPages] = useState(1);
@@ -17,7 +17,7 @@ export default function Page() {
 
     const fetchAlertsData = async () => {
         const res = await alertService.getAllAlerts({limit: rowsPerPage, page: page+1 });
-        setData(res.data);
+        setData(res.alerts);
         setTotalPages(res.pagination.total);
     }
 

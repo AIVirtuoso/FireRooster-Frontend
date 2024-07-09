@@ -1,7 +1,7 @@
 "use client";
 import { useAppSelector } from "@/hooks/store.hooks";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
-import { Alert } from "@/services/types/alert.type";
+import { AlertObject } from "@/services/types/alert.type";
 import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
 import {
   Divider,
@@ -23,7 +23,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 interface AlertPageProps {
-    data: Alert[];
+    data: AlertObject[];
     page: number;
     rowsPerPage: number;
     totalPages: number;
@@ -133,24 +133,24 @@ export function AlertPage({ data, page, rowsPerPage, handleChangePage, handleCha
             <TableBody  sx={{maxHeight: 'calc(50vh - 56px)', overflowY: 'auto'}}>
               {data?.map((row, i) => (
                 <StyledTableRow
-                  key={row.id}
+                  key={row.alert.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/dashboard/scanners/${row.scanner_id}/alert/${row.id}`)}
+                  onClick={() => router.push(`/dashboard/scanners/${row.alert.scanner_id}/alert/${row.alert.id}`)}
                 >
                   <TableCell>
                     <LocalFireDepartment color="warning" />
                   </TableCell>
                   <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell>
                   <TableCell align="center">
-                    { row.headline.length > 25 ? row.headline.slice(0, 25) + "...": row.headline }
+                    { row.alert.headline.length > 25 ? row.alert.headline.slice(0, 25) + "...": row.alert.headline }
                   </TableCell>
                   <TableCell align="center">
                     <div className="font-bold">
-                      {row.description.length > 130 ? row.description.slice(0, 130) + "...": row.description}
+                      {row.alert.description.length > 130 ? row.alert.description.slice(0, 130) + "...": row.alert.description}
                     </div>
                   </TableCell>
                   <TableCell align="center">
-                    <div className="font-bold">{row.address}</div>
+                    <div className="font-bold">{row.alert.address}</div>
                   </TableCell>
                   <TableCell align="center">
                     <House />
