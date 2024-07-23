@@ -28,11 +28,13 @@ export interface AlertObject {
 
 
 export interface IGetAlertsResponse {
-    alerts: AlertObject[],
+    alerts: AlertObject[];
     pagination: {
         total: number;
     }
 }
 export interface IGetAlertByIdResponse {
-    data: Alert,
+    alert: Alert;
+    addresses: string[]
+
 }
