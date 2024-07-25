@@ -6,11 +6,14 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Bell, CreditCard, LogOut, Menu, Radio, User } from "react-feather";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/hooks/store.hooks";
+import { setPageInfo } from "@/store/slices/scanner.slice";
 
 const MobileNavMenu = () => {
   const path = usePathname();
   const [openDrawer, setIsOpenDrawer] = useState(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleLogOut = async () => {
     localStorage.removeItem("auth");
@@ -40,6 +43,7 @@ const MobileNavMenu = () => {
         <li>
           <Link
             href="/dashboard/scanners"
+            onClick={() => dispatch(setPageInfo(null))}
             className={`p-2 flex items-center ${
               checkActiveTab(path, "scanners") ? "bg-gray-700 rounded-md" : ""
             }`}

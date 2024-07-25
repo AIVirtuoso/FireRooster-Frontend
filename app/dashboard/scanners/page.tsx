@@ -28,6 +28,8 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { useAppDispatch, useAppSelector } from "@/hooks/store.hooks";
+import { setPageInfo } from "@/store/slices/scanner.slice";
 
 
 export const StyledTableRow = styled(TableRow)(() => ({
@@ -55,11 +57,12 @@ const MenuProps = {
 };
 
 export default function Page() {
-  const [page, setPage] = useState(0);
+  const pageInfo = useAppSelector((state) => state.scanner.pageInfo);
+  const [page, setPage] = useState(pageInfo?.pageNo || 0);
   const [totalPage, setTotalPage] = useState(10);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [data, setData] = useState<Scanner[]>([]);
-  const [value, setValue] = useState<'allscanners' | 'myscanners'>('allscanners');
+  const [value, setValue] = useState<'allscanners' | 'myscanners'>(pageInfo ? 'myscanners' : 'allscanners');
   const [info, setInfo] = useState({
     alert: ''
   })
@@ -69,6 +72,7 @@ export default function Page() {
   const [selectedCounty, setSelectedCounty] = useState<string | "">("");
 
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (value === 'allscanners') {
@@ -108,6 +112,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     console.log("newPage: ", newPage);
 
     setPage(newPage);
+    dispatch(setPageInfo({ pageName: pageInfo?.pageName || '', pageNo: newPage}));
   };
 
   const handleChangeRowsPerPage = (
@@ -126,6 +131,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setPage(0);
     setTotalPage(0);
     setSearch("");
+    dispatch(setPageInfo({ pageName: newValue, pageNo: 0}));
   };
 
   const handleInfoChange = (event: SelectChangeEvent) => {

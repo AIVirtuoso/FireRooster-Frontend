@@ -1,22 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 interface IScannerSlice {
-    currentPage: string | null;
+    pageInfo: {
+        pageNo: number;
+        pageName: string;
+    } | null;
 }
 
 const initialState: IScannerSlice = {
-    currentPage: null
+    pageInfo: null
 }
 
 const scannerSlice = createSlice({
     name: 'scanner',
     initialState,
     reducers: {
-        setCurrentPage: (state, action) => {
-            state.currentPage = action.payload;
+        setPageInfo: (state, action) => {
+            state.pageInfo = action.payload;
         }
     }
 })
 
 export default scannerSlice.reducer;
-export const { setCurrentPage } = scannerSlice.actions;
+export const { setPageInfo } = scannerSlice.actions;

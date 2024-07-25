@@ -4,10 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bell, CreditCard, LogOut, Radio, User } from "react-feather";
 import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/hooks/store.hooks";
+import { setPageInfo } from "@/store/slices/scanner.slice";
 
 const Navmenu = () => {
   const path = usePathname();
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const handleLogOut = async () => {
     localStorage.removeItem("auth");
@@ -39,6 +42,7 @@ const Navmenu = () => {
         <li>
           <Link
             href="/dashboard/scanners"
+            onClick={() => dispatch(setPageInfo(null))}
             className={`p-2 flex items-center ${
               checkActiveTab(path, "scanners") ? "bg-gray-700 rounded-md" : ""
             }`}
