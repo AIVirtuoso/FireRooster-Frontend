@@ -70,6 +70,7 @@ export default function Page() {
   const [states, setStates] = useState<State[]>([]);
   const [selectedState, setSelectedState] = useState<State | "">("");
   const [selectedCounty, setSelectedCounty] = useState<string | "">("");
+  const [deleteRow, setDeleteRow] = useState<null | number>(null);
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -352,10 +353,15 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                           aria-label="delete"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDelete(item.scanner_id);
+                            if (deleteRow === item.id) {
+                              handleDelete(item.scanner_id);
+                              setDeleteRow(null);
+                            } else {
+                              setDeleteRow(item.id);
+                            }
                           }}
                         >
-                          <DeleteIcon sx={{ color: 'black' }} />
+                          <DeleteIcon sx={{ color: deleteRow === item.id ? 'red': 'black' }} />
                         </IconButton>
                       )
                     }
