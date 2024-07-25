@@ -351,6 +351,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                         <IconButton
                           aria-label="delete"
                           onClick={(e) => {
+                            e.stopPropagation();
                             handleDelete(item.scanner_id);
                           }}
                         >
