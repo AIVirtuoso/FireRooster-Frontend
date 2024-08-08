@@ -140,7 +140,8 @@ export function AlertPage({ data, page, rowsPerPage, handleChangePage, handleCha
                   <TableCell>
                     <LocalFireDepartment color="warning" />
                   </TableCell>
-                  <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell>
+                  {/* <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell> */}
+                  <TableCell scope="row">{new Date(row.alert?.dateTime).toLocaleString()}</TableCell>
                   <TableCell align="center">
                     { row.alert.headline.length > 25 ? row.alert.headline.slice(0, 25) + "...": row.alert.headline }
                   </TableCell>

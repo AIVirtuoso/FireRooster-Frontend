@@ -30,5 +30,6 @@ export const scannerService = {
     } catch (error) {
       throw error;
     }
-  }
+  },
+
 };

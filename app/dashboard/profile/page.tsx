@@ -15,18 +15,23 @@ import {
   SelectChangeEvent,
   Stack,
   TextField,
+  TextareaAutosize
 } from "@mui/material";
+
+
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
 import { useAppSelector } from "@/hooks/store.hooks";
+import { profileService } from "@/services/profile";
 
 const profileSchema = z.object({
   first_name: z.string(),
   last_name: z.string(),
   email: z.string().email("Please provide a valid email"),
+  prompt: z.string()  // Additional information is optional  
 });
 type TProfileSchema = z.infer<typeof profileSchema>;
 
@@ -133,13 +138,38 @@ export default function Page() {
     }
   }, []);
 
+  useEffect(() => {
+    try {  
+      const fetchProfile = async () => {
+        const response = await profileService.getProfileInfo();
+        console.log(response);
+        reset(response);
+      }
+      fetchProfile();
+    } catch (error) {  
+      console.error("Error saving data:", error);  
+    }  
+  }, [])
+
+  const onSubmit = async (formData: TProfileSchema) => {  
+    try {
+      const setProfile = async () => {
+        const response = profileService.setProfileInfo(formData);
+        console.log(response)
+      }
+      setProfile();
+    } catch (error) {  
+      console.error("Error saving data:", error);  
+    }
+  };
+
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Profile</div>
       </div>
       <Divider />
-      <form className="mt-8 xl:w-[50rem] w-full">
+      <form className="mt-8 xl:w-[50rem] w-full" onSubmit={handleSubmit(onSubmit)}>
         <Stack
           direction={`${isMobileWidth ? "column" : "row"}`}
           spacing={2}
@@ -223,7 +253,17 @@ export default function Page() {
             ))}
           </Select>
         </FormControl>
-        <FormGroup row>
+        <Box fontWeight={"bold"}>Prompt</Box>
+        <FormControl fullWidth>
+          <TextareaAutosize 
+            minRows={4}
+            maxRows={12}
+            placeholder="Enter prompt here..."  
+            {...register("prompt")} // Register the textarea  
+            style={{ width: '100%', boxSizing: 'border-box'}} // Add padding and box-sizing  
+          />  
+        </FormControl> 
+        {/* <FormGroup row>
           <FormControlLabel
             control={
               <Checkbox
@@ -238,11 +278,11 @@ export default function Page() {
             }
             label="Email alert"
           />
-          {/* <FormControlLabel
+          <FormControlLabel
             control={<Checkbox disabled />}
             label="Phone alert (coming soon)"
-          /> */}
-        </FormGroup>
+          />
+        </FormGroup> */}
         <LoadingButton
           sx={{
             [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },

@@ -3,6 +3,7 @@ import { Divider, Table, TableBody, TableCell, TableHead, TableRow, Paper } from
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { alertService } from "@/services/alerts";
+import { scannerService } from "@/services/scanners";
 
 export default function Page() {
     const { id, aid } = useParams();
@@ -18,6 +19,7 @@ export default function Page() {
         const res = await alertService.getAlertsById({ alert_id: Number(aid), scanner_id: Number(id) });
         setAlert(res.alert);
         setAddresses(res.addresses);
+
         console.log(res);
     }
 
@@ -48,7 +50,7 @@ export default function Page() {
 
                             <Divider sx={{ margin: '18px 0px' }} />
 
-                            <p className="text-[13px] text-gray-700">June 7, 2024, 11 p.m. IST</p>
+                            <p className="text-[13px] text-gray-700">{new Date(alert?.dateTime).toLocaleString()}</p>
 
                             <Divider sx={{ margin: '18px 0px' }} />
 

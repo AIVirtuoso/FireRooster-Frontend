@@ -19,6 +19,7 @@ export interface Alert {
     description: string;
     scanner_id: number;
     address: string;
+    dateTime: string
 }
 
 export interface AlertObject {
