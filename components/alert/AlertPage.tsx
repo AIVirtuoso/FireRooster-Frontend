@@ -25,7 +25,6 @@ import { useEffect, useState } from "react";
 interface AlertPageProps {
   data: AlertObject[];
   page: number;
-  sub_category: String;
   rowsPerPage: number;
   totalPages: number;
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -35,7 +34,6 @@ interface AlertPageProps {
 export function AlertPage({
   data,
   page,
-  sub_category,
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
@@ -210,7 +208,7 @@ export function AlertPage({
                   className="cursor-pointer"
                   onClick={() =>
                     router.push(
-                      `/dashboard/scanners/${row.alert.scanner_id}/alert/${sub_category}/${row.alert.id}`
+                      `/dashboard/scanners/${row.alert.scanner_id}/alert/${row.alert.sub_category}/${row.alert.id}`
                     )
                   }
                 >
