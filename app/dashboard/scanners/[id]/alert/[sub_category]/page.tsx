@@ -1,25 +1,28 @@
 "use client";
 import { AlertPage } from "@/components/alert/AlertPage";
-import { alertService } from "@/services/alerts";
-import { AlertObject } from "@/services/types/alert.type";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { AlertObject } from "@/services/types/alert.type";
+import { alertService } from "@/services/alerts";
 
 export default function Page() {
-  const { sub_category } = useParams<{ sub_category: string }>();
+  const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<AlertObject[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+  const { sub_category } = useParams<{ sub_category: string }>();
 
   useEffect(() => {
     fetchAlertsData();
-  }, [page, rowsPerPage, totalPages]);
+  }, [page, rowsPerPage]);
 
   const fetchAlertsData = async () => {
     const res = await alertService.getAllAlerts({
       limit: rowsPerPage,
       page: page + 1,
+      scanner_id: Number(id),
+      sub_category: sub_category,
     });
     setData(res.alerts);
     setTotalPages(res.pagination.total);
