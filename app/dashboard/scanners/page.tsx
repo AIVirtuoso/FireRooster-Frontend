@@ -26,11 +26,11 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useAppDispatch, useAppSelector } from "@/hooks/store.hooks";
 import { setPageInfo } from "@/store/slices/scanner.slice";
-
+import { useStore } from "@/store/StoreProvider";
 
 export const StyledTableRow = styled(TableRow)(() => ({
   td: { backgroundColor: "white" },
@@ -62,11 +62,13 @@ export default function Page() {
   const [totalPage, setTotalPage] = useState(10);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [data, setData] = useState<Scanner[]>([]);
-  const [value, setValue] = useState<'allscanners' | 'myscanners'>(pageInfo ? 'myscanners' : 'allscanners');
+  const [value, setValue] = useState<"allscanners" | "myscanners">(
+    pageInfo ? "myscanners" : "allscanners"
+  );
   const [info, setInfo] = useState({
-    alert: ''
-  })
-  const [search, setSearch] = useState('');
+    alert: "",
+  });
+  const [search, setSearch] = useState("");
   const [states, setStates] = useState<State[]>([]);
   const [selectedState, setSelectedState] = useState<State | "">("");
   const [selectedCounty, setSelectedCounty] = useState<string | "">("");
@@ -74,46 +76,50 @@ export default function Page() {
 
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [stateName, setStateName] = useState<String | null>(null);
+
+  const { currentStateName, setCurrentStateName } = useStore();
 
   useEffect(() => {
-    if (value === 'allscanners') {
+    if (value === "allscanners") {
       fetchAllScanners();
     } else {
       fetchMyScanners();
     }
-  }, [page, rowsPerPage, selectedCounty, selectedState, search])
+  }, [page, rowsPerPage, selectedCounty, selectedState, search]);
 
   useEffect(() => {
-    if (value === 'allscanners') {
+    if (value === "allscanners") {
       fetchStates();
       fetchAllScanners();
     } else {
       fetchMyScanners();
     }
-  }, [value])
+  }, [value]);
 
-const fetchStates = async () => {
+  const fetchStates = async () => {
     const res = await billingService.getStateList();
     setStates(res);
-}
+  };
 
-const handleStateChange = (e: SelectChangeEvent) => {
-  const id = e.target.value;
-  const state = states.find((item) => item.state_id === id) || "";
-  setSelectedState(state);
-}
+  const handleStateChange = (e: SelectChangeEvent) => {
+    const id = e.target.value;
+    const state = states.find((item) => item.state_id === id) || "";
+    setSelectedState(state);
+  };
 
-const handleCountyChange = (e: SelectChangeEvent) => {
-  const id = e.target.value;
-  setSelectedCounty(id);
-}
+  const handleCountyChange = (e: SelectChangeEvent) => {
+    const id = e.target.value;
+    setSelectedCounty(id);
+  };
 
   const handleChangePage = (event: unknown, newPage: number) => {
-
     console.log("newPage: ", newPage);
 
     setPage(newPage);
-    dispatch(setPageInfo({ pageName: pageInfo?.pageName || '', pageNo: newPage}));
+    dispatch(
+      setPageInfo({ pageName: pageInfo?.pageName || "", pageNo: newPage })
+    );
   };
 
   const handleChangeRowsPerPage = (
@@ -123,7 +129,10 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setPage(0);
   };
 
-  const handleChange = (event: React.SyntheticEvent, newValue: "allscanners" | 'myscanners') => {
+  const handleChange = (
+    event: React.SyntheticEvent,
+    newValue: "allscanners" | "myscanners"
+  ) => {
     setData([]);
     setValue(newValue);
     setSelectedState("");
@@ -132,7 +141,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
     setPage(0);
     setTotalPage(0);
     setSearch("");
-    dispatch(setPageInfo({ pageName: newValue, pageNo: 0}));
+    dispatch(setPageInfo({ pageName: newValue, pageNo: 0 }));
   };
 
   const handleInfoChange = (event: SelectChangeEvent) => {
@@ -141,49 +150,52 @@ const handleCountyChange = (e: SelectChangeEvent) => {
 
     setInfo({
       ...info,
-      [name]: value
-    })
+      [name]: value,
+    });
   };
 
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
 
-    setSearch(value)
-  }
+    setSearch(value);
+  };
 
   const fetchAllScanners = async () => {
-    const res = await scannerService.getAllScanners({ 
-      limit: rowsPerPage, page: page + 1, 
+    const res = await scannerService.getAllScanners({
+      limit: rowsPerPage,
+      page: page + 1,
       ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
       ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
-      search
+      search,
     });
     setTotalPage(res.pagination.total);
     setData(res.data);
-  }
+  };
 
   const fetchMyScanners = async () => {
     const res = await scannerService.getMyScanners({
-      limit: rowsPerPage, page: page + 1, 
+      limit: rowsPerPage,
+      page: page + 1,
       ...(selectedCounty && { county_id: [Number(selectedCounty)] }),
       ...(selectedState && { state_id: [Number(selectedState.state_id)] }),
-      search
-    })
+      search,
+    });
     setTotalPage(res.pagination.total);
     setData(res.data);
     setStates(res.states);
-  }
+  };
 
   const handleDelete = async (scanner_id: number) => {
     const res = await scannerService.deletePurchasedScanner({
-      scanner_id: scanner_id
-    })
-    fetchMyScanners()
-  }
+      scanner_id: scanner_id,
+    });
+    fetchMyScanners();
+  };
 
-  const handleClickRow = async (scanner_id: number) => {
-    router.push(`/dashboard/scanners/${scanner_id}/alert`)
-  }
+  const handleClickRow = async (scanner_id: number, curStateName: string) => {
+    setCurrentStateName(curStateName);
+    router.push(`/dashboard/scanners/${scanner_id}/settings`);
+  };
 
   return (
     <>
@@ -193,8 +205,12 @@ const handleCountyChange = (e: SelectChangeEvent) => {
         <div className="flex mt-6 gap-2">
           <div className="w-48">
             <FormControl size="small" fullWidth>
-              <TextField size="small" onChange={handleSearchChange} 
-                value={search} name="search" label="Search scanners"
+              <TextField
+                size="small"
+                onChange={handleSearchChange}
+                value={search}
+                name="search"
+                label="Search scanners"
               />
             </FormControl>
           </div>
@@ -206,7 +222,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                 labelId="state-filter-label"
                 id="state-filter"
                 label="Select state"
-                name='state'
+                name="state"
                 value={selectedState && selectedState.state_id}
                 onChange={handleStateChange}
                 MenuProps={MenuProps}
@@ -231,15 +247,16 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                 value={selectedCounty && selectedCounty}
                 onChange={handleCountyChange}
                 MenuProps={MenuProps}
-                name='county'
+                name="county"
                 disabled={!selectedState}
               >
                 <MenuItem value={""}>All county</MenuItem>
-                {selectedState && selectedState.county_list.map((county) => (
-                  <MenuItem key={county.county_id} value={county.county_id}>
-                    {county.county_name}
-                  </MenuItem>
-                ))}
+                {selectedState &&
+                  selectedState.county_list.map((county) => (
+                    <MenuItem key={county.county_id} value={county.county_id}>
+                      {county.county_name}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
           </div>
@@ -253,7 +270,7 @@ const handleCountyChange = (e: SelectChangeEvent) => {
                 label="Select alert"
                 value={info.alert}
                 onChange={handleInfoChange}
-                name='alert'
+                name="alert"
               >
                 <MenuItem value={""}>All alerts</MenuItem>
                 <MenuItem value={"fire"}>
@@ -265,7 +282,6 @@ const handleCountyChange = (e: SelectChangeEvent) => {
               </Select>
             </FormControl>
           </div>
-
         </div>
       </div>
 
@@ -275,14 +291,14 @@ const handleCountyChange = (e: SelectChangeEvent) => {
           onChange={handleChange}
           textColor="inherit"
           sx={{
-            '& .MuiTabs-indicator': {
-              backgroundColor: 'black', 
+            "& .MuiTabs-indicator": {
+              backgroundColor: "black",
             },
-            '& .MuiTab-root.Mui-selected': {
-              color: 'black',
+            "& .MuiTab-root.Mui-selected": {
+              color: "black",
             },
-            '& .MuiTab-root': {
-              textTransform: 'none'
+            "& .MuiTab-root": {
+              textTransform: "none",
             },
           }}
         >
@@ -292,8 +308,15 @@ const handleCountyChange = (e: SelectChangeEvent) => {
       </Box>
 
       <Divider />
-      <Paper sx={{ width: "100%", boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)" }} className="mt-8">
-        <TableContainer sx={{maxHeight: '50vh'}}>
+      <Paper
+        sx={{
+          width: "100%",
+          boxShadow:
+            "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)",
+        }}
+        className="mt-8"
+      >
+        <TableContainer sx={{ maxHeight: "50vh" }}>
           <Table
             sx={{
               // minWidth: 1450,
@@ -304,68 +327,132 @@ const handleCountyChange = (e: SelectChangeEvent) => {
           >
             <TableHead>
               <StyledTableHeaderRow>
-                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                <TableCell
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                >
                   <div className="font-bold">Receiver</div>
                 </TableCell>
-                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                <TableCell
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                >
                   <div className="font-bold">Listeners</div>
                 </TableCell>
-                <TableCell className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                <TableCell
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                >
                   <div className="font-bold">State</div>
                 </TableCell>
-                <TableCell align="center" className="uppercase" sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}>
+                <TableCell
+                  align="center"
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                >
                   <div className="font-bold">County</div>
                 </TableCell>
-                <TableCell sx={{ position: 'sticky', top: 0, zIndex: 1000, bgcolor: 'white' }}></TableCell>
+                <TableCell
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                ></TableCell>
               </StyledTableHeaderRow>
             </TableHead>
-            <TableBody sx={{maxHeight: 'calc(50vh - 56px)', overflowY: 'auto'}}>
+            <TableBody
+              sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
+            >
               {data.map((item) => (
-                <StyledTableRow
-                  key={item.id}
-                  className="cursor-pointer"
-                  
-                >
+                <StyledTableRow key={item.id} className="cursor-pointer">
                   <TableCell
-                    onClick={() => handleClickRow(item.scanner_id)}>{item.scanner_title}
+                    onClick={() =>
+                      handleClickRow(item.scanner_id, item.state_name)
+                    }
+                  >
+                    {item.scanner_title}
                   </TableCell>
                   <TableCell
                     scope="row"
-                    onClick={() => handleClickRow(item.scanner_id)}
+                    onClick={() =>
+                      handleClickRow(item.scanner_id, item.state_name)
+                    }
                   >
-                      {item.listeners_count}
+                    {item.listeners_count}
                   </TableCell>
-                  <TableCell onClick={() => handleClickRow(item.scanner_id)}>{item.state_name}</TableCell>
-                  <TableCell align="center" onClick={() => handleClickRow(item.scanner_id)}>
+                  <TableCell
+                    onClick={() =>
+                      handleClickRow(item.scanner_id, item.state_name)
+                    }
+                  >
+                    {item.state_name}
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    onClick={() =>
+                      handleClickRow(item.scanner_id, item.state_name)
+                    }
+                  >
                     <div className="font-bold">{item.county_name}</div>
                   </TableCell>
-                  <TableCell align="center" style={{width: "100px"}} onClick={() => handleClickRow(item.scanner_id)}>
-                    {
-                      (value === 'allscanners' && 
-                        <span onClick={() => handleClickRow(item.scanner_id)}> 
+                  <TableCell
+                    align="center"
+                    style={{ width: "100px" }}
+                    onClick={() =>
+                      handleClickRow(item.scanner_id, item.state_name)
+                    }
+                  >
+                    {value === "allscanners" && (
+                      <span
+                        onClick={() =>
+                          handleClickRow(item.scanner_id, item.state_name)
+                        }
+                      >
                         Details
-                        </span>
-                      )
-                    }
-                    {
-                      (value === 'myscanners' && 
-                        <IconButton
-                          aria-label="delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (deleteRow === item.id) {
-                              handleDelete(item.scanner_id);
-                              setDeleteRow(null);
-                            } else {
-                              setDeleteRow(item.id);
-                            }
+                      </span>
+                    )}
+                    {value === "myscanners" && (
+                      <IconButton
+                        aria-label="delete"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (deleteRow === item.id) {
+                            handleDelete(item.scanner_id);
+                            setDeleteRow(null);
+                          } else {
+                            setDeleteRow(item.id);
+                          }
+                        }}
+                      >
+                        <DeleteIcon
+                          sx={{
+                            color: deleteRow === item.id ? "red" : "black",
                           }}
-                        >
-                          <DeleteIcon sx={{ color: deleteRow === item.id ? 'red': 'black' }} />
-                        </IconButton>
-                      )
-                    }
-                      
+                        />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </StyledTableRow>
               ))}

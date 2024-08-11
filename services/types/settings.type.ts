@@ -5,13 +5,15 @@ export interface Pagination {
 
 export interface IGetAlertsPayload extends Pagination {
   scanner_id?: number;
-  sub_category?: string;
 }
 
 export interface IGetAlertByIdPayload {
   alert_id?: number;
   scanner_id?: number;
-  sub_category?: string;
+}
+
+export interface IGetSubCategoriesByCategory extends Pagination {
+  category: string;
 }
 
 export interface Alert {
@@ -23,18 +25,24 @@ export interface Alert {
   dateTime: string;
 }
 
-export interface AlertObject {
+export interface Category {
+  id: number;
+  sub_category: string;
+  category: string;
+  scanner_id: number;
+}
+
+export interface SettingsObject {
   alert: Alert;
   addresses: string[];
 }
 
 export interface IGetAlertsResponse {
-  alerts: AlertObject[];
-  pagination: {
-    total: number;
-  };
+  alerts: SettingsObject[];
 }
 export interface IGetAlertByIdResponse {
   alert: Alert;
   addresses: string[];
 }
+
+export interface IGetSubCategoriesByCategoryResponse {}

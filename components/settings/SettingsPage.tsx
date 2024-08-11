@@ -10,6 +10,7 @@ import {
   MenuItem,
   Paper,
   TablePagination,
+  Typography,
   styled,
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -21,47 +22,30 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useStore } from "@/store/StoreProvider";
+import { Category } from "@/services/types/settings.type";
+import { unknown } from "zod";
 
 interface AlertPageProps {
-  data: AlertObject[];
-  page: number;
-  sub_category: String;
-  rowsPerPage: number;
-  totalPages: number;
-  handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleChangePage: (event: unknown, newPage: number) => void;
+  data: Category[];
+  fetchAlertData: (category: string) => void;
+  scanner_id: Number;
 }
 
-export function AlertPage({
+export function SettingsPage({
   data,
-  page,
-  sub_category,
-  rowsPerPage,
-  handleChangePage,
-  handleChangeRowsPerPage,
-  totalPages,
+  fetchAlertData,
+  scanner_id,
 }: AlertPageProps) {
-  // const [page, setPage] = useState(0);
-  // const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [filterAlert, setFilterAlert] = useState("");
+  const [filterAlert, setFilterAlert] = useState("ALL");
   const router = useRouter();
 
   const { isAuth } = useCheckAuth();
-  // const handleChangePage = (event: unknown, newPage: number) => {
-  //   setPage(newPage);
-  // };
-
-  // const handleChangeRowsPerPage = (
-  //   event: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
+  const { currentStateName, setCurrentStateName } = useStore();
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
     th: { backgroundColor: "white" },
-    // "&:last-child td, &:last-child th": { borderBottom: "unset" },
   }));
 
   const StyledTableHeaderRow = styled(TableRow)(() => ({
@@ -73,6 +57,7 @@ export function AlertPage({
 
   const handleFilterChange = (event: SelectChangeEvent) => {
     setFilterAlert(event.target.value as string);
+    fetchAlertData(event.target.value as string);
   };
 
   useEffect(() => {
@@ -82,35 +67,46 @@ export function AlertPage({
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
-        <div className="font-semibold text-xl text-coolGray-800">Alerts</div>
+        <div className="font-semibold text-xl text-coolGray-800">Settings</div>
         <div className="w-52">
           <FormControl size="small" fullWidth>
-            <InputLabel id="alert-filter-label">Select alert</InputLabel>
+            <InputLabel id="alert-filter-label">Settings</InputLabel>
             <Select
               labelId="alert-filter-label"
               id="alert-filter"
-              label="Select alert"
+              label="Settings"
               value={filterAlert}
               onChange={handleFilterChange}
             >
-              <MenuItem value={""}>All alerts</MenuItem>
-              <MenuItem value={"fire"}>
-                Fire alert{" "}
+              <MenuItem value={"ALL"} selected>
+                ALL
+              </MenuItem>
+              <MenuItem value={"Fire Alerts"}>
+                Fire Alerts
                 <LocalFireDepartment color="warning" className="ms-1" />
               </MenuItem>
-              <MenuItem value={"police"}>Police alert</MenuItem>
-              <MenuItem value={30}>Menu 3</MenuItem>
+              <MenuItem value={"Police Dispatch"}>Police Dispatch</MenuItem>
+              <MenuItem value={"Medical Emergencies"}>
+                Medical Emergencies
+              </MenuItem>
+              <MenuItem value={"Miscellaneous (MISC)"}>
+                Miscellaneous (MISC)
+              </MenuItem>
             </Select>
           </FormControl>
         </div>
       </div>
       <Divider />
+      <Paper sx={{ width: "100%" }} className="mt-3">
+        <div className="font-bold text-sm text-coolGray-100 ms-3">
+          US &gt; {currentStateName} &gt; All Scanners
+        </div>
+      </Paper>
 
       <Paper sx={{ width: "100%" }} className="mt-6">
         <TableContainer sx={{ maxHeight: "68vh" }}>
           <Table
             sx={{
-              // minWidth: 1450,
               overflowX: "scroll",
               marginBottom: "20px",
             }}
@@ -137,7 +133,7 @@ export function AlertPage({
                     bgcolor: "white",
                   }}
                 >
-                  Id
+                  NO
                 </TableCell>
                 <TableCell
                   align="center"
@@ -149,31 +145,7 @@ export function AlertPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Headline</div>
-                </TableCell>
-                <TableCell
-                  align="center"
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                >
-                  <div className="font-bold">Description</div>
-                </TableCell>
-                <TableCell
-                  align="center"
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                >
-                  <div className="font-bold">Address</div>
+                  <div className="font-bold">Keyword</div>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -197,7 +169,31 @@ export function AlertPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Source</div>
+                  <div className="font-bold">Traffic (24hrs)</div>
+                </TableCell>
+                <TableCell
+                  align="center"
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                >
+                  <div className="font-bold">Traffic (%)</div>
+                </TableCell>
+                <TableCell
+                  align="center"
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                  }}
+                >
+                  <div className="font-bold">Lifetime</div>
                 </TableCell>
               </StyledTableHeaderRow>
             </TableHead>
@@ -206,56 +202,28 @@ export function AlertPage({
             >
               {data?.map((row, i) => (
                 <StyledTableRow
-                  key={row.alert.id}
+                  key={row.id}
                   className="cursor-pointer"
                   onClick={() =>
                     router.push(
-                      `/dashboard/scanners/${row.alert.scanner_id}/alert/${sub_category}/${row.alert.id}`
+                      `/dashboard/scanners/${scanner_id}/alert/${row.sub_category}`
                     )
                   }
                 >
                   <TableCell>
                     <LocalFireDepartment color="warning" />
                   </TableCell>
-                  {/* <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell> */}
-                  <TableCell scope="row">
-                    {new Date(row.alert?.dateTime).toLocaleString()}
-                  </TableCell>
-                  <TableCell align="center">
-                    {row.alert.headline.length > 25
-                      ? row.alert.headline.slice(0, 25) + "..."
-                      : row.alert.headline}
-                  </TableCell>
-                  <TableCell align="center">
-                    <div className="font-bold">
-                      {row.alert.description.length > 130
-                        ? row.alert.description.slice(0, 130) + "..."
-                        : row.alert.description}
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <div className="font-bold">{row.alert.address}</div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <House />
-                  </TableCell>
-                  <TableCell align="center">
-                    <Radio />
-                  </TableCell>
+                  <TableCell scope="row">{row.id}</TableCell>
+                  <TableCell align="center">{row.sub_category}</TableCell>
+                  <TableCell align="center"></TableCell>
+                  <TableCell align="center"></TableCell>
+                  <TableCell align="center"></TableCell>
+                  <TableCell align="center"></TableCell>
                 </StyledTableRow>
               ))}
             </TableBody>
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 15]}
-          component="div"
-          count={totalPages}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
       </Paper>
     </>
   );

@@ -1,17 +1,40 @@
-'use client'
-import { useRef } from 'react'
-import { Provider } from 'react-redux'
-import { makeStore, AppStoreType } from '@/store'
+"use client";
+import { createContext, useContext, useState, useRef } from "react";
+import { Provider as ReduxProvider } from "react-redux";
+import { makeStore, AppStoreType } from "@/store";
+
+interface StoreContextProps {
+  currentStateName: string;
+  setCurrentStateName: (name: string) => void;
+}
+
+const StoreContext = createContext<StoreContextProps | undefined>(undefined);
 
 export default function StoreProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const storeRef = useRef<AppStoreType>()
+  const [currentStateName, setCurrentStateName] = useState<string>("");
+  const storeRef = useRef<AppStoreType>();
+
   if (!storeRef.current) {
-    storeRef.current = makeStore()
+    storeRef.current = makeStore();
   }
 
-  return <Provider store={storeRef.current}>{children}</Provider>
+  return (
+    <ReduxProvider store={storeRef.current}>
+      <StoreContext.Provider value={{ currentStateName, setCurrentStateName }}>
+        {children}
+      </StoreContext.Provider>
+    </ReduxProvider>
+  );
 }
+
+export const useStore = (): StoreContextProps => {
+  const context = useContext(StoreContext);
+  if (!context) {
+    throw new Error("useStore must be used within a StoreProvider");
+  }
+  return context;
+};
