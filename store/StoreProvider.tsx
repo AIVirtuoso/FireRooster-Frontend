@@ -6,6 +6,8 @@ import { makeStore, AppStoreType } from "@/store";
 interface StoreContextProps {
   currentStateName: string;
   setCurrentStateName: (name: string) => void;
+  currentScanners: string;
+  setCurrentScanners: (scanners: string) => void;
 }
 
 const StoreContext = createContext<StoreContextProps | undefined>(undefined);
@@ -16,6 +18,7 @@ export default function StoreProvider({
   children: React.ReactNode;
 }) {
   const [currentStateName, setCurrentStateName] = useState<string>("");
+  const [currentScanners, setCurrentScanners] = useState<string>("");
   const storeRef = useRef<AppStoreType>();
 
   if (!storeRef.current) {
@@ -24,7 +27,14 @@ export default function StoreProvider({
 
   return (
     <ReduxProvider store={storeRef.current}>
-      <StoreContext.Provider value={{ currentStateName, setCurrentStateName }}>
+      <StoreContext.Provider
+        value={{
+          currentStateName,
+          setCurrentStateName,
+          currentScanners,
+          setCurrentScanners,
+        }}
+      >
         {children}
       </StoreContext.Provider>
     </ReduxProvider>

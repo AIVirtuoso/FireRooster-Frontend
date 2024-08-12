@@ -248,7 +248,7 @@ export function AlertPage({
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 15]}
+          rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
           component="div"
           count={totalPages}
           rowsPerPage={rowsPerPage}

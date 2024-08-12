@@ -76,9 +76,8 @@ export default function Page() {
 
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [stateName, setStateName] = useState<String | null>(null);
-
   const { currentStateName, setCurrentStateName } = useStore();
+  const { currentScanners, setCurrentScanners } = useStore();
 
   useEffect(() => {
     if (value === "allscanners") {
@@ -194,6 +193,7 @@ export default function Page() {
 
   const handleClickRow = async (scanner_id: number, curStateName: string) => {
     setCurrentStateName(curStateName);
+    setCurrentScanners(value);
     router.push(`/dashboard/scanners/${scanner_id}/settings`);
   };
 
@@ -460,7 +460,7 @@ export default function Page() {
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={[5, 10, 15]}
+          rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
           component="div"
           count={totalPage}
           rowsPerPage={rowsPerPage}

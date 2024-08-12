@@ -42,6 +42,7 @@ export function SettingsPage({
 
   const { isAuth } = useCheckAuth();
   const { currentStateName, setCurrentStateName } = useStore();
+  const { currentScanners, setCurrentScanners } = useStore();
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
@@ -99,7 +100,8 @@ export function SettingsPage({
       <Divider />
       <Paper sx={{ width: "100%" }} className="mt-3">
         <div className="font-bold text-sm text-coolGray-100 ms-3">
-          US &gt; {currentStateName} &gt; All Scanners
+          US &gt; {currentStateName} &gt;{" "}
+          {currentScanners === "allscanners" ? "All scanners" : "My scanners"}
         </div>
       </Paper>
 
