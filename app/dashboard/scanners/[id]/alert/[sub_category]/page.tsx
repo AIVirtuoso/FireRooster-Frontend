@@ -44,6 +44,7 @@ export default function Page() {
       <AlertPage
         data={data}
         page={page}
+        scanner_id={Number(id)}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         rowsPerPage={rowsPerPage}

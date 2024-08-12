@@ -1,16 +1,12 @@
 "use client";
-import { useAppSelector } from "@/hooks/store.hooks";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
-import { AlertObject } from "@/services/types/alert.type";
-import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
+import { LocalFireDepartment } from "@mui/icons-material";
 import {
   Divider,
   FormControl,
   InputLabel,
   MenuItem,
   Paper,
-  TablePagination,
-  Typography,
   styled,
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -24,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useStore } from "@/store/StoreProvider";
 import { Category } from "@/services/types/settings.type";
-import { unknown } from "zod";
+import Link from "next/link";
 
 interface AlertPageProps {
   data: Category[];
@@ -43,6 +39,7 @@ export function SettingsPage({
   const { isAuth } = useCheckAuth();
   const { currentStateName, setCurrentStateName } = useStore();
   const { currentScanners, setCurrentScanners } = useStore();
+  const [pageName, setPageName] = useState<String>("ALL");
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
@@ -57,6 +54,7 @@ export function SettingsPage({
   }));
 
   const handleFilterChange = (event: SelectChangeEvent) => {
+    setPageName(event.target.value as string);
     setFilterAlert(event.target.value as string);
     fetchAlertData(event.target.value as string);
   };
@@ -68,7 +66,9 @@ export function SettingsPage({
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
-        <div className="font-semibold text-xl text-coolGray-800">Settings</div>
+        <div className="font-semibold text-xl text-coolGray-800">
+          {pageName}
+        </div>
         <div className="w-52">
           <FormControl size="small" fullWidth>
             <InputLabel id="alert-filter-label">Settings</InputLabel>
@@ -100,8 +100,26 @@ export function SettingsPage({
       <Divider />
       <Paper sx={{ width: "100%" }} className="mt-3">
         <div className="font-bold text-sm text-coolGray-100 ms-3">
-          US &gt; {currentStateName} &gt;{" "}
-          {currentScanners === "allscanners" ? "All scanners" : "My scanners"}
+          US &gt;{" "}
+          <a
+            className="custom-hyperlink"
+            onClick={(e) => {
+              e.preventDefault();
+              router.push(`/dashboard/scanners/`);
+            }}
+          >
+            {currentStateName}
+          </a>{" "}
+          &gt;{" "}
+          <a
+            className="custom-hyperlink"
+            onClick={(e) => {
+              e.preventDefault();
+              router.push(`/dashboard/scanners/`);
+            }}
+          >
+            {currentScanners === "allscanners" ? "All scanners" : "My scanners"}
+          </a>
         </div>
       </Paper>
 

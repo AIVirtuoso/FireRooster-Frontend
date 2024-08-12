@@ -20,11 +20,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface AlertPageProps {
   data: AlertObject[];
   page: number;
+  scanner_id?: number;
   rowsPerPage: number;
   totalPages: number;
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -34,6 +35,7 @@ interface AlertPageProps {
 export function AlertPage({
   data,
   page,
+  scanner_id,
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
@@ -73,34 +75,42 @@ export function AlertPage({
     setFilterAlert(event.target.value as string);
   };
 
+  const handleRowClick = (rowData: any) => {
+    router.push(
+      `/dashboard/scanners/${rowData.alert.scanner_id}/alert/${rowData.alert.sub_category}/${rowData.alert.id}`
+    );
+  };
+
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
-
+  console.log(scanner_id);
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Alerts</div>
-        <div className="w-52">
-          <FormControl size="small" fullWidth>
-            <InputLabel id="alert-filter-label">Select alert</InputLabel>
-            <Select
-              labelId="alert-filter-label"
-              id="alert-filter"
-              label="Select alert"
-              value={filterAlert}
-              onChange={handleFilterChange}
-            >
-              <MenuItem value={""}>All alerts</MenuItem>
-              <MenuItem value={"fire"}>
-                Fire alert{" "}
-                <LocalFireDepartment color="warning" className="ms-1" />
-              </MenuItem>
-              <MenuItem value={"police"}>Police alert</MenuItem>
-              <MenuItem value={30}>Menu 3</MenuItem>
-            </Select>
-          </FormControl>
-        </div>
+        {!(scanner_id !== undefined) && (
+          <div className="w-52">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="alert-filter-label">Select alert</InputLabel>
+              <Select
+                labelId="alert-filter-label"
+                id="alert-filter"
+                label="Select alert"
+                value={filterAlert}
+                onChange={handleFilterChange}
+              >
+                <MenuItem value={""}>All alerts</MenuItem>
+                <MenuItem value={"fire"}>
+                  Fire alert{" "}
+                  <LocalFireDepartment color="warning" className="ms-1" />
+                </MenuItem>
+                <MenuItem value={"police"}>Police alert</MenuItem>
+                <MenuItem value={30}>Menu 3</MenuItem>
+              </Select>
+            </FormControl>
+          </div>
+        )}
       </div>
       <Divider />
 
@@ -203,41 +213,36 @@ export function AlertPage({
               sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
             >
               {data?.map((row, i) => (
-                <StyledTableRow
-                  key={row.alert.id}
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
-                      `/dashboard/scanners/${row.alert.scanner_id}/alert/${row.alert.sub_category}/${row.alert.id}`
-                    )
-                  }
-                >
-                  <TableCell>
+                <StyledTableRow key={row.alert.id} className="cursor-pointer">
+                  <TableCell onClick={() => handleRowClick(row)}>
                     <LocalFireDepartment color="warning" />
                   </TableCell>
                   {/* <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell> */}
-                  <TableCell scope="row">
+                  <TableCell scope="row" onClick={() => handleRowClick(row)}>
                     {new Date(row.alert?.dateTime).toLocaleString()}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" onClick={() => handleRowClick(row)}>
                     {row.alert.headline.length > 25
                       ? row.alert.headline.slice(0, 25) + "..."
                       : row.alert.headline}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" onClick={() => handleRowClick(row)}>
                     <div className="font-bold">
                       {row.alert.description.length > 130
                         ? row.alert.description.slice(0, 130) + "..."
                         : row.alert.description}
                     </div>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" onClick={() => handleRowClick(row)}>
                     <div className="font-bold">{row.alert.address}</div>
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell align="center" onClick={() => handleRowClick(row)}>
                     <House />
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell
+                    align="center"
+                    onClick={() => router.push(`/dashboard/scanners`)}
+                  >
                     <Radio />
                   </TableCell>
                 </StyledTableRow>

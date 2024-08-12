@@ -2,7 +2,7 @@ import authService from "@/services/auth";
 import { checkActiveTab } from "@/utils/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, CreditCard, LogOut, Radio, User } from "react-feather";
+import { Bell, CreditCard, Filter, LogOut, Radio, User } from "react-feather";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/hooks/store.hooks";
 import { setPageInfo } from "@/store/slices/scanner.slice";
@@ -15,18 +15,15 @@ const Navmenu = () => {
   const handleLogOut = async () => {
     localStorage.removeItem("auth");
     localStorage.removeItem("user");
-      router.push("/auth/login/");
+    router.push("/auth/login/");
     // await authService.logOut().then(() => {
-      
+
     // });
   };
 
   return (
     <div className="nav-menu hidden lg:flex max-w-xs w-80 bg-gray-900 text-white flex flex-col p-8">
-      <div className="pb-4 mb-8">
-        Company logo
-        
-      </div>
+      <div className="pb-4 mb-8">Company logo</div>
       <p className="mb-2 text-gray-600">Application</p>
       <ul className="mb-8">
         <li>
@@ -48,6 +45,17 @@ const Navmenu = () => {
             }`}
           >
             <Radio className="me-4" size={18} /> Scanners
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/dashboard/filter"
+            onClick={() => dispatch(setPageInfo(null))}
+            className={`p-2 flex items-center ${
+              checkActiveTab(path, "filter") ? "bg-gray-700 rounded-md" : ""
+            }`}
+          >
+            <Filter className="me-4" size={18} /> Filter
           </Link>
         </li>
       </ul>

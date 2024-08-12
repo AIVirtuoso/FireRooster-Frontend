@@ -108,16 +108,26 @@ a {
   text-decoration: none;
 }
 
-.MuiFormControl-root .MuiInputBase-root{
+.MuiFormControl-root .MuiInputBase-root {
   background: white;
 }
 .MuiFormControl-root .MuiInputLabel-root {
   font-size: 1.1rem;
 }
-.MuiTableRow-root:hover td, .MuiTableRow-root:hover:not(:first-child) th {
+.MuiTableRow-root:hover td,
+.MuiTableRow-root:hover:not(:first-child) th {
   background-color: #d1d5db;
-} 
+}
 
+.custom-hyperlink {
+  color: blue;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.custom-hyperlink:hover {
+  cursor: hand;
+}
 
 @media (prefers-color-scheme: light) {
   html {

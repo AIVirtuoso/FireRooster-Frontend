@@ -20,7 +20,7 @@ const MobileNavMenu = () => {
     localStorage.removeItem("user");
     router.push("/auth/login/");
     // await authService.logOut().then(() => {
-      
+
     // });
   };
   const handleToggleDrawer = () => {
@@ -49,6 +49,17 @@ const MobileNavMenu = () => {
             }`}
           >
             <Radio className="me-2" size={18} /> Scanners
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/dashboard/filter"
+            onClick={() => dispatch(setPageInfo(null))}
+            className={`p-2 flex items-center ${
+              checkActiveTab(path, "filter") ? "bg-gray-700 rounded-md" : ""
+            }`}
+          >
+            <Radio className="me-2" size={18} /> Filter
           </Link>
         </li>
       </ul>
