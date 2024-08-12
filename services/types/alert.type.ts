@@ -21,6 +21,9 @@ export interface Alert {
   scanner_id: number;
   address: string;
   dateTime: string;
+  category: string;
+  sub_category: string;
+
 }
 
 export interface AlertObject {

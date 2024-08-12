@@ -28,7 +28,7 @@ const authService = {
   },
 
   async logIn(data: LoginData) {
-    const login = "/api/auth/token/";
+    const login = "/api/auth/token";
     try {
       const response = await axios.post(`${BASE_URL}${login}`, data);
       return response.data;

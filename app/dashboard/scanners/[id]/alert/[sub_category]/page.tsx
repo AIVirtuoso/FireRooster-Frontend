@@ -44,7 +44,6 @@ export default function Page() {
       <AlertPage
         data={data}
         page={page}
-        sub_category={sub_category}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         rowsPerPage={rowsPerPage}
