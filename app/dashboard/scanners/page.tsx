@@ -59,8 +59,8 @@ const MenuProps = {
 export default function Page() {
   const pageInfo = useAppSelector((state) => state.scanner.pageInfo);
   const [page, setPage] = useState(pageInfo?.pageNo || 0);
-  const [totalPage, setTotalPage] = useState(10);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalPage, setTotalPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [data, setData] = useState<Scanner[]>([]);
   const [value, setValue] = useState<"allscanners" | "myscanners">(
     pageInfo ? "myscanners" : "allscanners"
@@ -316,7 +316,7 @@ export default function Page() {
         }}
         className="mt-8"
       >
-        <TableContainer sx={{ maxHeight: "50vh" }}>
+        <TableContainer sx={{ maxHeight: "60vh" }}>
           <Table
             sx={{
               // minWidth: 1450,
