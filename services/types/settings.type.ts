@@ -30,6 +30,7 @@ export interface Category {
   sub_category: string;
   category: string;
   scanner_id: number;
+  is_selected?: boolean;
 }
 
 export interface SettingsObject {

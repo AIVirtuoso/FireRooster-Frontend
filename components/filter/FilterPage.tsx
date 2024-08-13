@@ -21,7 +21,6 @@ import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Category } from "@/services/types/settings.type";
-import { Grid } from "react-feather";
 
 interface AlertPageProps {
   data: Category[];
@@ -32,6 +31,8 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
   const [filterAlert, setFilterAlert] = useState("ALL");
   const router = useRouter();
   const { isAuth } = useCheckAuth();
+  const [filteredData, setFilteredData] = useState<Category[]>(data);
+
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
     th: { backgroundColor: "white" },
@@ -43,30 +44,18 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
     },
   }));
 
-  const handleFilterChange = (event: SelectChangeEvent) => {
-    setFilterAlert(event.target.value as string);
-    fetchAlertData(event.target.value as string);
+  const handleRowClick = (index: number) => {
+    let tempData = [...data];
+    tempData[index].is_selected = !tempData[index].is_selected;
+    setFilteredData(tempData);
   };
 
-  const [checkedRows, setCheckedRows] = useState<Set<number>>(
-    new Set(data.map((row) => row.id))
-  );
-
-  const handleRowClick = (event: React.MouseEvent<HTMLTableRowElement>) => {
-    const rowIndex = +event.currentTarget.rowIndex;
-    setCheckedRows((prevCheckedRows) => {
-      const newCheckedRows = new Set(prevCheckedRows);
-      if (newCheckedRows.has(rowIndex)) newCheckedRows.delete(rowIndex);
-      else newCheckedRows.add(rowIndex);
-      return newCheckedRows;
-    });
-    console.log(checkedRows);
-  };
-
-  const isChecked = (id: number) => checkedRows.has(id);
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
+  useEffect(() => {
+    setFilteredData(data);
+  }, [data]);
 
   return (
     <>
@@ -82,7 +71,7 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                 id="alert-filter"
                 label="Settings"
                 value={filterAlert}
-                onChange={handleFilterChange}
+                onChange={(e) => setFilterAlert(e.target.value)}
               >
                 <MenuItem value={"ALL"} selected>
                   ALL
@@ -125,6 +114,18 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                     width: "5%",
                   }}
                 >
+                  <div className="font-bold">ID</div>
+                </TableCell>
+                <TableCell
+                  className="uppercase"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    bgcolor: "white",
+                    width: "5%",
+                  }}
+                >
                   <div className="font-bold">Alert</div>
                 </TableCell>
                 <TableCell
@@ -157,29 +158,33 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
             <TableBody
               sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
             >
-              {data?.map((row, i) => (
-                <StyledTableRow
-                  key={row.id}
-                  className="cursor-pointer"
-                  data-index={row.id}
-                  onClick={handleRowClick}
-                >
-                  <TableCell>
-                    <LocalFireDepartment
-                      color="warning"
-                      style={{ opacity: isChecked(row.id) ? 1 : 0.2 }}
-                    />
-                  </TableCell>
-                  <TableCell scope="row">
-                    <Checkbox
-                      name={row.sub_category}
-                      checked={checkedRows.has(row.id)}
-                      readOnly
-                    />
-                  </TableCell>
-                  <TableCell align="center">{row.sub_category}</TableCell>
-                </StyledTableRow>
-              ))}
+              {filteredData?.map(
+                (row, index) =>
+                  (filterAlert === "ALL" || row.category === filterAlert) && (
+                    <StyledTableRow
+                      key={row.id}
+                      className="cursor-pointer"
+                      data-index={row.id}
+                      onClick={() => handleRowClick(index)}
+                    >
+                      <TableCell>
+                        <LocalFireDepartment
+                          color="warning"
+                          style={{ opacity: row.is_selected ? 1 : 0.2 }}
+                        />
+                      </TableCell>
+                      <TableCell scope="row">
+                        <Checkbox
+                          name={row.sub_category}
+                          checked={row.is_selected}
+                          readOnly
+                        />
+                      </TableCell>
+                      <TableCell align="center">{row.id}</TableCell>
+                      <TableCell align="center">{row.sub_category}</TableCell>
+                    </StyledTableRow>
+                  )
+              )}
             </TableBody>
           </Table>
         </TableContainer>
