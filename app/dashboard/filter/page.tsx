@@ -1,25 +1,25 @@
 "use client";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Category } from "@/services/types/settings.type";
 import { settingsService } from "@/services/settings";
-import { useParams } from "next/navigation";
 import { FilterPage } from "@/components/filter/FilterPage";
 
 export default function Page() {
-  const { id } = useParams<{ id: string }>();
   const [data, setData] = useState<Category[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [category, setCategory] = useState<string>("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchAlertsData(category);
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search]);
 
   const fetchAlertsData = async (category: string) => {
     try {
       const res = await settingsService.getSubCategoriesByCategory({
         category: String(category == "ALL" ? "" : category),
+        search: search,
       });
       setData(
         (res as Category[]).sort((a, b) => {
@@ -33,9 +33,18 @@ export default function Page() {
     }
   };
 
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value);
+  };
+
   return (
     <>
-      <FilterPage data={data} fetchAlertData={fetchAlertsData} />
+      <FilterPage
+        data={data}
+        search={search}
+        handleSearchChange={handleSearchChange}
+      />
     </>
   );
 }

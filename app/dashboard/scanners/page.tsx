@@ -3,7 +3,14 @@ import { billingService } from "@/services/billing";
 import { scannerService } from "@/services/scanners";
 import { State } from "@/services/types/billing.type";
 import { Scanner } from "@/services/types/scanner.type";
-import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
+import {
+  House,
+  LocalFireDepartment,
+  LocalPolice,
+  MedicalInformation,
+  MiscellaneousServices,
+  Radio,
+} from "@mui/icons-material";
 import {
   Box,
   Divider,
@@ -65,9 +72,6 @@ export default function Page() {
   const [value, setValue] = useState<"allscanners" | "myscanners">(
     pageInfo ? "myscanners" : "allscanners"
   );
-  const [info, setInfo] = useState({
-    alert: "",
-  });
   const [search, setSearch] = useState("");
   const [states, setStates] = useState<State[]>([]);
   const [selectedState, setSelectedState] = useState<State | "">("");
@@ -104,6 +108,7 @@ export default function Page() {
   const handleStateChange = (e: SelectChangeEvent) => {
     const id = e.target.value;
     const state = states.find((item) => item.state_id === id) || "";
+    if (state === "") setSelectedCounty("");
     setSelectedState(state);
   };
 
@@ -143,19 +148,8 @@ export default function Page() {
     dispatch(setPageInfo({ pageName: newValue, pageNo: 0 }));
   };
 
-  const handleInfoChange = (event: SelectChangeEvent) => {
-    const name = event.target.name;
-    const value = event.target.value;
-
-    setInfo({
-      ...info,
-      [name]: value,
-    });
-  };
-
   const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-
     setSearch(value);
   };
 
@@ -257,28 +251,6 @@ export default function Page() {
                       {county.county_name}
                     </MenuItem>
                   ))}
-              </Select>
-            </FormControl>
-          </div>
-
-          <div className="w-48">
-            <FormControl size="small" fullWidth>
-              <InputLabel id="alert-filter-label">Select alert</InputLabel>
-              <Select
-                labelId="alert-filter-label"
-                id="alert-filter"
-                label="Select alert"
-                value={info.alert}
-                onChange={handleInfoChange}
-                name="alert"
-              >
-                <MenuItem value={""}>All alerts</MenuItem>
-                <MenuItem value={"fire"}>
-                  Fire alert{" "}
-                  <LocalFireDepartment color="warning" className="ms-1" />
-                </MenuItem>
-                <MenuItem value={"police"}>Police alert</MenuItem>
-                <MenuItem value={30}>Menu 3</MenuItem>
               </Select>
             </FormControl>
           </div>

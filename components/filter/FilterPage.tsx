@@ -3,27 +3,20 @@ import { useCheckAuth } from "@/hooks/useCheckAuth";
 import {
   LocalFireDepartment,
   LocalPolice,
-  LocalPoliceOutlined,
-  LocalPoliceRounded,
-  LocalPoliceSharp,
-  LocalPoliceTwoTone,
   MedicalInformation,
-  MedicalServices,
   MiscellaneousServices,
 } from "@mui/icons-material";
 import {
-  Alert,
-  Button,
   Checkbox,
   Divider,
   FormControl,
   InputLabel,
   MenuItem,
   Paper,
-  Snackbar,
   styled,
+  TextField,
 } from "@mui/material";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
+import Select from "@mui/material/Select";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -35,21 +28,22 @@ import { useEffect, useState } from "react";
 import { Category } from "@/services/types/settings.type";
 import { LoadingButton } from "@mui/lab";
 import { settingsService } from "@/services/settings";
-import apiClient from "@/axios";
 
 interface AlertPageProps {
   data: Category[];
-  fetchAlertData: (category: string) => void;
+  search: string;
+  handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
+export function FilterPage({
+  data,
+  search,
+  handleSearchChange,
+}: AlertPageProps) {
   const [filterAlert, setFilterAlert] = useState("ALL");
   const router = useRouter();
   const { isAuth } = useCheckAuth();
   const [filteredData, setFilteredData] = useState<Category[]>(data);
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const StyledTableRow = styled(TableRow)(() => ({
@@ -67,25 +61,6 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
     let tempData = [...data];
     tempData[index].is_selected = 1 - (tempData[index].is_selected || 0);
     setFilteredData(tempData);
-  };
-
-  const handleSelectedSave = async () => {
-    const endPoint = "/api/alerts/update-selected-subcategories";
-    try {
-      const response = await apiClient.post(
-        endPoint,
-        JSON.stringify(filteredData)
-      );
-      setSnackbarMessage("Saved successfully!");
-      setSnackbarOpen(true);
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
-  };
-
-  const handleCloseSnackbar = () => {
-    setSnackbarOpen(false);
   };
 
   const onClickSaveButton = async () => {
@@ -109,9 +84,20 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
 
   return (
     <>
-      <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
+      <div className="mb-4 p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Filters</div>
-        <div className="flex">
+        <div className="flex mt-6 gap-2">
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <TextField
+                size="small"
+                onChange={handleSearchChange}
+                value={search}
+                name="search"
+                label="Search filters"
+              />
+            </FormControl>
+          </div>
           <div className="ml-5 w-52">
             <FormControl size="small" fullWidth>
               <InputLabel id="alert-filter-label">Settings</InputLabel>
@@ -183,18 +169,6 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                   <div className="font-bold">Alert</div>
                 </TableCell>
                 <TableCell
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                    width: "15%",
-                  }}
-                >
-                  <div className="font-bold">Check</div>
-                </TableCell>
-                <TableCell
                   align="center"
                   className="uppercase"
                   sx={{
@@ -254,7 +228,6 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                           readOnly
                         />
                       </TableCell>
-                      <TableCell align="center">{row.id}</TableCell>
                       <TableCell align="center">{row.sub_category}</TableCell>
                     </StyledTableRow>
                   )
