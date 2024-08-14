@@ -1,7 +1,8 @@
 "use client";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
-import { LocalFireDepartment } from "@mui/icons-material";
+import { Api, LocalFireDepartment } from "@mui/icons-material";
 import {
+  Alert,
   Button,
   Checkbox,
   Divider,
@@ -9,6 +10,7 @@ import {
   InputLabel,
   MenuItem,
   Paper,
+  Snackbar,
   styled,
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -21,6 +23,7 @@ import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Category } from "@/services/types/settings.type";
+import apiClient from "@/axios";
 
 interface AlertPageProps {
   data: Category[];
@@ -32,6 +35,9 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
   const router = useRouter();
   const { isAuth } = useCheckAuth();
   const [filteredData, setFilteredData] = useState<Category[]>(data);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
@@ -50,6 +56,25 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
     setFilteredData(tempData);
   };
 
+  const handleSelectedSave = async () => {
+    const endPoint = "/api/alerts/update-selected-subcategories";
+    try {
+      const response = await apiClient.post(
+        endPoint,
+        JSON.stringify(filteredData)
+      );
+      setSnackbarMessage("Saved successfully!");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
+  };
+
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
@@ -62,7 +87,24 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Filters</div>
         <div className="flex">
-          <Button variant="contained">Save</Button>
+          <Button variant="contained" onClick={handleSelectedSave}>
+            Save
+          </Button>
+          <Snackbar
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            open={snackbarOpen}
+            autoHideDuration={6000}
+            onClose={handleCloseSnackbar}
+          >
+            <Alert
+              onClose={handleCloseSnackbar}
+              severity="success"
+              variant="filled"
+              sx={{ width: "100%" }}
+            >
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
           <div className="ml-5 w-52">
             <FormControl size="small" fullWidth>
               <InputLabel id="alert-filter-label">Settings</InputLabel>

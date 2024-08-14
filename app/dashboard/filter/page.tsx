@@ -21,7 +21,13 @@ export default function Page() {
       const res = await settingsService.getSubCategoriesByCategory({
         category: String(category == "ALL" ? "" : category),
       });
-      setData(res as Category[]);
+      setData(
+        (res as Category[]).sort((a, b) => {
+          if (a.id < b.id) return -1;
+          else if (a.id > b.id) return 1;
+          return 0;
+        })
+      );
     } catch (error) {
       console.error("Error fetching data:", error);
     }
