@@ -30,7 +30,7 @@ export interface Category {
   sub_category: string;
   category: string;
   scanner_id: number;
-  is_selected?: boolean;
+  is_selected?: number;
 }
 
 export interface SettingsObject {
@@ -47,3 +47,7 @@ export interface IGetAlertByIdResponse {
 }
 
 export interface IGetSubCategoriesByCategoryResponse {}
+export interface IUpdateSelectedSubCategoriesResponse {
+  status: boolean;
+  message: string;
+}

@@ -84,7 +84,7 @@ export function AlertPage({
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
-  console.log(scanner_id);
+  
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
@@ -115,7 +115,7 @@ export function AlertPage({
       <Divider />
 
       <Paper sx={{ width: "100%" }} className="mt-6">
-        <TableContainer sx={{ maxHeight: "68vh" }}>
+        <TableContainer sx={{ maxHeight: "75vh" }}>
           <Table
             sx={{
               // minWidth: 1450,

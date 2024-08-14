@@ -1,3 +1,5 @@
+import { Scanner } from "./scanner.type";
+
 export interface Pagination {
   page?: number;
   limit?: number;
@@ -40,4 +42,5 @@ export interface IGetAlertsResponse {
 export interface IGetAlertByIdResponse {
   alert: Alert;
   addresses: string[];
+  scanner: Scanner;
 }

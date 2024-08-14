@@ -1,6 +1,6 @@
 "use client";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
-import { LocalFireDepartment } from "@mui/icons-material";
+import { LocalFireDepartment, LocalPolice, MedicalInformation, MiscellaneousServices } from "@mui/icons-material";
 import {
   Divider,
   FormControl,
@@ -153,7 +153,7 @@ export function SettingsPage({
                     bgcolor: "white",
                   }}
                 >
-                  NO
+                  TYPE
                 </TableCell>
                 <TableCell
                   align="center"
@@ -165,7 +165,7 @@ export function SettingsPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Keyword</div>
+                  <div className="font-bold">24hr</div>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -177,7 +177,7 @@ export function SettingsPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Type</div>
+                  <div className="font-bold">Monthly Dispatches</div>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -189,7 +189,7 @@ export function SettingsPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Traffic (24hrs)</div>
+                  <div className="font-bold">Monthly Average</div>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -201,7 +201,7 @@ export function SettingsPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Traffic (%)</div>
+                  <div className="font-bold">Category</div>
                 </TableCell>
                 <TableCell
                   align="center"
@@ -213,7 +213,7 @@ export function SettingsPage({
                     bgcolor: "white",
                   }}
                 >
-                  <div className="font-bold">Lifetime</div>
+                  <div className="font-bold">Total Lifetime</div>
                 </TableCell>
               </StyledTableHeaderRow>
             </TableHead>
@@ -221,25 +221,39 @@ export function SettingsPage({
               sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
             >
               {data?.map((row, i) => (
-                <StyledTableRow
-                  key={row.id}
-                  className="cursor-pointer"
-                  onClick={() =>
-                    router.push(
-                      `/dashboard/scanners/${scanner_id}/alert/${row.sub_category}`
-                    )
-                  }
-                >
-                  <TableCell>
-                    <LocalFireDepartment color="warning" />
-                  </TableCell>
-                  <TableCell scope="row">{row.id}</TableCell>
-                  <TableCell align="center">{row.sub_category}</TableCell>
-                  <TableCell align="center"></TableCell>
-                  <TableCell align="center"></TableCell>
-                  <TableCell align="center"></TableCell>
-                  <TableCell align="center"></TableCell>
-                </StyledTableRow>
+                (row.is_selected == 1) && (
+                  <StyledTableRow
+                    key={row.id}
+                    className="cursor-pointer"
+                    onClick={() =>
+                      router.push(
+                        `/dashboard/scanners/${scanner_id}/alert/${row.sub_category}`
+                      )
+                    }
+                  >
+                    <TableCell>
+                      {/* {
+                        (row.category == "Fire Alerts") && ( <LocalFireDepartment color="warning"/>)
+                      }
+                      {
+                        (row.category == "Police Dispatch") && ( <LocalPolice color="warning"/>)
+                      }
+                      {
+                        (row.category == "Medical Emergencies") && ( <MedicalInformation color="warning"/>)
+                      }
+                      {
+                        (row.category == "Miscellaneous (MISC)") && ( <MiscellaneousServices color="warning"/>)
+                      } */}
+                      <img src={'/logo_Icon.png'} width={"20px"} height={"20px"}/>
+                    </TableCell>
+                    <TableCell align="center">{row.sub_category}</TableCell>
+                    <TableCell scope="row">{row.id}</TableCell>
+                    <TableCell align="center"></TableCell>
+                    <TableCell align="center"></TableCell>
+                    <TableCell align="center">{row.category}</TableCell>
+                    <TableCell align="center"></TableCell>
+                  </StyledTableRow>
+                )
               ))}
             </TableBody>
           </Table>

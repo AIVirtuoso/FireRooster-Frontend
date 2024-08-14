@@ -1,6 +1,16 @@
 "use client";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
-import { Api, LocalFireDepartment } from "@mui/icons-material";
+import {
+  LocalFireDepartment,
+  LocalPolice,
+  LocalPoliceOutlined,
+  LocalPoliceRounded,
+  LocalPoliceSharp,
+  LocalPoliceTwoTone,
+  MedicalInformation,
+  MedicalServices,
+  MiscellaneousServices,
+} from "@mui/icons-material";
 import {
   Alert,
   Button,
@@ -23,6 +33,8 @@ import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Category } from "@/services/types/settings.type";
+import { LoadingButton } from "@mui/lab";
+import { settingsService } from "@/services/settings";
 import apiClient from "@/axios";
 
 interface AlertPageProps {
@@ -38,6 +50,7 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
@@ -52,7 +65,7 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
 
   const handleRowClick = (index: number) => {
     let tempData = [...data];
-    tempData[index].is_selected = !tempData[index].is_selected;
+    tempData[index].is_selected = 1 - (tempData[index].is_selected || 0);
     setFilteredData(tempData);
   };
 
@@ -75,6 +88,18 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
     setSnackbarOpen(false);
   };
 
+  const onClickSaveButton = async () => {
+    setIsSubmitting(true);
+    try {
+      const res = await settingsService.updateSelectedSubCategories(
+        filteredData
+      );
+    } catch (error) {
+      console.log(error);
+    }
+    setIsSubmitting(false);
+  };
+
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
@@ -87,24 +112,6 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Filters</div>
         <div className="flex">
-          <Button variant="contained" onClick={handleSelectedSave}>
-            Save
-          </Button>
-          <Snackbar
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            open={snackbarOpen}
-            autoHideDuration={6000}
-            onClose={handleCloseSnackbar}
-          >
-            <Alert
-              onClose={handleCloseSnackbar}
-              severity="success"
-              variant="filled"
-              sx={{ width: "100%" }}
-            >
-              {snackbarMessage}
-            </Alert>
-          </Snackbar>
           <div className="ml-5 w-52">
             <FormControl size="small" fullWidth>
               <InputLabel id="alert-filter-label">Settings</InputLabel>
@@ -116,17 +123,22 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                 onChange={(e) => setFilterAlert(e.target.value)}
               >
                 <MenuItem value={"ALL"} selected>
-                  ALL
+                  <span className="mx-auto">ALL</span>
                 </MenuItem>
                 <MenuItem value={"Fire Alerts"}>
+                  <LocalFireDepartment color="warning" className="mr-2" />
                   Fire Alerts
-                  <LocalFireDepartment color="warning" className="ms-1" />
                 </MenuItem>
-                <MenuItem value={"Police Dispatch"}>Police Dispatch</MenuItem>
+                <MenuItem value={"Police Dispatch"}>
+                  <LocalPolice color="warning" className="mr-2" />
+                  Police Dispatch
+                </MenuItem>
                 <MenuItem value={"Medical Emergencies"}>
+                  <MedicalInformation color="warning" className="mr-2" />
                   Medical Emergencies
                 </MenuItem>
                 <MenuItem value={"Miscellaneous (MISC)"}>
+                  <MiscellaneousServices color="warning" className="mr-2" />
                   Miscellaneous (MISC)
                 </MenuItem>
               </Select>
@@ -156,7 +168,7 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                     width: "5%",
                   }}
                 >
-                  <div className="font-bold">ID</div>
+                  <div className="font-bold"></div>
                 </TableCell>
                 <TableCell
                   className="uppercase"
@@ -210,15 +222,35 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
                       onClick={() => handleRowClick(index)}
                     >
                       <TableCell>
-                        <LocalFireDepartment
-                          color="warning"
-                          style={{ opacity: row.is_selected ? 1 : 0.2 }}
-                        />
+                        {row.category == "Fire Alerts" && (
+                          <LocalFireDepartment
+                            color="warning"
+                            style={{ opacity: row.is_selected ? 1 : 0.2 }}
+                          />
+                        )}
+                        {row.category == "Police Dispatch" && (
+                          <LocalPolice
+                            color="warning"
+                            style={{ opacity: row.is_selected ? 1 : 0.2 }}
+                          />
+                        )}
+                        {row.category == "Medical Emergencies" && (
+                          <MedicalInformation
+                            color="warning"
+                            style={{ opacity: row.is_selected ? 1 : 0.2 }}
+                          />
+                        )}
+                        {row.category == "Miscellaneous (MISC)" && (
+                          <MiscellaneousServices
+                            color="warning"
+                            style={{ opacity: row.is_selected ? 1 : 0.2 }}
+                          />
+                        )}
                       </TableCell>
                       <TableCell scope="row">
                         <Checkbox
                           name={row.sub_category}
-                          checked={row.is_selected}
+                          checked={row.is_selected == 1}
                           readOnly
                         />
                       </TableCell>
@@ -231,6 +263,19 @@ export function FilterPage({ data, fetchAlertData }: AlertPageProps) {
           </Table>
         </TableContainer>
       </Paper>
+      <LoadingButton
+        sx={{
+          [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },
+          background: "rgb(30, 41, 59)",
+          padding: "10px 20px",
+          marginTop: "1.4rem",
+        }}
+        loading={isSubmitting}
+        variant="contained"
+        onClick={onClickSaveButton}
+      >
+        Save changes
+      </LoadingButton>
     </>
   );
 }

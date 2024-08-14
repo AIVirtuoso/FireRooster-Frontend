@@ -4,12 +4,14 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { alertService } from "@/services/alerts";
 import { scannerService } from "@/services/scanners";
+import { Scanner } from "@/services/types/scanner.type";
 
 export default function Page() {
     const { id, aid } = useParams();
 
-    const [alert, setAlert] = useState<any>();
+    const [alert, setAlert] = useState<any>(null);
     const [addresses, setAddresses] = useState<any[]>([]) // Updated to handle address objects
+    const [scanner, setScanner] = useState<any>() // Updated to handle address objects
 
     useEffect(() => {
         fetchAlertsData();
@@ -19,6 +21,7 @@ export default function Page() {
         const res = await alertService.getAlertsById({ alert_id: Number(aid), scanner_id: Number(id) });
         setAlert(res.alert);
         setAddresses(res.addresses);
+        setScanner(res.scanner);
 
         console.log(res);
     }
@@ -27,7 +30,7 @@ export default function Page() {
         <>
             <div>
                 <p className="text-xl font-semibold">Alert #{id}</p>
-                <p className="text-gray-700 text-[13px]">Cook, Illinois (Chicago Fire - Digital)</p>
+                <p className="text-gray-700 text-[13px]">{scanner && `${scanner.county_name}, ${scanner.state_name} (${scanner.scanner_title})`}</p>
 
                 <div className="mt-7 grid grid-cols-3 gap-10">
                     <div className="col-span-1">

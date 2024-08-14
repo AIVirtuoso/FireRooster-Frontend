@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from "axios";
 import apiClient from "../axios";
-import { IGetSubCategoriesByCategory } from "./types/settings.type";
+import { Category, IGetSubCategoriesByCategory, IUpdateSelectedSubCategoriesResponse } from "./types/settings.type";
 import { IGetSubCategoriesByCategoryResponse } from "./types/settings.type";
 
 export const settingsService = {
@@ -9,6 +9,19 @@ export const settingsService = {
     try {
       const response =
         await apiClient.post<IGetSubCategoriesByCategoryResponse>(
+          endPoint,
+          category
+        );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async updateSelectedSubCategories(category: Category[]) {
+    const endPoint = "/api/alerts/update-selected-subcategories";
+    try {
+      const response =
+        await apiClient.post<IUpdateSelectedSubCategoriesResponse>(
           endPoint,
           category
         );

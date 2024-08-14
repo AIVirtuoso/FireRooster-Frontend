@@ -8,7 +8,7 @@ export default function AuthLayout({
   return (
     <div className={styles.authWrapper}>
       <div className={styles.authHeader}>
-        Company logo
+        <img src={'/logo.png'}></img>
       </div>
       {children}
     </div>
