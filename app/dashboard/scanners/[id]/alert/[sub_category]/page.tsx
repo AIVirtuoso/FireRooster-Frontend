@@ -1,7 +1,7 @@
 "use client";
 import { AlertPage } from "@/components/alert/AlertPage";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { AlertObject } from "@/services/types/alert.type";
 import { alertService } from "@/services/alerts";
 
@@ -12,10 +12,11 @@ export default function Page() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
   const { sub_category } = useParams<{ sub_category: string }>();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetchAlertsData();
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, search]);
 
   const fetchAlertsData = async () => {
     const res = await alertService.getAllAlerts({
@@ -23,6 +24,7 @@ export default function Page() {
       page: page + 1,
       scanner_id: Number(id),
       sub_category: sub_category,
+      search: search,
     });
     setData(res.alerts);
     setTotalPages(res.pagination.total);
@@ -39,11 +41,18 @@ export default function Page() {
     setPage(0);
   };
 
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value);
+  };
+
   return (
     <>
       <AlertPage
         data={data}
         page={page}
+        search={search}
+        handleSearchChange={handleSearchChange}
         scanner_id={Number(id)}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
