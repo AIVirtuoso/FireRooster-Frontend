@@ -1,8 +1,14 @@
 "use client";
-import { useAppSelector } from "@/hooks/store.hooks";
 import { useCheckAuth } from "@/hooks/useCheckAuth";
 import { AlertObject } from "@/services/types/alert.type";
-import { House, LocalFireDepartment, Radio } from "@mui/icons-material";
+import {
+  House,
+  LocalFireDepartment,
+  LocalPolice,
+  MedicalInformation,
+  MiscellaneousServices,
+  Radio,
+} from "@mui/icons-material";
 import {
   Divider,
   FormControl,
@@ -21,18 +27,25 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface AlertPageProps {
   data: AlertObject[];
   page: number;
   search: string;
   handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  filterAlert: string;
+  handleInfoChange: (event: SelectChangeEvent) => void;
   scanner_id?: number;
   rowsPerPage: number;
   totalPages: number;
   handleChangeRowsPerPage: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleChangePage: (event: unknown, newPage: number) => void;
+  selectedFrom: Date | null;
+  selectedTo: Date | null;
+  handleDateChange: (event: unknown, type: "from" | "to", date: Date) => void;
 }
 
 export function AlertPage({
@@ -40,13 +53,17 @@ export function AlertPage({
   page,
   search,
   handleSearchChange,
+  filterAlert,
+  handleInfoChange,
   scanner_id,
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
   totalPages,
+  selectedFrom,
+  selectedTo,
+  handleDateChange,
 }: AlertPageProps) {
-  const [filterAlert, setFilterAlert] = useState("");
   const router = useRouter();
 
   const { isAuth } = useCheckAuth();
@@ -54,17 +71,12 @@ export function AlertPage({
     td: { backgroundColor: "white" },
     th: { backgroundColor: "white" },
   }));
-
   const StyledTableHeaderRow = styled(TableRow)(() => ({
     th: {
       fontSize: ".8rem",
       fontWeight: "bold",
     },
   }));
-
-  const handleFilterChange = (event: SelectChangeEvent) => {
-    setFilterAlert(event.target.value as string);
-  };
 
   const handleRowClick = (rowData: any) => {
     router.push(
@@ -88,7 +100,7 @@ export function AlertPage({
                 onChange={handleSearchChange}
                 value={search}
                 name="search"
-                label="Search scanners"
+                label="Search alerts"
               />
             </FormControl>
           </div>
@@ -101,25 +113,63 @@ export function AlertPage({
                   id="alert-filter"
                   label="Select alert"
                   value={filterAlert}
-                  onChange={handleFilterChange}
+                  onChange={handleInfoChange}
+                  name="alert"
                 >
-                  <MenuItem value={""}>All alerts</MenuItem>
-                  <MenuItem value={"fire"}>
-                    Fire alert{" "}
-                    <LocalFireDepartment color="warning" className="ms-1" />
+                  <MenuItem value={"ALL"} selected>
+                    <span className="mx-auto">ALL</span>
                   </MenuItem>
-                  <MenuItem value={"police"}>Police alert</MenuItem>
-                  <MenuItem value={30}>Menu 3</MenuItem>
+                  <MenuItem value={"Fire Alerts"}>
+                    <LocalFireDepartment color="warning" className="mr-2" />
+                    Fire Alerts
+                  </MenuItem>
+                  <MenuItem value={"Police Dispatch"}>
+                    <LocalPolice color="warning" className="mr-2" />
+                    Police Dispatch
+                  </MenuItem>
+                  <MenuItem value={"Medical Emergencies"}>
+                    <MedicalInformation color="warning" className="mr-2" />
+                    Medical Emergencies
+                  </MenuItem>
+                  <MenuItem value={"Miscellaneous (MISC)"}>
+                    <MiscellaneousServices color="warning" className="mr-2" />
+                    Miscellaneous (MISC)
+                  </MenuItem>
                 </Select>
               </FormControl>
             </div>
           )}
+          <div className="w-48 custom-date-picker-wrapper">
+            <DatePicker
+              selected={selectedFrom}
+              onChange={(date, e) => handleDateChange(e, "from", date as Date)}
+              placeholderText="From"
+              isClearable
+              customInput={
+                <TextField size="small" label="From" variant="outlined" />
+              }
+              className="custom-datepicker"
+              popperClassName="datepicker-popper"
+            />
+          </div>
+          <div className="w-48 custom-date-picker-wrapper">
+            <DatePicker
+              selected={selectedTo}
+              onChange={(date, e) => handleDateChange(e, "to", date as Date)}
+              placeholderText="To"
+              isClearable
+              customInput={
+                <TextField size="small" label="To" variant="outlined" />
+              }
+              className="custom-datepicker"
+              popperClassName="datepicker-popper"
+            />
+          </div>
         </div>
       </div>
       <Divider />
-
       <Paper sx={{ width: "100%" }} className="mt-6">
-        <TableContainer sx={{ maxHeight: "75vh" }}>
+        <TableContainer sx={{ maxHeight: "70vh" }}>
           <Table
             sx={{
               overflowX: "scroll",
@@ -213,12 +263,23 @@ export function AlertPage({
               </StyledTableHeaderRow>
             </TableHead>
             <TableBody
-              sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
+              sx={{ maxHeight: "calc(50vh - 112px)", overflowY: "auto" }}
             >
               {data?.map((row, i) => (
                 <StyledTableRow key={row.alert.id} className="cursor-pointer">
                   <TableCell onClick={() => handleRowClick(row)}>
-                    <LocalFireDepartment color="warning" />
+                    {row.alert.category == "Fire Alerts" && (
+                      <LocalFireDepartment color="warning" />
+                    )}
+                    {row.alert.category == "Police Dispatch" && (
+                      <LocalPolice color="warning" />
+                    )}
+                    {row.alert.category == "Medical Emergencies" && (
+                      <MedicalInformation color="warning" />
+                    )}
+                    {row.alert.category == "Miscellaneous (MISC)" && (
+                      <MiscellaneousServices color="warning" />
+                    )}
                   </TableCell>
                   <TableCell scope="row" onClick={() => handleRowClick(row)}>
                     {new Date(row.alert?.dateTime).toLocaleString()}

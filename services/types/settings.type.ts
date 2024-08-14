@@ -14,6 +14,7 @@ export interface IGetAlertByIdPayload {
 
 export interface IGetSubCategoriesByCategory extends Pagination {
   category: string;
+  search: string;
 }
 
 export interface Alert {

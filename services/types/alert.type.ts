@@ -9,6 +9,9 @@ export interface IGetAlertsPayload extends Pagination {
   scanner_id?: number;
   sub_category?: string;
   search: string;
+  category?: string;
+  selected_from?: Date | null;
+  selected_to?: Date | null;
 }
 
 export interface IGetAlertByIdPayload {
