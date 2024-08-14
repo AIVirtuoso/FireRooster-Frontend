@@ -8,6 +8,7 @@ export interface Pagination {
 export interface IGetAlertsPayload extends Pagination {
   scanner_id?: number;
   sub_category?: string;
+  search: string;
 }
 
 export interface IGetAlertByIdPayload {
@@ -25,7 +26,6 @@ export interface Alert {
   dateTime: string;
   category: string;
   sub_category: string;
-
 }
 
 export interface AlertObject {

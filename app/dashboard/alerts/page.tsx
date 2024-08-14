@@ -5,7 +5,7 @@ import { alertService } from "@/services/alerts";
 import { AlertObject } from "@/services/types/alert.type";
 import { setPageInfo } from "@/store/slices/scanner.slice";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 
 export default function Page() {
   const { sub_category } = useParams<{ sub_category: string }>();
@@ -14,17 +14,19 @@ export default function Page() {
   const [page, setPage] = useState(pageInfo?.pageNo || 0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
+  const [search, setSearch] = useState("");
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     fetchAlertsData();
-  }, [page, rowsPerPage, totalPages]);
+  }, [page, rowsPerPage, totalPages, search]);
 
   const fetchAlertsData = async () => {
     const res = await alertService.getAllAlerts({
       limit: rowsPerPage,
       page: page + 1,
+      search,
     });
     setData(res.alerts);
     setTotalPages(res.pagination.total);
@@ -44,11 +46,18 @@ export default function Page() {
     setPage(0);
   };
 
+  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setSearch(value);
+  };
+
   return (
     <>
       <AlertPage
         data={data}
         page={page}
+        search={search}
+        handleSearchChange={handleSearchChange}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         rowsPerPage={rowsPerPage}

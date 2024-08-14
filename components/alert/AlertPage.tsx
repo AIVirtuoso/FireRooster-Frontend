@@ -10,6 +10,7 @@ import {
   MenuItem,
   Paper,
   TablePagination,
+  TextField,
   styled,
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
@@ -20,11 +21,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 
 interface AlertPageProps {
   data: AlertObject[];
   page: number;
+  search: string;
+  handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   scanner_id?: number;
   rowsPerPage: number;
   totalPages: number;
@@ -35,33 +38,21 @@ interface AlertPageProps {
 export function AlertPage({
   data,
   page,
+  search,
+  handleSearchChange,
   scanner_id,
   rowsPerPage,
   handleChangePage,
   handleChangeRowsPerPage,
   totalPages,
 }: AlertPageProps) {
-  // const [page, setPage] = useState(0);
-  // const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterAlert, setFilterAlert] = useState("");
   const router = useRouter();
 
   const { isAuth } = useCheckAuth();
-  // const handleChangePage = (event: unknown, newPage: number) => {
-  //   setPage(newPage);
-  // };
-
-  // const handleChangeRowsPerPage = (
-  //   event: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   setRowsPerPage(parseInt(event.target.value, 10));
-  //   setPage(0);
-  // };
-
   const StyledTableRow = styled(TableRow)(() => ({
     td: { backgroundColor: "white" },
     th: { backgroundColor: "white" },
-    // "&:last-child td, &:last-child th": { borderBottom: "unset" },
   }));
 
   const StyledTableHeaderRow = styled(TableRow)(() => ({
@@ -84,33 +75,46 @@ export function AlertPage({
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
-  
+
   return (
     <>
-      <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
+      <div className="mb-4 p-4 bg-white rounded">
         <div className="font-semibold text-xl text-coolGray-800">Alerts</div>
-        {!(scanner_id !== undefined) && (
-          <div className="w-52">
+        <div className="flex mt-6 gap-2">
+          <div className="w-48">
             <FormControl size="small" fullWidth>
-              <InputLabel id="alert-filter-label">Select alert</InputLabel>
-              <Select
-                labelId="alert-filter-label"
-                id="alert-filter"
-                label="Select alert"
-                value={filterAlert}
-                onChange={handleFilterChange}
-              >
-                <MenuItem value={""}>All alerts</MenuItem>
-                <MenuItem value={"fire"}>
-                  Fire alert{" "}
-                  <LocalFireDepartment color="warning" className="ms-1" />
-                </MenuItem>
-                <MenuItem value={"police"}>Police alert</MenuItem>
-                <MenuItem value={30}>Menu 3</MenuItem>
-              </Select>
+              <TextField
+                size="small"
+                onChange={handleSearchChange}
+                value={search}
+                name="search"
+                label="Search scanners"
+              />
             </FormControl>
           </div>
-        )}
+          {!(scanner_id !== undefined) && (
+            <div className="w-48">
+              <FormControl size="small" fullWidth>
+                <InputLabel id="alert-filter-label">Select alert</InputLabel>
+                <Select
+                  labelId="alert-filter-label"
+                  id="alert-filter"
+                  label="Select alert"
+                  value={filterAlert}
+                  onChange={handleFilterChange}
+                >
+                  <MenuItem value={""}>All alerts</MenuItem>
+                  <MenuItem value={"fire"}>
+                    Fire alert{" "}
+                    <LocalFireDepartment color="warning" className="ms-1" />
+                  </MenuItem>
+                  <MenuItem value={"police"}>Police alert</MenuItem>
+                  <MenuItem value={30}>Menu 3</MenuItem>
+                </Select>
+              </FormControl>
+            </div>
+          )}
+        </div>
       </div>
       <Divider />
 
@@ -118,7 +122,6 @@ export function AlertPage({
         <TableContainer sx={{ maxHeight: "75vh" }}>
           <Table
             sx={{
-              // minWidth: 1450,
               overflowX: "scroll",
               marginBottom: "20px",
             }}
@@ -217,7 +220,6 @@ export function AlertPage({
                   <TableCell onClick={() => handleRowClick(row)}>
                     <LocalFireDepartment color="warning" />
                   </TableCell>
-                  {/* <TableCell scope="row">{((page * rowsPerPage) + i + 1)}</TableCell> */}
                   <TableCell scope="row" onClick={() => handleRowClick(row)}>
                     {new Date(row.alert?.dateTime).toLocaleString()}
                   </TableCell>
