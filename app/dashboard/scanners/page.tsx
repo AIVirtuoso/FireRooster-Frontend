@@ -39,13 +39,13 @@ import { useAppDispatch, useAppSelector } from "@/hooks/store.hooks";
 import { setPageInfo } from "@/store/slices/scanner.slice";
 import { useStore } from "@/store/StoreProvider";
 
-export const StyledTableRow = styled(TableRow)(() => ({
+const StyledTableRow = styled(TableRow)(() => ({
   td: { backgroundColor: "white" },
   th: { backgroundColor: "white" },
   // "&:last-child td, &:last-child th": { borderBottom: "unset" },
 }));
 
-export const StyledTableHeaderRow = styled(TableRow)(() => ({
+const StyledTableHeaderRow = styled(TableRow)(() => ({
   th: {
     fontSize: ".8rem",
     fontWeight: "bold",

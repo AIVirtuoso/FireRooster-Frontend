@@ -68,7 +68,7 @@ export default function Page() {
 
               <div>
                 <p className="text-[12px] text-gray-600">
-                  This data is a realtime snapshot from the city's fire dispatch
+                  This data is a realtime snapshot from the city&#39;s fire dispatch
                   website/channels.
                 </p>
 

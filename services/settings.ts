@@ -4,7 +4,8 @@ import { Category, IGetSubCategoriesByCategory, IUpdateSelectedSubCategoriesResp
 import { IGetSubCategoriesByCategoryResponse } from "./types/settings.type";
 
 export const settingsService = {
-  async getSubCategoriesByCategory(category: IGetSubCategoriesByCategory) {
+  // async getSubCategoriesByCategory(category: IGetSubCategoriesByCategory) {
+  async getSubCategoriesByCategory(category: any) {
     const endPoint = "/api/alerts/all-subcategories";
     try {
       const response =

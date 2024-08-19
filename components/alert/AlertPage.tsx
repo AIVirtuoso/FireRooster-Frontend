@@ -37,7 +37,7 @@ interface AlertPageProps {
   search: string;
   handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   filterAlert: string;
-  handleInfoChange: (event: SelectChangeEvent) => void;
+  handleInfoChange?: (event: SelectChangeEvent) => void;
   scanner_id?: number;
   rowsPerPage: number;
   totalPages: number;

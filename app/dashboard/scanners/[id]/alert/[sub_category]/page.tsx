@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
 import { AlertObject } from "@/services/types/alert.type";
 import { alertService } from "@/services/alerts";
+import { SelectChangeEvent } from "@mui/material";
 
 export default function Page() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,10 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(1);
   const { sub_category } = useParams<{ sub_category: string }>();
   const [search, setSearch] = useState("");
+  const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
+  const [selectedTo, setSelectedTo] = useState<Date | null>(null);
+  const [filterAlert, setFilterAlert] = useState("ALL");
+
 
   useEffect(() => {
     fetchAlertsData();
@@ -46,18 +51,37 @@ export default function Page() {
     setSearch(value);
   };
 
+  const handleDateChange = (
+    event: unknown,
+    type: "from" | "to",
+    date: Date
+  ) => {
+    if (type === "from") setSelectedFrom(date);
+    else setSelectedTo(date);
+  };
+
+  const handleInfoChange = (event: SelectChangeEvent) => {
+    const fAlert = event.target.value;
+    setFilterAlert(fAlert);
+  };
+
   return (
     <>
       <AlertPage
         data={data}
         page={page}
         search={search}
+        filterAlert={filterAlert}
         handleSearchChange={handleSearchChange}
         scanner_id={Number(id)}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         rowsPerPage={rowsPerPage}
         totalPages={totalPages}
+        selectedFrom={selectedFrom}
+        selectedTo={selectedTo}
+        handleDateChange={handleDateChange}
+        handleInfoChange={handleInfoChange}
       />
     </>
   );

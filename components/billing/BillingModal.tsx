@@ -28,14 +28,25 @@ import {
   TableHead,
   TablePagination,
 } from "@mui/material";
+import TableRow from "@mui/material/TableRow";
 import { County, State } from "@/services/types/billing.type";
-import {
-  StyledTableHeaderRow,
-  StyledTableRow,
-} from "@/app/dashboard/scanners/page";
+
 import { scannerService } from "@/services/scanners";
 import { Scanner } from "@/services/types/scanner.type";
 import { SubEnum, subInfo } from "@/lib/constants";
+
+const StyledTableRow = styled(TableRow)(() => ({
+  td: { backgroundColor: "white" },
+  th: { backgroundColor: "white" },
+  // "&:last-child td, &:last-child th": { borderBottom: "unset" },
+}));
+
+const StyledTableHeaderRow = styled(TableRow)(() => ({
+  th: {
+    fontSize: ".8rem",
+    fontWeight: "bold",
+  },
+}));
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
