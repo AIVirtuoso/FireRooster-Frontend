@@ -9,7 +9,7 @@ import {
   Paper,
 } from "@mui/material";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { alertService } from "@/services/alerts";
 import OpenMapButton from "@/components/googlemap/openMapButton";
 
@@ -19,6 +19,8 @@ export default function Page() {
   const [alert, setAlert] = useState<any>(null);
   const [addresses, setAddresses] = useState<any[]>([]);
   const [scanner, setScanner] = useState<any>();
+  const [audio, setAudio] = useState<any>({});
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     fetchAlertsData();
@@ -32,8 +34,16 @@ export default function Page() {
     setAlert(res.alert);
     setAddresses(res.addresses);
     setScanner(res.scanner);
+    setAudio(res.audio);
   };
 
+
+  const setPlaybackRate = (rate: number) => {
+    if (audioRef.current) {
+      audioRef.current.playbackRate = rate;
+    }
+  };
+  console.log("NEXT_Audio_Base_URL: ", process.env.NEXT_Audio_Base_URL)
   return (
     <>
       <div>
@@ -59,6 +69,42 @@ export default function Page() {
                 <span className="font-bold">Desc: </span>
                 {alert?.description}
               </p>
+              
+              <Divider sx={{ margin: "18px 0px" }} />
+              
+              <p className="text-[13px] text-gray-700" style={{maxHeight: "200px", overflow: "auto"}}>
+                <span className="font-bold">Transcript: </span>
+                {audio.context}
+              </p>
+
+              <Divider sx={{ margin: "18px 0px" }} />
+
+              <div>
+                <audio ref={audioRef} controls>
+                  <source src={`${process.env.NEXT_PUBLIC_Audio_Base_URL}${audio.file_name}`} type="audio/mpeg" />
+                </audio>
+                <div className="mt-4 flex space-x-2">
+                  <button
+                    onClick={() => setPlaybackRate(0.25)}
+                    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
+                  >
+                    1/4
+                  </button>
+                  <button
+                    onClick={() => setPlaybackRate(0.5)}
+                    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
+                  >
+                    1/2
+                  </button>
+                  <button
+                    onClick={() => setPlaybackRate(1)}
+                    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
+                  >
+                    Normal
+                  </button>
+                </div>
+              </div>
+
 
               <Divider sx={{ margin: "18px 0px" }} />
               <p className="text-[13px] text-gray-700">
