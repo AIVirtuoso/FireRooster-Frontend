@@ -46,4 +46,5 @@ export interface IGetAlertByIdResponse {
   alert: Alert;
   addresses: string[];
   scanner: Scanner;
+  audio: any;
 }
