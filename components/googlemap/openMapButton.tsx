@@ -20,11 +20,11 @@ const OpenMapButton: React.FC<OpenMapButtonProps> = ({ address }) => {
         viewBox="0 0 512 512"
         fill="#000000"
       >
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+        <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
         <g
           id="SVGRepo_tracerCarrier"
-          stroke-linecap="round"
-          stroke-linejoin="round"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         ></g>
         <g id="SVGRepo_iconCarrier">
           {" "}
@@ -33,7 +33,7 @@ const OpenMapButton: React.FC<OpenMapButtonProps> = ({ address }) => {
             {" "}
             <path d="M375 136a133 133 0 00-79-66 136 136 0 00-40-6 133 133 0 00-103 48 133 133 0 00-31 86c0 38 13 64 13 64 15 32 42 61 61 86a399 399 0 0130 45 222 222 0 0117 42c3 10 6 13 13 13s11-5 13-13a228 228 0 0116-41 472 472 0 0145-63c5-6 32-39 45-64 0 0 15-29 15-68 0-37-15-63-15-63z"></path>{" "}
           </clipPath>{" "}
-          <g stroke-width="130" clip-path="url(#a)">
+          <g strokeWidth="130" clipPath="url(#a)">
             {" "}
             <path stroke="#fbbc04" d="M104 379l152-181"></path>{" "}
             <path stroke="#4285f4" d="M256 198L378 53"></path>{" "}

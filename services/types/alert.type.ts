@@ -29,6 +29,7 @@ export interface Alert {
   dateTime: string;
   category: string;
   sub_category: string;
+  is_visited?: number;
 }
 
 export interface AlertObject {

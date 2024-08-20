@@ -65,11 +65,10 @@ export function AlertPage({
   handleDateChange,
 }: AlertPageProps) {
   const router = useRouter();
-
   const { isAuth } = useCheckAuth();
-  const StyledTableRow = styled(TableRow)(() => ({
-    td: { backgroundColor: "white" },
-    th: { backgroundColor: "white" },
+  const StyledTableRow = styled(TableRow)(({ color }) => ({
+    td: { backgroundColor: color },
+    th: { backgroundColor: color },
   }));
   const StyledTableHeaderRow = styled(TableRow)(() => ({
     th: {
@@ -266,7 +265,15 @@ export function AlertPage({
               sx={{ maxHeight: "calc(50vh - 112px)", overflowY: "auto" }}
             >
               {data?.map((row, i) => (
-                <StyledTableRow key={row.alert.id} className="cursor-pointer">
+                <StyledTableRow
+                  key={row.alert.id}
+                  className="cursor-pointer"
+                  color={
+                    row.alert.is_visited === null || row.alert.is_visited === 0
+                      ? "#dee2fd88"
+                      : "white"
+                  }
+                >
                   <TableCell onClick={() => handleRowClick(row)}>
                     {row.alert.category == "Fire Alerts" && (
                       <LocalFireDepartment color="warning" />

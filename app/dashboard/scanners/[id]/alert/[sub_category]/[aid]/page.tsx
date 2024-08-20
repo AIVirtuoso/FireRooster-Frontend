@@ -20,11 +20,20 @@ export default function Page() {
   const [addresses, setAddresses] = useState<any[]>([]);
   const [scanner, setScanner] = useState<any>();
   const [audio, setAudio] = useState<any>({});
+  const [audioUrl, setAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     fetchAlertsData();
   }, [id, aid]);
+
+  useEffect(() => {
+    if (audio?.file_name) {
+      setAudioUrl(
+        `${process.env.NEXT_PUBLIC_Audio_Base_URL}${audio.file_name}`
+      );
+    }
+  }, [audio]);
 
   const fetchAlertsData = async () => {
     const res = await alertService.getAlertsById({
@@ -37,13 +46,11 @@ export default function Page() {
     setAudio(res.audio);
   };
 
-
   const setPlaybackRate = (rate: number) => {
     if (audioRef.current) {
       audioRef.current.playbackRate = rate;
     }
   };
-  console.log("NEXT_Audio_Base_URL: ", process.env.NEXT_Audio_Base_URL)
   return (
     <>
       <div>
@@ -69,10 +76,13 @@ export default function Page() {
                 <span className="font-bold">Desc: </span>
                 {alert?.description}
               </p>
-              
+
               <Divider sx={{ margin: "18px 0px" }} />
-              
-              <p className="text-[13px] text-gray-700" style={{maxHeight: "200px", overflow: "auto"}}>
+
+              <p
+                className="text-[13px] text-gray-700"
+                style={{ maxHeight: "200px", overflow: "auto" }}
+              >
                 <span className="font-bold">Transcript: </span>
                 {audio.context}
               </p>
@@ -80,8 +90,12 @@ export default function Page() {
               <Divider sx={{ margin: "18px 0px" }} />
 
               <div>
-                <audio ref={audioRef} controls>
-                  <source src={`${process.env.NEXT_PUBLIC_Audio_Base_URL}${audio.file_name}`} type="audio/mpeg" />
+                <audio
+                  ref={audioRef}
+                  controls
+                  onLoadedData={() => console.log("Audio loaded")}
+                >
+                  {audioUrl && <source src={audioUrl} type="audio/mpeg" />}
                 </audio>
                 <div className="mt-4 flex space-x-2">
                   <button
@@ -105,7 +119,6 @@ export default function Page() {
                 </div>
               </div>
 
-
               <Divider sx={{ margin: "18px 0px" }} />
               <p className="text-[13px] text-gray-700">
                 {new Date(alert?.dateTime).toLocaleString()}
@@ -114,8 +127,8 @@ export default function Page() {
 
               <div>
                 <p className="text-[12px] text-gray-600">
-                  This data is a realtime snapshot from the city&#39;s fire dispatch
-                  website/channels.
+                  This data is a realtime snapshot from the city&#39;s fire
+                  dispatch website/channels.
                 </p>
 
                 <p className="text-[12px] text-gray-600 mt-6">

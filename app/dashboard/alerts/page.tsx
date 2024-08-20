@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/store.hooks";
 import { alertService } from "@/services/alerts";
 import { AlertObject } from "@/services/types/alert.type";
 import { setPageInfo } from "@/store/slices/scanner.slice";
+import { useStore } from "@/store/StoreProvider";
 import { SelectChangeEvent } from "@mui/material";
 import { ChangeEvent, useEffect, useState } from "react";
 
@@ -14,8 +15,7 @@ export default function Page() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
-  const [filterAlert, setFilterAlert] = useState("ALL");
-
+  const { currentCategory, setCurrentCategory } = useStore();
   const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
   const [selectedTo, setSelectedTo] = useState<Date | null>(null);
 
@@ -28,7 +28,7 @@ export default function Page() {
     rowsPerPage,
     totalPages,
     search,
-    filterAlert,
+    currentCategory,
     selectedFrom,
     selectedTo,
   ]);
@@ -38,7 +38,7 @@ export default function Page() {
       limit: rowsPerPage,
       page: page + 1,
       search,
-      category: String(filterAlert == "ALL" ? "" : filterAlert),
+      category: String(currentCategory == "ALL" ? "" : currentCategory),
       selected_from: selectedFrom,
       selected_to: selectedTo,
     });
@@ -48,7 +48,7 @@ export default function Page() {
 
   const handleInfoChange = (event: SelectChangeEvent) => {
     const fAlert = event.target.value;
-    setFilterAlert(fAlert);
+    setCurrentCategory(fAlert);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -86,7 +86,7 @@ export default function Page() {
         page={page}
         search={search}
         handleSearchChange={handleSearchChange}
-        filterAlert={filterAlert}
+        filterAlert={currentCategory}
         handleInfoChange={handleInfoChange}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
