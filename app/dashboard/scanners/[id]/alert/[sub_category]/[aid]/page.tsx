@@ -7,11 +7,41 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Typography,
+  Collapse,
+  Box 
 } from "@mui/material";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { alertService } from "@/services/alerts";
 import OpenMapButton from "@/components/googlemap/openMapButton";
+import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material"; // Import the icon
+
+
+interface ContactInfo {
+  past_info: ResidentInfo[];
+  owner_info: (ResidentInfo | null)[];
+  current_info: ResidentInfo[];
+}
+
+interface AddressData {
+  address: string;
+  score: number;
+  type: string | null;
+  dateTime: string | null;
+  id: number;
+  alert_id: number;
+  scanner_id: number | null;
+  contact_info: ContactInfo;
+}
+
+interface ResidentInfo {
+  name: string;
+  past_address: string;
+  phone_number: string;
+  email_address: string;
+  current_address: string;
+}
 
 export default function Page() {
   const { id, aid } = useParams();
@@ -22,6 +52,14 @@ export default function Page() {
   const [audio, setAudio] = useState<any>({});
   const [audioUrl, setAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [expandedRows, setExpandedRows] = useState<number[]>([]);
+
+
+  const handleRowClick = (index: number) => {
+    setExpandedRows((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
+  };
 
   useEffect(() => {
     fetchAlertsData();
@@ -72,7 +110,6 @@ export default function Page() {
             <Divider />
 
             <div className="mt-3 bg-white rounded-md px-4 py-7 shadow-md">
-              <p className="text-[17px] font-bold mb-[2px]">Dispatch Website</p>
 
               <p className="text-sm text-gray-600 mt-2">
                 <span className="font-bold mt-2">Headline: </span>
@@ -159,7 +196,8 @@ export default function Page() {
             <p className="text-[17px] font-bold mb-[2px] mt-4">
               Possible Addresses:{" "}
             </p>
-            <Paper className="mt-2 p-2">
+
+            <Paper className="mt-2 p-2" style={{ maxHeight: "70vh", overflow: "auto" }}>
               <Table>
                 <TableHead>
                   <TableRow>
@@ -187,24 +225,121 @@ export default function Page() {
                     >
                       Map
                     </TableCell>
+                    <TableCell
+                      align="center"
+                      style={{ fontSize: "16px", fontWeight: "bold" }}
+                    ></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {addresses.map((addr, index) => (
-                    <TableRow key={index}>
-                      <TableCell align="center">{index + 1}</TableCell>
-                      <TableCell align="center">{addr?.address}</TableCell>
-                      <TableCell align="center">
-                        {addr?.score * 100} %
-                      </TableCell>
-                      <TableCell>
-                        <OpenMapButton address={addr?.address} />
-                      </TableCell>
-                    </TableRow>
+                  {addresses.map((addr: AddressData, index: number) => (
+                    <React.Fragment key={index}>
+                      {/* Original row styling */}
+                      <TableRow style={{ backgroundColor: expandedRows.includes(index) ? '#f5f5f5' : 'white' }}>
+                        <TableCell align="center">{index + 1}</TableCell>
+                        <TableCell align="center">{addr.address}</TableCell>
+                        <TableCell align="center">{(addr.score * 100).toFixed(2)} %</TableCell>
+                        <TableCell>
+                          <OpenMapButton address={addr.address} />
+                        </TableCell>
+                        <TableCell align="center" onClick={() => handleRowClick(index)}>
+                          <ExpandMoreIcon
+                            style={{
+                              transition: "transform 0.3s",
+                              transform: expandedRows.includes(index) ? "rotate(180deg)" : "rotate(0deg)",
+                              cursor: "pointer",
+                            }}
+                          />
+                        </TableCell>
+                      </TableRow>
+
+                      <TableRow>
+                        <TableCell colSpan={5} style={{ padding: "0" }}>
+                          <Collapse in={expandedRows.includes(index)} timeout="auto" unmountOnExit>
+                            <Box style={{ backgroundColor: '#f0f0f0', padding: "10px", border: "1px solid #ccc" }}>
+                              {/* Owner Info Section */}
+                              {addr.contact_info.owner_info?.length > 0 && (
+                                <Table size="small">
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell align="center" style={{ fontWeight: 'bold', backgroundColor: '#e0e0e0' }}>Owners</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {addr.contact_info.owner_info.map((info: ResidentInfo | null, idx: number) => (
+                                      info && (
+                                        <TableRow key={idx}>
+                                          <TableCell>
+                                            <strong>Name:</strong> {info.name} <br />
+                                            <strong>Past Address:</strong> {info.past_address} <br />
+                                            <strong>Phone Number:</strong> {info.phone_number} <br />
+                                            <strong>Email Address:</strong> {info.email_address} <br />
+                                            <strong>Current Address:</strong> {info.current_address}
+                                          </TableCell>
+                                        </TableRow>
+                                      )
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+
+                              {/* Current Info Section */}
+                              {addr.contact_info.current_info?.length > 0 && (
+                                <Table size="small">
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell align="center" style={{ fontWeight: 'bold', backgroundColor: '#e0e0e0' }}>Current Residents</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {addr.contact_info.current_info.map((info: ResidentInfo, idx: number) => (
+                                      <TableRow key={idx}>
+                                        <TableCell>
+                                          <strong>Name:</strong> {info.name} <br />
+                                          <strong>Past Address:</strong> {info.past_address} <br />
+                                          <strong>Phone Number:</strong> {info.phone_number} <br />
+                                          <strong>Email Address:</strong> {info.email_address} <br />
+                                          <strong>Current Address:</strong> {info.current_address}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+
+                              {/* Past Info Section */}
+                              {addr.contact_info.past_info?.length > 0 && (
+                                <Table size="small">
+                                  <TableHead>
+                                    <TableRow>
+                                      <TableCell align="center" style={{ fontWeight: 'bold', backgroundColor: '#e0e0e0' }}>Past Residents</TableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {addr.contact_info.past_info.map((info: ResidentInfo, idx: number) => (
+                                      <TableRow key={idx}>
+                                        <TableCell>
+                                          <strong>Name:</strong> {info.name} <br />
+                                          <strong>Past Address:</strong> {info.past_address} <br />
+                                          <strong>Phone Number:</strong> {info.phone_number} <br />
+                                          <strong>Email Address:</strong> {info.email_address} <br />
+                                          <strong>Current Address:</strong> {info.current_address}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              )}
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </React.Fragment>
                   ))}
                 </TableBody>
               </Table>
             </Paper>
+
           </div>
         </div>
       </div>
