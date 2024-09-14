@@ -20,7 +20,6 @@ export default function Page() {
       console.log(response);
       setUser(response)
     }
-    console.log("dfdff")
     getUser();
 
   }, []);
@@ -39,7 +38,7 @@ export default function Page() {
       window.open(checkout_session_id);
     } else {
       console.error('No URL found in the response');
-    }    
+    }
   };
 
   const handleOpenModal = (type: SubEnum) => {
@@ -99,7 +98,7 @@ export default function Page() {
                   Choose Scanners
                 </button>
               )}
-              
+
               {user?.usertype?.tier != "Silver" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
@@ -110,7 +109,7 @@ export default function Page() {
               )}
             </CardActions>
           </Card>
-          
+
           <Card
             className="sm:me-4 bg-gray-900 text-white"
             variant="outlined"
@@ -156,7 +155,7 @@ export default function Page() {
                   Choose Scanners
                 </button>
               )}
-              
+
               {user?.usertype?.tier != "Gold" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
@@ -213,7 +212,7 @@ export default function Page() {
                   Choose Scanners
                 </button>
               )}
-              
+
               {user?.usertype?.tier != "Platinum" && (
                 <button
                   className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
@@ -271,13 +270,13 @@ export default function Page() {
                 </button>
               </CardActions>
             </Card>
-            )
+          )
           }
 
         </div>
       </div>
 
-      { openModal && <BillingModal handleClose={() => setOpenModal(false)} type={selectedSub} /> }
+      {openModal && <BillingModal handleClose={() => setOpenModal(false)} type={selectedSub} />}
     </>
   );
 }

@@ -43,6 +43,13 @@ export default function Page() {
     setAlert(res.alert);
     setAddresses(res.addresses);
     setScanner(res.scanner);
+
+    // const junkRegex = /Speaker [A-Z]:\s*Silence of\.*\s*(Speaker [A-Z]:\s*)?(More than \d+ minute|Than \d+ minute|[0-9]+ seconds|xx seconds)\.?\n?|Speaker [A-Z]:\s*Silence of more\.?\s*(Speaker [A-Z]:\s*)?(Than \d+ minute|More than \d+ minute|[0-9]+ seconds|xx seconds)\.?\n?|Speaker [A-Z]:\s*Silence\.*\s*(more than \d+ minute)?\.?\n?/gi;
+    // let transcript = res.audio.context.replace(junkRegex, '');
+    // transcript = transcript.replace(/(Speaker [A-Z]:)/g, '<br>$1');
+    // transcript = transcript.replace(/\s+/g, ' ').replace(/\n\s+/g, '\n').trim();
+
+    // res.audio.context = transcript;
     setAudio(res.audio);
   };
 
@@ -84,7 +91,7 @@ export default function Page() {
                 style={{ maxHeight: "200px", overflow: "auto" }}
               >
                 <span className="font-bold">Transcript: </span>
-                {audio.context}
+                <span dangerouslySetInnerHTML={{ __html: audio.cleared_context === null ? audio.context : audio.cleared_context }}></span>
               </p>
 
               <Divider sx={{ margin: "18px 0px" }} />

@@ -4,14 +4,6 @@ import { scannerService } from "@/services/scanners";
 import { State } from "@/services/types/billing.type";
 import { Scanner } from "@/services/types/scanner.type";
 import {
-  House,
-  LocalFireDepartment,
-  LocalPolice,
-  MedicalInformation,
-  MiscellaneousServices,
-  Radio,
-} from "@mui/icons-material";
-import {
   Box,
   Divider,
   FormControl,

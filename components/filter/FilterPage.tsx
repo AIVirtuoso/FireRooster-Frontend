@@ -78,6 +78,7 @@ export function FilterPage({
   useEffect(() => {
     if (!isAuth) router.push("/auth/login");
   }, [isAuth]);
+  
   useEffect(() => {
     setFilteredData(data);
   }, [data]);

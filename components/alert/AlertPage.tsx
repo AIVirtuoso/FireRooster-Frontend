@@ -78,8 +78,10 @@ export function AlertPage({
   }));
 
   const handleRowClick = (rowData: any) => {
+    let subcategory = rowData.alert.sub_category;
+    subcategory = subcategory.replace("/", "-");
     router.push(
-      `/dashboard/scanners/${rowData.alert.scanner_id}/alert/${rowData.alert.sub_category}/${rowData.alert.id}`
+      `/dashboard/scanners/${rowData.alert.scanner_id}/alert/${subcategory}/${rowData.alert.id}`
     );
   };
 

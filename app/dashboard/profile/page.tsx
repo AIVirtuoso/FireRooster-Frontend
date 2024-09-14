@@ -1,16 +1,10 @@
 "use client";
 import {
   Box,
-  Checkbox,
-  Chip,
   Divider,
   FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
   InputLabel,
   MenuItem,
-  OutlinedInput,
   Select,
   SelectChangeEvent,
   Stack,
@@ -18,7 +12,7 @@ import {
   TextareaAutosize
 } from "@mui/material";
 
-
+import { billingService } from "@/services/billing";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,12 +20,14 @@ import { useEffect, useState } from "react";
 import { LoadingButton } from "@mui/lab";
 import { useAppSelector } from "@/hooks/store.hooks";
 import { profileService } from "@/services/profile";
+import { State } from "@/services/types/billing.type";
+import UploadCSVButton from "@/components/upload-csv/uploadCSVButton"
 
 const profileSchema = z.object({
   first_name: z.string(),
   last_name: z.string(),
   email: z.string().email("Please provide a valid email"),
-  prompt: z.string()  // Additional information is optional  
+  prompt: z.string()
 });
 type TProfileSchema = z.infer<typeof profileSchema>;
 
@@ -45,62 +41,16 @@ const MenuProps = {
     },
   },
 };
-const alerts = [
-  "Fire",
-  // "Police", "Army"
-];
-const usStates = [
-  "Alabama",
-  "Alaska",
-  "Arizona",
-  "Arkansas",
-  "California",
-  "Colorado",
-  "Connecticut",
-  "Delaware",
-  "Florida",
-  "Georgia",
-  "Hawaii",
-  "Idaho",
-  "Illinois",
-  "Indiana",
-  "Iowa",
-  "Kansas",
-  "Kentucky",
-  "Louisiana",
-  "Maine",
-  "Maryland",
-  "Massachusetts",
-  "Michigan",
-  "Minnesota",
-  "Mississippi",
-  "Missouri",
-  "Montana",
-  "Nebraska",
-  "Nevada",
-  "New Hampshire",
-  "New Jersey",
-  "New Mexico",
-  "New York",
-  "North Carolina",
-  "North Dakota",
-  "Ohio",
-  "Oklahoma",
-  "Oregon",
-  "Pennsylvania",
-  "Rhode Island",
-  "South Carolina",
-  "South Dakota",
-  "Tennessee",
-  "Texas",
-  "Utah",
-  "Vermont",
-  "Virginia",
-  "Washington",
-  "West Virginia",
-  "Wisconsin",
-  "Wyoming",
-];
+
+function getCurrentCounty(selectedState: State | "", selectedCounty: string) {
+  if (selectedState === "")
+    return "";
+  let countyName = '';
+  const county = selectedState.county_list.find(county => county.county_id === selectedCounty);
+  if (county)
+    countyName = county.county_name;
+  return countyName;
+}
 
 export default function Page() {
   const user = useAppSelector(state => state.auth.user);
@@ -115,19 +65,28 @@ export default function Page() {
     resolver: zodResolver(profileSchema),
     defaultValues: user
   });
-  const [filterState, setFilterState] = useState("");
-  const [filterAlert, setFilterAlert] = useState<string[]>([]);
   const [isMobileWidth, setIsMobileWidth] = useState(false);
 
-  const handleStateChange = (event: SelectChangeEvent) => {
-    setFilterState(event.target.value as string);
+  const [states, setStates] = useState<State[]>([]);
+  const [selectedState, setSelectedState] = useState<State | "">("");
+  const [selectedCounty, setSelectedCounty] = useState<string | "">("");
+  const [uploadDisabled, setUploadDisabled] = useState(false);
+
+  const fetchStates = async () => {
+    const res = await billingService.getStateList();
+    setStates(res);
   };
 
-  const handleAlertChange = (event: SelectChangeEvent<typeof filterAlert>) => {
-    const {
-      target: { value },
-    } = event;
-    setFilterAlert(typeof value === "string" ? value.split(",") : value);
+  const handleStateChange = (e: SelectChangeEvent) => {
+    const id = e.target.value;
+    const state = states.find((item) => item.state_id === id) || "";
+    if (state === "") setSelectedCounty("");
+    setSelectedState(state);
+  };
+
+  const handleCountyChange = (e: SelectChangeEvent) => {
+    const id = e.target.value;
+    setSelectedCounty(id);
   };
 
   useEffect(() => {
@@ -139,27 +98,35 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    try {  
+    try {
       const fetchProfile = async () => {
         const response = await profileService.getProfileInfo();
         console.log(response);
         reset(response);
       }
       fetchProfile();
-    } catch (error) {  
-      console.error("Error saving data:", error);  
-    }  
+      fetchStates();
+    } catch (error) {
+      console.error("Error saving data:", error);
+    }
   }, [])
 
-  const onSubmit = async (formData: TProfileSchema) => {  
+  useEffect(() => {
+    if (selectedState.toString().length > 0 && selectedCounty.toString().length > 0)
+      setUploadDisabled(false);
+    else
+      setUploadDisabled(true);
+  }, [selectedState, selectedCounty])
+
+  const onSubmit = async (formData: TProfileSchema) => {
     try {
       const setProfile = async () => {
         const response = profileService.setProfileInfo(formData);
         console.log(response)
       }
       setProfile();
-    } catch (error) {  
-      console.error("Error saving data:", error);  
+    } catch (error) {
+      console.error("Error saving data:", error);
     }
   };
 
@@ -206,83 +173,63 @@ export default function Page() {
           helperText={errors?.email?.message}
           onChange={(e) => setValue("email", e.target.value)}
         />
-        <FormControl size="medium" fullWidth sx={{ margin: "2rem 0" }}>
-          <InputLabel id="state-filter-label">Select state</InputLabel>
-          <Select
-            labelId="state-filter-label"
-            id="state-filter"
-            label="Select state s"
-            value={filterState}
-            onChange={handleStateChange}
-            MenuProps={MenuProps}
-          >
-            {usStates.map((state) => (
-              <MenuItem key={state} value={state}>
-                {state}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl fullWidth sx={{ marginBottom: "1.2rem" }}>
-          <InputLabel id="multiple-checkbox-alert-label">
-            Select alert (multiple options)
-          </InputLabel>
-          <Select
-            labelId="multiple-checkbox-alert-label"
-            id="multiple-checkbox-alert"
-            multiple
-            value={filterAlert}
-            onChange={handleAlertChange}
-            input={<OutlinedInput label="Select alert (multiple options) s" />}
-            renderValue={(selected) => selected.join(", ")}
-            MenuProps={MenuProps}
-          >
-            {alerts.map((alert) => (
-              <MenuItem key={alert} value={alert}>
-                <Checkbox
-                  checked={filterAlert.indexOf(alert) > -1}
-                  sx={{
-                    color: "rgb(30, 41, 59)",
-                    "&.Mui-checked": {
-                      color: "rgb(30, 41, 59)",
-                    },
-                  }}
-                />
-                {alert}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <div className="flex mt-8 gap-2 mb-8">
+          <div className="w-60">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="state-filter-label">Select state</InputLabel>
+              <Select
+                labelId="state-filter-label"
+                id="state-filter"
+                label="Select state"
+                name="state"
+                value={selectedState && selectedState.state_id}
+                onChange={handleStateChange}
+                MenuProps={MenuProps}
+              >
+                {states.map((state) => (
+                  <MenuItem key={state.state_id} value={state.state_id}>
+                    {state.state_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+          <div className="w-60">
+            <FormControl size="small" fullWidth>
+              <InputLabel id="state-filter-label">Select county</InputLabel>
+              <Select
+                labelId="state-filter-label"
+                id="state-filter"
+                label="Select county"
+                value={selectedCounty}
+                onChange={handleCountyChange}
+                MenuProps={MenuProps}
+                name="county"
+                disabled={!selectedState}
+              >
+                {selectedState &&
+                  selectedState.county_list.map((county) => (
+                    <MenuItem key={county.county_id} value={county.county_id}>
+                      {county.county_name}
+                    </MenuItem>
+                  ))}
+              </Select>
+            </FormControl>
+          </div>
+          <div className="w-60">
+            <UploadCSVButton disabled={uploadDisabled} state={selectedState ? selectedState.state_name : ""} county={getCurrentCounty(selectedState, selectedCounty)} />
+          </div>
+        </div>
         <Box fontWeight={"bold"}>Prompt</Box>
         <FormControl fullWidth>
-          <TextareaAutosize 
+          <TextareaAutosize
             minRows={4}
             maxRows={12}
-            placeholder="Enter prompt here..."  
+            placeholder="Enter prompt here..."
             {...register("prompt")} // Register the textarea  
-            style={{ width: '100%', boxSizing: 'border-box'}} // Add padding and box-sizing  
-          />  
-        </FormControl> 
-        {/* <FormGroup row>
-          <FormControlLabel
-            control={
-              <Checkbox
-                defaultChecked
-                sx={{
-                  color: "rgb(30, 41, 59)",
-                  "&.Mui-checked": {
-                    color: "rgb(30, 41, 59)",
-                  },
-                }}
-              />
-            }
-            label="Email alert"
+            style={{ width: '100%', boxSizing: 'border-box' }} // Add padding and box-sizing  
           />
-          <FormControlLabel
-            control={<Checkbox disabled />}
-            label="Phone alert (coming soon)"
-          />
-        </FormGroup> */}
+        </FormControl>
         <LoadingButton
           sx={{
             [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },
