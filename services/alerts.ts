@@ -1,5 +1,5 @@
 import apiClient from "../axios";
-import { IGetAlertsPayload, IGetAlertsResponse } from "./types/alert.type";
+import { IGetAlertsPayload, IGetAlertsResponse, IGetUnlockContactInfoPayload, IGetUnlockContactInfoResponse } from "./types/alert.type";
 import {
   IGetAlertByIdPayload,
   IGetAlertByIdResponse,
@@ -18,6 +18,7 @@ export const alertService = {
       throw error;
     }
   },
+
   async getAlertsById(payload: IGetAlertByIdPayload) {
     const endPoint = "/api/alerts/get-alert-by-id";
     try {
@@ -30,4 +31,18 @@ export const alertService = {
       throw error;
     }
   },
+
+  async unlockContactInfo(payload: IGetUnlockContactInfoPayload) {
+    const endPoint = "/api/alerts/unlock-contact-info"
+    try {
+      const response = await apiClient.post<IGetUnlockContactInfoResponse>(
+        `${endPoint}`,
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
 };

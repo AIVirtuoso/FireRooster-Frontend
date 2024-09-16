@@ -24,7 +24,7 @@ const Navmenu = () => {
   return (
     <div className="nav-menu hidden lg:flex max-w-xs w-80 bg-gray-900 text-white flex flex-col p-8">
       <div className="mx-auto mb-5">
-        <img src={'/logo.png'} width={"150px"} height={"150px"}></img>
+        <img src={'/white_logo.png'} width={"150px"} height={"150px"}></img>
       </div>
       <p className="mb-2 text-gray-600">Application</p>
       <ul className="mb-8">

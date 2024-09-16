@@ -20,6 +20,14 @@ export interface IGetAlertByIdPayload {
   sub_category?: string;
 }
 
+export interface IGetUnlockContactInfoPayload {
+  address_id?: number;
+}
+export interface IGetUnlockContactInfoResponse {
+  status: boolean;
+  message: string;
+}
+
 export interface Alert {
   id: number;
   headline: string;

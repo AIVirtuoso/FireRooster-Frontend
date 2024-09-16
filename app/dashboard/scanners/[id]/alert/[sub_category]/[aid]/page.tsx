@@ -33,6 +33,7 @@ interface AddressData {
   alert_id: number;
   scanner_id: number | null;
   contact_info: ContactInfo;
+  spokeo_status: number;
 }
 
 interface ResidentInfo {
@@ -53,13 +54,25 @@ export default function Page() {
   const [audioUrl, setAudioUrl] = useState<string>("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleRowClick = (index: number) => {
     setExpandedRows((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
   };
+
+  const unlockContactInfo = async (address_id: number) => {
+    setLoading(true);
+    const res = await alertService.unlockContactInfo({address_id: address_id});
+    await fetchAlertsData();
+    setLoading(false);
+  }
 
   useEffect(() => {
     fetchAlertsData();
@@ -125,10 +138,16 @@ export default function Page() {
 
               <p
                 className="text-[13px] text-gray-700"
-                style={{ maxHeight: "200px", overflow: "auto" }}
+                style={{ maxHeight: "200px", overflow: "auto"}}
               >
                 <span className="font-bold">Transcript: </span>
-                <span dangerouslySetInnerHTML={{ __html: audio.cleared_context === null ? audio.context : audio.cleared_context }}></span>
+                {isMounted ? (
+                  <pre>
+                    {audio.cleared_context === null ? audio.context : audio.cleared_context}
+                  </pre>
+                ) : (
+                  <pre>Loading...</pre> // Fallback content during server-side rendering
+                )}
               </p>
 
               <Divider sx={{ margin: "18px 0px" }} />
@@ -242,14 +261,46 @@ export default function Page() {
                         <TableCell>
                           <OpenMapButton address={addr.address} />
                         </TableCell>
-                        <TableCell align="center" onClick={() => handleRowClick(index)}>
-                          <ExpandMoreIcon
+                        <TableCell align="center">
+                          {/* <ExpandMoreIcon
                             style={{
                               transition: "transform 0.3s",
                               transform: expandedRows.includes(index) ? "rotate(180deg)" : "rotate(0deg)",
                               cursor: "pointer",
                             }}
-                          />
+                          /> */}
+                          { addr.score == 1 && (
+                            !loading ? (
+                              addr.spokeo_status ? (
+                                <img
+                                  src="/completed.png"
+                                  alt="Icon"
+                                  width={27}
+                                  height={27}
+                                  style={{cursor: "pointer"}}
+                                  onClick={() => handleRowClick(index)}
+                                />
+                              ) : (
+                                <img
+                                  src="/unlock.png"
+                                  alt="Icon"
+                                  width={25}
+                                  height={25}
+                                  style={{cursor: "pointer"}}
+                                  onClick={() => unlockContactInfo(addr.id)}
+                                />
+                              )
+                            ) : (
+                              <img
+                                src="/loading.png"
+                                alt="Icon"
+                                width={27}
+                                height={27}
+                                style={{cursor: "pointer"}}
+                              />
+                            )
+                          )}
+
                         </TableCell>
                       </TableRow>
 
@@ -258,7 +309,7 @@ export default function Page() {
                           <Collapse in={expandedRows.includes(index)} timeout="auto" unmountOnExit>
                             <Box style={{ backgroundColor: '#f0f0f0', padding: "10px", border: "1px solid #ccc" }}>
                               {/* Owner Info Section */}
-                              {addr.contact_info.owner_info?.length > 0 && (
+                              {addr.contact_info?.owner_info?.length > 0 && (
                                 <Table size="small">
                                   <TableHead>
                                     <TableRow>
@@ -284,7 +335,7 @@ export default function Page() {
                               )}
 
                               {/* Current Info Section */}
-                              {addr.contact_info.current_info?.length > 0 && (
+                              {addr.contact_info?.current_info?.length > 0 && (
                                 <Table size="small">
                                   <TableHead>
                                     <TableRow>
@@ -308,7 +359,7 @@ export default function Page() {
                               )}
 
                               {/* Past Info Section */}
-                              {addr.contact_info.past_info?.length > 0 && (
+                              {addr.contact_info?.past_info?.length > 0 && (
                                 <Table size="small">
                                   <TableHead>
                                     <TableRow>
