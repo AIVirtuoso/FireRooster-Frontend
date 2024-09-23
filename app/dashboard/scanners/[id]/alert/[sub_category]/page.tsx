@@ -13,7 +13,8 @@ export default function Page() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
   const { sub_category } = useParams<{ sub_category: string }>();
-  const [search, setSearch] = useState("");
+  const [headSearch, setHeadSearch] = useState("");
+  const [decSearch, setDecSearch] = useState("");
   const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
   const [selectedTo, setSelectedTo] = useState<Date | null>(null);
   const [filterAlert, setFilterAlert] = useState("ALL");
@@ -21,7 +22,7 @@ export default function Page() {
 
   useEffect(() => {
     fetchAlertsData();
-  }, [page, rowsPerPage, search]);
+  }, [page, rowsPerPage, headSearch, decSearch]);
 
   const fetchAlertsData = async () => {
     const res = await alertService.getAllAlerts({
@@ -29,7 +30,8 @@ export default function Page() {
       page: page + 1,
       scanner_id: Number(id),
       sub_category: sub_category,
-      search: search,
+      headSearch: headSearch,
+      decSearch: decSearch
     });
     setData(res.alerts);
     setTotalPages(res.pagination.total);
@@ -46,9 +48,14 @@ export default function Page() {
     setPage(0);
   };
 
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleHeadSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setSearch(value);
+    setHeadSearch(value);
+  };
+
+  const handleDecSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setDecSearch(value);
   };
 
   const handleDateChange = (
@@ -70,9 +77,11 @@ export default function Page() {
       <AlertPage
         data={data}
         page={page}
-        search={search}
+        headSearch={headSearch}
+        decSearch={decSearch}
         filterAlert={filterAlert}
-        handleSearchChange={handleSearchChange}
+        handleHeadSearchChange={handleHeadSearchChange}
+        handleDecSearchChange={handleDecSearchChange}
         scanner_id={Number(id)}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}

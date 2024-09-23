@@ -14,7 +14,8 @@ export default function Page() {
   const [page, setPage] = useState(pageInfo?.pageNo || 0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [search, setSearch] = useState("");
+  const [headSearch, setHeadSearch] = useState("");
+  const [decSearch, setDecSearch] = useState("");
   const { currentCategory, setCurrentCategory } = useStore();
   const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
   const [selectedTo, setSelectedTo] = useState<Date | null>(null);
@@ -27,7 +28,8 @@ export default function Page() {
     page,
     rowsPerPage,
     totalPages,
-    search,
+    headSearch,
+    decSearch,
     currentCategory,
     selectedFrom,
     selectedTo,
@@ -37,7 +39,8 @@ export default function Page() {
     const res = await alertService.getAllAlerts({
       limit: rowsPerPage,
       page: page + 1,
-      search,
+      headSearch,
+      decSearch,
       category: String(currentCategory == "ALL" ? "" : currentCategory),
       selected_from: selectedFrom,
       selected_to: selectedTo,
@@ -65,9 +68,13 @@ export default function Page() {
     setPage(0);
   };
 
-  const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleHeadSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
-    setSearch(value);
+    setHeadSearch(value);
+  };
+  const handleDecSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setDecSearch(value);
   };
 
   const handleDateChange = (
@@ -84,8 +91,10 @@ export default function Page() {
       <AlertPage
         data={data}
         page={page}
-        search={search}
-        handleSearchChange={handleSearchChange}
+        headSearch={headSearch}
+        decSearch={decSearch}
+        handleHeadSearchChange={handleHeadSearchChange}
+        handleDecSearchChange={handleDecSearchChange}
         filterAlert={currentCategory}
         handleInfoChange={handleInfoChange}
         handleChangePage={handleChangePage}

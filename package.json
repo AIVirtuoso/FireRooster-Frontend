@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.0",
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^3.6.0",
     "@mui/icons-material": "^5.15.14",
     "@mui/lab": "^5.0.0-alpha.169",
@@ -29,6 +29,7 @@
     "react-feather": "^2.0.10",
     "react-hook-form": "^7.51.0",
     "react-hot-toast": "^2.4.1",
+    "react-phone-input-2": "^2.15.1",
     "react-redux": "^9.1.2",
     "react-toastify": "^10.0.5",
     "stripe": "^14.24.0",

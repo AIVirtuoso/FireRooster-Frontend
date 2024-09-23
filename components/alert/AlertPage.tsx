@@ -34,8 +34,10 @@ import "react-datepicker/dist/react-datepicker.css";
 interface AlertPageProps {
   data: AlertObject[];
   page: number;
-  search: string;
-  handleSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  headSearch: string;
+  decSearch: string;
+  handleHeadSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleDecSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   filterAlert: string;
   handleInfoChange?: (event: SelectChangeEvent) => void;
   scanner_id?: number;
@@ -51,8 +53,10 @@ interface AlertPageProps {
 export function AlertPage({
   data,
   page,
-  search,
-  handleSearchChange,
+  headSearch,
+  decSearch,
+  handleHeadSearchChange,
+  handleDecSearchChange,
   filterAlert,
   handleInfoChange,
   scanner_id,
@@ -98,10 +102,21 @@ export function AlertPage({
             <FormControl size="small" fullWidth>
               <TextField
                 size="small"
-                onChange={handleSearchChange}
-                value={search}
-                name="search"
-                label="Search alerts"
+                onChange={handleHeadSearchChange}
+                value={headSearch}
+                name="headSearch"
+                label="Search Headline"
+              />
+            </FormControl>
+          </div>
+          <div className="w-48">
+            <FormControl size="small" fullWidth>
+              <TextField
+                size="small"
+                onChange={handleDecSearchChange}
+                value={decSearch}
+                name="decSearch"
+                label="Search Description"
               />
             </FormControl>
           </div>

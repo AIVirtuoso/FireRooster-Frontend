@@ -8,7 +8,7 @@ interface CheckoutData {
 
 const accountService = {
   async getProfile() {
-    const userApi = "/api/auth/user/";
+    const userApi = "/api/auth/user";
     try {
       const response = await apiClient.get<GetUserResponse>(`${userApi}`);
       return response.data;

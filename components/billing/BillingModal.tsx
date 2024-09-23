@@ -94,6 +94,7 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
 
   useEffect(() => {
     fetchStates();
+    fetchSelectedScanners();
   }, []);
 
   useEffect(() => {
@@ -129,6 +130,25 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
       obj[item.state_id] = item;
     });
     setStateObject(obj);
+  };
+  const fetchSelectedScanners = async () => {
+    const scanners = await billingService.getSelectedList();
+    const _selectedStates: string[] = [];
+    const _selectedCounties: string[] = [];
+    const _selectedScanners: number[] = [];
+    scanners.map((scanner) => {
+      _selectedStates.push(scanner.state_id)
+      _selectedCounties.push(scanner.county_id)
+      _selectedScanners.push(scanner.scanner_id)
+    });
+
+
+    setSelectedStates(Array.from(new Set(_selectedStates)))
+    setSelectedCounties(Array.from(new Set(_selectedCounties)))
+    setSelectedScanners(Array.from(new Set(_selectedScanners)))
+    console.log(_selectedScanners)
+    console.log(Array.from(new Set(_selectedScanners)).length)
+
   };
 
   const handleStateChange = (e: SelectChangeEvent<typeof selectedStates>) => {
@@ -252,7 +272,7 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
                   input={<OutlinedInput label="Tag" />}
                   renderValue={(selected) =>
                     selected
-                      .map((item) => stateObject[item].state_name)
+                      .map((item) => stateObject[item]?.state_name)
                       .join(", ")
                   }
                   MenuProps={MenuProps}
@@ -285,7 +305,8 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
                   input={<OutlinedInput label="Tag" />}
                   renderValue={(selected) =>
                     selected
-                      .map((item) => countiesObject[item].county_name)
+                      .map((item) => {
+                        return countiesObject[item]?.county_name})
                       .join(", ")
                   }
                   MenuProps={MenuProps}

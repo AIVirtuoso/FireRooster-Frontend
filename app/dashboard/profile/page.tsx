@@ -22,12 +22,16 @@ import { useAppSelector } from "@/hooks/store.hooks";
 import { profileService } from "@/services/profile";
 import { State } from "@/services/types/billing.type";
 import UploadCSVButton from "@/components/upload-csv/uploadCSVButton"
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { Controller, ControllerRenderProps, FieldValues, Path } from 'react-hook-form';
 
 const profileSchema = z.object({
   first_name: z.string(),
   last_name: z.string(),
   email: z.string().email("Please provide a valid email"),
-  prompt: z.string()
+  phone_number: z.string().nonempty("Phone number is required"),
+  prompt: z.string(),
 });
 type TProfileSchema = z.infer<typeof profileSchema>;
 
@@ -53,7 +57,7 @@ function getCurrentCounty(selectedState: State | "", selectedCounty: string) {
 }
 
 export default function Page() {
-  const user = useAppSelector(state => state.auth.user);
+  const user = useAppSelector(state => state.auth?.user);
   const {
     register,
     handleSubmit,
@@ -61,9 +65,10 @@ export default function Page() {
     reset,
     getValues,
     setValue,
+    control,
   } = useForm<TProfileSchema>({
     resolver: zodResolver(profileSchema),
-    defaultValues: user
+    defaultValues: user,
   });
   const [isMobileWidth, setIsMobileWidth] = useState(false);
 
@@ -173,6 +178,32 @@ export default function Page() {
           helperText={errors?.email?.message}
           onChange={(e) => setValue("email", e.target.value)}
         />
+
+        <Controller
+          name="phone_number"
+          control={control}
+          defaultValue={getValues("phone_number" || "")}
+          render={({ field }: { field: ControllerRenderProps<TProfileSchema, "phone_number"> }) => (
+            <div style={{ marginTop: '1rem' }}>
+              <PhoneInput
+                country={'us'}
+                value={field.value || ""}
+                onChange={(value) => field.onChange({ target: { name: field.name, value } })}
+                onBlur={field.onBlur}
+                inputProps={{
+                  name: field.name,
+                  ref: field.ref,
+                  required: true,
+                }}
+                inputStyle={{ width: '100%' }}
+              />
+              {errors.phone_number && (
+                <p style={{ color: 'red' }}>{errors.phone_number.message}</p>
+              )}
+            </div>
+          )}
+        />
+
         <div className="flex mt-8 gap-2 mb-8">
           <div className="w-60">
             <FormControl size="small" fullWidth>

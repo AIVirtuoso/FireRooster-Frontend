@@ -19,6 +19,7 @@ export default function StoreProvider({
 }: {
   children: React.ReactNode;
 }) {
+  
   const [currentStateName, setCurrentStateName] = useState<string>("");
   const [currentScanners, setCurrentScanners] = useState<string>("");
   const [currentCategory, setCurrentCategory] = useState<string>("ALL");
