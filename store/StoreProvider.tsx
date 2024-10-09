@@ -10,6 +10,8 @@ interface StoreContextProps {
   setCurrentScanners: (scanners: string) => void;
   currentCategory: string;
   setCurrentCategory: (category: string) => void;
+  currentStars: number;
+  setCurrentStars: (stars: number) => void;
 }
 
 const StoreContext = createContext<StoreContextProps | undefined>(undefined);
@@ -23,6 +25,7 @@ export default function StoreProvider({
   const [currentStateName, setCurrentStateName] = useState<string>("");
   const [currentScanners, setCurrentScanners] = useState<string>("");
   const [currentCategory, setCurrentCategory] = useState<string>("ALL");
+  const [currentStars, setCurrentStars] = useState<number>(1);
   const storeRef = useRef<AppStoreType>();
 
   if (!storeRef.current) {
@@ -39,6 +42,8 @@ export default function StoreProvider({
           setCurrentScanners,
           currentCategory,
           setCurrentCategory,
+          currentStars,
+          setCurrentStars
         }}
       >
         {children}

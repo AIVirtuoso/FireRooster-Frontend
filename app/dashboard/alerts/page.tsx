@@ -16,7 +16,7 @@ export default function Page() {
   const [totalPages, setTotalPages] = useState(1);
   const [headSearch, setHeadSearch] = useState("");
   const [decSearch, setDecSearch] = useState("");
-  const { currentCategory, setCurrentCategory } = useStore();
+  const { currentCategory, setCurrentCategory, currentStars, setCurrentStars } = useStore();
   const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
   const [selectedTo, setSelectedTo] = useState<Date | null>(null);
 
@@ -33,6 +33,7 @@ export default function Page() {
     currentCategory,
     selectedFrom,
     selectedTo,
+    currentStars,
   ]);
 
   const fetchAlertsData = async () => {
@@ -44,6 +45,7 @@ export default function Page() {
       category: String(currentCategory == "ALL" ? "" : currentCategory),
       selected_from: selectedFrom,
       selected_to: selectedTo,
+      stars: currentStars
     });
     setData(res.alerts);
     setTotalPages(res.pagination.total);
@@ -86,6 +88,11 @@ export default function Page() {
     else setSelectedTo(date);
   };
 
+  const handleClickStars = (index: number) => {
+    console.log("index: ", index)
+    setCurrentStars(index);
+  }
+
   return (
     <>
       <AlertPage
@@ -97,6 +104,8 @@ export default function Page() {
         handleDecSearchChange={handleDecSearchChange}
         filterAlert={currentCategory}
         handleInfoChange={handleInfoChange}
+        handleClickStars={handleClickStars}
+        currentStars={currentStars}
         handleChangePage={handleChangePage}
         handleChangeRowsPerPage={handleChangeRowsPerPage}
         rowsPerPage={rowsPerPage}

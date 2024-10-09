@@ -13,6 +13,7 @@ export interface IGetAlertsPayload extends Pagination {
   category?: string;
   selected_from?: Date | null;
   selected_to?: Date | null;
+  stars?: number;
 }
 
 export interface IGetAlertByIdPayload {
@@ -39,6 +40,9 @@ export interface Alert {
   category: string;
   sub_category: string;
   is_visited?: number;
+  rating: number;
+  rating_title: string;
+  rating_criteria: string;
 }
 
 export interface AlertObject {

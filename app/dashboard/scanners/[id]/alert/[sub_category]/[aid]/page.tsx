@@ -16,7 +16,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { alertService } from "@/services/alerts";
 import OpenMapButton from "@/components/googlemap/openMapButton";
 import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material"; // Import the icon
-
+import { transcriptService } from "@/services/transcript";
+import { LoadingButton } from "@mui/lab";
+import ModalComponent from "@/components/alert/TranscribeModal";
 
 interface ContactInfo {
   past_info: ResidentInfo[];
@@ -44,6 +46,9 @@ interface ResidentInfo {
   current_address: string;
 }
 
+const starCount = 5;  
+const stars = Array(starCount).fill(0); 
+
 export default function Page() {
   const { id, aid } = useParams();
 
@@ -56,6 +61,19 @@ export default function Page() {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);  
+  const [whisperTranscript, setWhisperTranscript] = useState("");  
+  const [assemblyTranscript, setAssemblyTranscript] = useState("");  
+  const [clearedTranscript, setClearedTranscript] = useState("");  
+  const [prompt, setPrompt] = useState('');  
+
+  const handleOpenModal = () => {  
+    setModalOpen(true);  
+  };  
+
+  const handleCloseModal = () => {  
+    setModalOpen(false);  
+  };  
 
   useEffect(() => {
     setIsMounted(true);
@@ -76,6 +94,7 @@ export default function Page() {
 
   useEffect(() => {
     fetchAlertsData();
+    fetchPrompt();
   }, [id, aid]);
 
   useEffect(() => {
@@ -102,24 +121,89 @@ export default function Page() {
 
     // res.audio.context = transcript;
     setAudio(res.audio);
+
+    setWhisperTranscript(res.audio.context)
+    setAssemblyTranscript(res.audio.assembly_transcript)
+    setClearedTranscript(res.audio.cleared_context)
   };
+
+  const fetchPrompt = async () => {
+    setLoading(true)
+    const data = await transcriptService.getTranscriptPrompt();
+    setPrompt(data);
+    setLoading(false)
+  }
 
   const setPlaybackRate = (rate: number) => {
     if (audioRef.current) {
       audioRef.current.playbackRate = rate;
     }
   };
+
+  const handleRerun = async (event: any, model: string) => {
+    setLoading(true)
+    const formData = new FormData();
+
+    formData.append('model', model);
+    formData.append('file_name', audio.file_name);
+    const data = await transcriptService.getTranscriptByModels(formData);
+    console.log(data)
+    if(model == 'whisper') setWhisperTranscript(data);
+    else setAssemblyTranscript(data);
+    setLoading(false)
+  }
+
+  const handleGPTRerun = async() => {
+    setLoading(true)
+    const formData = new FormData();
+    formData.append('file_name', audio.file_name);
+    formData.append('whisper_transcript', whisperTranscript);
+    formData.append('assembly_transcript', assemblyTranscript);
+    formData.append('prompt', prompt);
+
+    const data = await transcriptService.getTranscriptByGPT(formData);
+    setClearedTranscript(data)
+    setLoading(false)
+  }
+
+  const handleSavePrompt = async () => {
+    const formData = new FormData();
+    formData.append('prompt', prompt);
+    await transcriptService.setTranscriptPrompt(formData)
+  }
+
+  const handlePromptChange = (e: any) => {
+    setPrompt(e.target.value);
+  }
+
+  
   return (
     <>
       <div>
-        <p className="text-xl font-semibold">Alert #{id}</p>
+        <p className="text-xl font-semibold">Alert #{aid}</p>
         <p className="text-gray-700 text-[13px]">
           {scanner &&
             `${scanner.county_name}, ${scanner.state_name} (${scanner.scanner_title})`}
         </p>
         <div className="mt-7 grid grid-cols-3 gap-10">
           <div className="col-span-1">
-            <p className="text-xl font-bold mb-[2px]">Dispatch Website</p>
+            <div className="tooltip-container">  
+              <p className="text-xl font-bold mb-[2px]" style={{ marginRight: '10px' }}>  
+                Dispatch Website  
+              </p>  
+              {stars.map((_, index) => (  
+                index < alert?.rating ? (  
+                  <img key={index} src={'/star-yellow.png'} alt="Star" className="w-6 h-6" style={{ marginBottom: '5px' }} />  
+                ) : (  
+                  <img key={index} src={'/star-gray.png'} alt="Star" className="w-6 h-6" style={{ marginBottom: '5px', opacity: 0.5 }} />  
+                )  
+              ))}  
+              <span className="tooltip-text"> 
+                {alert?.rating_title}
+                <hr />
+                {alert?.rating_criteria}
+              </span>  
+            </div>
             <Divider />
 
             <div className="mt-3 bg-white rounded-md px-4 py-7 shadow-md">
@@ -141,9 +225,34 @@ export default function Page() {
                 style={{ maxHeight: "200px", overflow: "auto"}}
               >
                 <span className="font-bold">Transcript: </span>
+                <button  
+                  onClick={handleOpenModal}  
+                  className="p-1 bg-blue-500 text-white rounded ml-4"  
+                >  
+                  <span role="img" aria-label="open modal">  
+                    🔍
+                  </span>  
+                </button>  
+
+                <ModalComponent
+                  isOpen={isModalOpen}
+                  onClose={handleCloseModal}
+                  whisperTranscript={whisperTranscript}
+                  assemblyTranscript={assemblyTranscript}
+                  clearedTranscript={clearedTranscript}
+                  loading={loading}
+                  audioRef={audioRef}
+                  audioUrl={audioUrl}
+                  prompt={prompt}
+                  handleRerun={handleRerun}
+                  handleGPTRerun={handleGPTRerun}
+                  handleSavePrompt={handleSavePrompt}
+                  setPlaybackRate={setPlaybackRate}
+                  handlePromptChange={handlePromptChange}
+                />
                 {isMounted ? (
-                  <pre>
-                    {audio.cleared_context === null ? audio.context : audio.cleared_context}
+                  <pre style={{"textWrap": "wrap"}}>
+                    {clearedTranscript || whisperTranscript}
                   </pre>
                 ) : (
                   <pre>Loading...</pre> // Fallback content during server-side rendering
@@ -207,10 +316,12 @@ export default function Page() {
             <p className="text-xl font-bold mb-[2px]">Location</p>
             <Divider />
 
-            <p className="text-[17px] mb-[2px] mt-4">
+            <p className="text-[17px] mb-[2px] mt-4 flex">
               {" "}
               <span className="font-bold mr-4"> Known Address: </span>{" "}
-              <span style={{ fontStyle: "italic" }}>{alert?.address}</span>
+              <span style={{ fontStyle: "italic", marginRight: "auto" }}>{alert?.address}</span>
+              <img src={'/thumb_up.png'} alt="thumbup" className="w-10 h-10 mx-2" />
+              <img src={'/thumb_down.png'} alt="thumbdown" className="w-10 h-10 mx-2" />
             </p>
             <p className="text-[17px] font-bold mb-[2px] mt-4">
               Possible Addresses:{" "}
