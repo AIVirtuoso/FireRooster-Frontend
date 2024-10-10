@@ -101,7 +101,7 @@ export default function Page() {
       setIsMobileWidth(false);
     }
   }, []);
-
+  
   useEffect(() => {
     try {
       const fetchProfile = async () => {
@@ -134,7 +134,7 @@ export default function Page() {
       console.error("Error saving data:", error);
     }
   };
-
+  console.log(user)
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
@@ -204,76 +204,83 @@ export default function Page() {
           )}
         />
 
-        <div className="flex mt-8 gap-2 mb-8">
-          <div className="w-60">
-            <FormControl size="small" fullWidth>
-              <InputLabel id="state-filter-label">Select state</InputLabel>
-              <Select
-                labelId="state-filter-label"
-                id="state-filter"
-                label="Select state"
-                name="state"
-                value={selectedState && selectedState.state_id}
-                onChange={handleStateChange}
-                MenuProps={MenuProps}
+        {
+          user.tier == 6 && (
+            <>
+              <div className="flex mt-8 gap-2 mb-8">
+                <div className="w-60">
+                  <FormControl size="small" fullWidth>
+                    <InputLabel id="state-filter-label">Select state</InputLabel>
+                    <Select
+                      labelId="state-filter-label"
+                      id="state-filter"
+                      label="Select state"
+                      name="state"
+                      value={selectedState && selectedState.state_id}
+                      onChange={handleStateChange}
+                      MenuProps={MenuProps}
+                    >
+                      {states.map((state) => (
+                        <MenuItem key={state.state_id} value={state.state_id}>
+                          {state.state_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </div>
+                <div className="w-60">
+                  <FormControl size="small" fullWidth>
+                    <InputLabel id="state-filter-label">Select county</InputLabel>
+                    <Select
+                      labelId="state-filter-label"
+                      id="state-filter"
+                      label="Select county"
+                      value={selectedCounty}
+                      onChange={handleCountyChange}
+                      MenuProps={MenuProps}
+                      name="county"
+                      disabled={!selectedState}
+                    >
+                      {selectedState &&
+                        selectedState.county_list.map((county) => (
+                          <MenuItem key={county.county_id} value={county.county_id}>
+                            {county.county_name}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                </div>
+                <div className="w-60">
+                  <UploadCSVButton disabled={uploadDisabled} state={selectedState ? selectedState.state_name : ""} county={getCurrentCounty(selectedState, selectedCounty)} />
+                </div>
+              </div>
+              <Box fontWeight={"bold"}>Prompt</Box>
+              <FormControl fullWidth>
+                <TextareaAutosize
+                  minRows={4}
+                  maxRows={12}
+                  placeholder="Enter prompt here..."
+                  {...register("prompt")} // Register the textarea  
+                  style={{ width: '100%', boxSizing: 'border-box' }} // Add padding and box-sizing  
+                />
+              </FormControl>
+              <LoadingButton
+                sx={{
+                  [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },
+                  background: "rgb(30, 41, 59)",
+                  padding: "10px 20px",
+                  marginTop: "1.4rem",
+                }}
+                loading={isSubmitting}
+                variant="contained"
+                type="submit"
               >
-                {states.map((state) => (
-                  <MenuItem key={state.state_id} value={state.state_id}>
-                    {state.state_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
-          <div className="w-60">
-            <FormControl size="small" fullWidth>
-              <InputLabel id="state-filter-label">Select county</InputLabel>
-              <Select
-                labelId="state-filter-label"
-                id="state-filter"
-                label="Select county"
-                value={selectedCounty}
-                onChange={handleCountyChange}
-                MenuProps={MenuProps}
-                name="county"
-                disabled={!selectedState}
-              >
-                {selectedState &&
-                  selectedState.county_list.map((county) => (
-                    <MenuItem key={county.county_id} value={county.county_id}>
-                      {county.county_name}
-                    </MenuItem>
-                  ))}
-              </Select>
-            </FormControl>
-          </div>
-          <div className="w-60">
-            <UploadCSVButton disabled={uploadDisabled} state={selectedState ? selectedState.state_name : ""} county={getCurrentCounty(selectedState, selectedCounty)} />
-          </div>
-        </div>
-        <Box fontWeight={"bold"}>Prompt</Box>
-        <FormControl fullWidth>
-          <TextareaAutosize
-            minRows={4}
-            maxRows={12}
-            placeholder="Enter prompt here..."
-            {...register("prompt")} // Register the textarea  
-            style={{ width: '100%', boxSizing: 'border-box' }} // Add padding and box-sizing  
-          />
-        </FormControl>
-        <LoadingButton
-          sx={{
-            [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },
-            background: "rgb(30, 41, 59)",
-            padding: "10px 20px",
-            marginTop: "1.4rem",
-          }}
-          loading={isSubmitting}
-          variant="contained"
-          type="submit"
-        >
-          Save changes
-        </LoadingButton>
+                Save changes
+              </LoadingButton>
+            </>
+          )
+        }
+        
       </form>
     </>
   );

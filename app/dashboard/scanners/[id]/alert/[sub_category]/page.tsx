@@ -5,6 +5,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { AlertObject } from "@/services/types/alert.type";
 import { alertService } from "@/services/alerts";
 import { SelectChangeEvent } from "@mui/material";
+import { useStore } from "@/store/StoreProvider";
 
 export default function Page() {
   const { id } = useParams<{ id: string }>();
@@ -18,11 +19,11 @@ export default function Page() {
   const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
   const [selectedTo, setSelectedTo] = useState<Date | null>(null);
   const [filterAlert, setFilterAlert] = useState("ALL");
-
+  const {currentStars, setCurrentStars} = useStore();
 
   useEffect(() => {
     fetchAlertsData();
-  }, [page, rowsPerPage, headSearch, decSearch]);
+  }, [page, rowsPerPage, headSearch, decSearch, currentStars]);
 
   const fetchAlertsData = async () => {
     const res = await alertService.getAllAlerts({
@@ -31,7 +32,8 @@ export default function Page() {
       scanner_id: Number(id),
       sub_category: sub_category,
       headSearch: headSearch,
-      decSearch: decSearch
+      decSearch: decSearch,
+      stars: currentStars
     });
     setData(res.alerts);
     setTotalPages(res.pagination.total);
@@ -71,6 +73,11 @@ export default function Page() {
     const fAlert = event.target.value;
     setFilterAlert(fAlert);
   };
+  
+  const handleClickStars = (index: number) => {
+    console.log("index: ", index)
+    setCurrentStars(index);
+  }
 
   return (
     <>
@@ -80,6 +87,8 @@ export default function Page() {
         headSearch={headSearch}
         decSearch={decSearch}
         filterAlert={filterAlert}
+        handleClickStars={handleClickStars}
+        currentStars={currentStars}
         handleHeadSearchChange={handleHeadSearchChange}
         handleDecSearchChange={handleDecSearchChange}
         scanner_id={Number(id)}

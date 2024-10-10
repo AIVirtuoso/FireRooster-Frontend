@@ -4,24 +4,34 @@ import { SubEnum, PlanEnum } from "@/lib/constants";
 import getStripe from "@/lib/get-stripe";
 import accountService from "@/services/account";
 import stripeService from "@/services/stripe";
-import { Card, CardActions, CardContent, Divider } from "@mui/material";
+import {
+  Card,
+  CardActions,
+  CardContent,
+  Divider,
+  Typography,
+  useMediaQuery,
+  useTheme,
+  Grid,
+  Button,
+} from "@mui/material";
 import { useEffect, useState } from "react";
-
-
 
 export default function Page() {
   const [user, setUser] = useState<any>();
   const [openModal, setOpenModal] = useState(false);
   const [selectedSub, setSelectedSub] = useState<SubEnum>(SubEnum.Ember);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   useEffect(() => {
     async function getUser() {
       const response = await accountService.getProfile();
       console.log(response);
-      setUser(response)
+      setUser(response);
     }
     getUser();
-
   }, []);
 
   const handleCheckoutSubscription = async (stripeSubId: string) => {
@@ -37,14 +47,119 @@ export default function Page() {
       // Open the URL in a new tab
       window.open(checkout_session_id);
     } else {
-      console.error('No URL found in the response');
+      console.error("No URL found in the response");
     }
   };
 
   const handleOpenModal = (type: SubEnum) => {
     setSelectedSub(type);
     setOpenModal(true);
-  }
+  };
+
+  // Subscription plans data
+  const plans = [
+    {
+      title: "Ember",
+      description: (
+        <>
+          Only scanners from 1 state
+          <br />
+          Only scanners from 1 county
+          <br />
+          Up to 10 scanners
+        </>
+      ),
+      price: "$800",
+      per: "/month",
+      tier: "Ember",
+      planId: PlanEnum.Ember,
+    },
+    {
+      title: "Blaze",
+      description: (
+        <>
+          Only scanners from 1 state
+          <br />
+          Scanners from 2 counties
+          <br />
+          Up to 20 scanners (10 scanners / county)
+        </>
+      ),
+      price: "$1500",
+      per: "/month",
+      tier: "Blaze",
+      planId: PlanEnum.Blaze,
+    },
+    {
+      title: "Inferno",
+      description: (
+        <>
+          Scanners from 2 states
+          <br />
+          Scanners from 3 counties
+          <br />
+          Up to 30 scanners (10 scanners / county)
+        </>
+      ),
+      price: "$2000",
+      per: "/month",
+      tier: "Inferno",
+      planId: PlanEnum.Inferno,
+    },
+    {
+      title: "WildFire",
+      description: (
+        <>
+          Scanners from 2 states
+          <br />
+          Scanners from 4 counties
+          <br />
+          Up to 50 scanners
+        </>
+      ),
+      price: "$3000",
+      per: "/month",
+      tier: "WildFire",
+      planId: PlanEnum.WildFire,
+    },
+    {
+      title: "Partner Plus",
+      description: (
+        <>
+          Scanners from 2 states
+          <br />
+          Scanners from 5 counties
+          <br />
+          Up to 80 scanners
+        </>
+      ),
+      price: "$3800",
+      per: "/month",
+      tier: "Partner",
+      planId: PlanEnum.Partner,
+    },
+    // Administrator plan (if applicable)
+    ...(user?.usertype?.tier === "Administrator"
+      ? [
+          {
+            title: "Administrator",
+            description: (
+              <>
+                All states
+                <br />
+                All counties
+                <br />
+                All scanners
+              </>
+            ),
+            price: "",
+            per: "",
+            tier: "Administrator",
+            planId: "", // No plan ID needed
+          },
+        ]
+      : []),
+  ];
 
   return (
     <>
@@ -53,340 +168,95 @@ export default function Page() {
       </div>
       <Divider />
       <div className="font-semibold text-xl text-coolGray-800 mt-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3">
-          <Card
-            className="sm:me-4 bg-gray-900 text-white"
-            sx={{
-              backgroundColor: "rgb(21,24,39)",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              marginBottom: "20px",
-              padding: "20px",
-            }}
-          >
-            <CardContent
-              sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-            >
-              <div className="title text-2xl font-bold mb-4">Ember</div>
-              <div className="font-light mb-4">
-                Only scanners from 1 state
-                <br></br>
-                Only scanners from 1 county
-                <br></br>
-                Up to 10 scanners
-              </div>
-              <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$800</span>
-                /month
-              </div>
-            </CardContent>
-            <CardActions
-              sx={{
-                marginTop: "auto",
-                display: "flex",
-                flexDirection: "column",
-                padding: "16px",
-              }}
-            >
-              {user?.usertype?.tier == "Ember" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                  onClick={() => handleOpenModal(SubEnum.Ember)}
-                >
-                  Choose Scanners
-                </button>
-              )}
-
-              {user?.usertype?.tier != "Ember" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleCheckoutSubscription(PlanEnum.Ember)}
-                >
-                  Subscribe
-                </button>
-              )}
-            </CardActions>
-          </Card>
-
-          <Card
-            className="sm:me-4 bg-gray-900 text-white"
-            variant="outlined"
-            sx={{
-              backgroundColor: "rgb(21,24,39)",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              marginBottom: "20px",
-              padding: "20px",
-            }}
-          >
-            <CardContent
-              sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-            >
-              <div className="title text-2xl font-bold mb-4">Blaze</div>
-              <div className="font-light mb-8">
-                Only scanners from 1 state
-                <br></br>
-                Scanners from 2 counties
-                <br></br>
-                Up to 20 scanners(10 scanners / county)
-              </div>
-              <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$1500</span>
-                /month
-              </div>
-            </CardContent>
-            <CardActions
-              sx={{
-                marginTop: "auto",
-                display: "flex",
-                flexDirection: "column",
-                padding: "16px",
-              }}
-            >
-              {user?.usertype?.tier == "Blaze" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleOpenModal(SubEnum.Blaze)}
-                >
-                  Choose Scanners
-                </button>
-              )}
-
-              {user?.usertype?.tier != "Blaze" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleCheckoutSubscription(PlanEnum.Blaze)}
-                >
-                  Subscribe
-                </button>
-              )}
-            </CardActions>
-          </Card>
-
-          <Card
-            className="sm:me-4 bg-gray-900 text-white"
-            variant="outlined"
-            sx={{
-              backgroundColor: "rgb(21,24,39)",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              marginBottom: "20px",
-              padding: "20px",
-            }}
-          >
-            <CardContent
-              sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-            >
-              <div className="title text-2xl font-bold mb-4">Inferno</div>
-              <div className="font-light mb-8">
-                Scanners from 2 states
-                <br></br>
-                Scanners from 3 counties
-                <br></br>
-                Up to 30 scanners (10 scanners / county)
-              </div>
-              <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$2000</span>
-                /month
-              </div>
-            </CardContent>
-            <CardActions
-              sx={{
-                marginTop: "auto",
-                display: "flex",
-                flexDirection: "column",
-                padding: "16px",
-              }}
-            >
-              {user?.usertype?.tier == "Inferno" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                  onClick={() => handleOpenModal(SubEnum.Inferno)}
-                >
-                  Choose Scanners
-                </button>
-              )}
-
-              {user?.usertype?.tier != "Inferno" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleCheckoutSubscription(PlanEnum.Inferno)}
-                >
-                  Subscribe
-                </button>
-              )}
-            </CardActions>
-          </Card>
-
-          <Card
-            className="sm:me-4 bg-gray-900 text-white"
-            variant="outlined"
-            sx={{
-              backgroundColor: "rgb(21,24,39)",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              marginBottom: "20px",
-              padding: "20px",
-            }}
-          >
-            <CardContent
-              sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-            >
-              <div className="title text-2xl font-bold mb-4">WildFire</div>
-              <div className="font-light mb-8">
-                Scanners from 2 states
-                <br></br>
-                Scanners from 4 counties
-                <br></br>
-                Up to 50 scanners
-              </div>
-              <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$3000</span>
-                /month
-              </div>
-            </CardContent>
-            <CardActions
-              sx={{
-                marginTop: "auto",
-                display: "flex",
-                flexDirection: "column",
-                padding: "16px",
-              }}
-            >
-              {user?.usertype?.tier == "WildFire" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                  onClick={() => handleOpenModal(SubEnum.WildFire)}
-                >
-                  Choose Scanners
-                </button>
-              )}
-
-              {user?.usertype?.tier != "WildFire" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleCheckoutSubscription(PlanEnum.WildFire)}
-                >
-                  Subscribe
-                </button>
-              )}
-            </CardActions>
-          </Card>
-
-          <Card
-            className="sm:me-4 bg-gray-900 text-white"
-            variant="outlined"
-            sx={{
-              backgroundColor: "rgb(21,24,39)",
-              color: "white",
-              display: "flex",
-              flexDirection: "column",
-              marginBottom: "20px",
-              padding: "20px",
-            }}
-          >
-            <CardContent
-              sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-            >
-              <div className="title text-2xl font-bold mb-4">Partner Plus</div>
-              <div className="font-light mb-8">
-                Scanners from 2 states
-                <br></br>
-                Scanners from 5 counties
-                <br></br>
-                Up to 80 scanners
-              </div>
-              <div className="price mt-auto font-light">
-                <span className="text-4xl font-bold">$3800</span>
-                /month
-              </div>
-            </CardContent>
-            <CardActions
-              sx={{
-                marginTop: "auto",
-                display: "flex",
-                flexDirection: "column",
-                padding: "16px",
-              }}
-            >
-              {user?.usertype?.tier == "Partner" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleOpenModal(SubEnum.Partner)}
-                >
-                  Choose Scanners
-                </button>
-              )}
-
-              {user?.usertype?.tier != "Partner" && (
-                <button
-                  className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                  onClick={() => handleCheckoutSubscription(PlanEnum.Partner)}
-                >
-                  Subscribe
-                </button>
-              )}
-            </CardActions>
-          </Card>
-
-
-          {
-            user?.usertype?.tier == "Administrator" && (
+        <Grid container spacing={2}>
+          {plans.map((plan) => (
+            <Grid item xs={12} sm={6} md={4} key={plan.title}>
               <Card
-                className="sm:me-4 bg-gray-900 text-white"
-                variant="outlined"
+                className="bg-gray-900 text-white"
                 sx={{
                   backgroundColor: "rgb(21,24,39)",
                   color: "white",
                   display: "flex",
                   flexDirection: "column",
-                  marginBottom: "20px",
-                  padding: "20px",
+                  height: "100%",
                 }}
               >
-                <CardContent
-                  sx={{ display: "flex", flexDirection: "column", flex: 1 }}
-                >
-                  <div className="title text-2xl font-bold mb-1">Administrator</div>
-                  <div className="title text-xl font-bold mb-4">(Only visiable for Administrator)</div>
-                  <div className="font-light mb-8">
-                    All states
-                    <br></br>
-                    All counties
-                    <br></br>
-                    All scanners
-                  </div>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Typography variant="h5" component="div" gutterBottom>
+                    {plan.title}
+                  </Typography>
+                  {plan.title === "Administrator" && (
+                    <Typography
+                      variant="subtitle1"
+                      component="div"
+                      gutterBottom
+                    >
+                      (Only visible for Administrator)
+                    </Typography>
+                  )}
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    {plan.description}
+                  </Typography>
+                  {plan.price && (
+                    <Typography variant="h4" sx={{ mt: "auto" }}>
+                      {plan.price}
+                      <Typography variant="body2" component="span">
+                        {plan.per}
+                      </Typography>
+                    </Typography>
+                  )}
                 </CardContent>
                 <CardActions
                   sx={{
-                    marginTop: "auto",
                     display: "flex",
                     flexDirection: "column",
                     padding: "16px",
                   }}
                 >
-                  <button
-                    className="w-full bg-gray-700 hover:bg-gray-600 rounded-sm py-2"
-                    // onClick={() => handleCheckoutSubscription(SILVER_ID)}
-                    onClick={() => handleOpenModal(SubEnum.ADMINISTRATOR)}
-                  >
-                    Choose Scanners
-                  </button>
+                  {user?.usertype?.tier === plan.tier ? (
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleOpenModal(plan.tier as SubEnum)}
+                      sx={{
+                        backgroundColor: "gray",
+                        "&:hover": { backgroundColor: "darkgray" },
+                      }}
+                    >
+                      Choose Scanners
+                    </Button>
+                  ) : (
+                    plan.planId && (
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        onClick={() =>
+                          handleCheckoutSubscription(plan.planId)
+                        }
+                        sx={{
+                          backgroundColor: "gray",
+                          "&:hover": { backgroundColor: "darkgray" },
+                        }}
+                      >
+                        Subscribe
+                      </Button>
+                    )
+                  )}
                 </CardActions>
               </Card>
-            )
-          }
-        </div>
+            </Grid>
+          ))}
+        </Grid>
       </div>
 
-      {openModal && <BillingModal handleClose={() => setOpenModal(false)} type={selectedSub} />}
+      {openModal && (
+        <BillingModal
+          handleClose={() => setOpenModal(false)}
+          type={selectedSub}
+        />
+      )}
     </>
   );
 }

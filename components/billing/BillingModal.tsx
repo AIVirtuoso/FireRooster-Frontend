@@ -21,32 +21,28 @@ import {
   Select,
   SelectChangeEvent,
   Snackbar,
+  useMediaQuery,
+  useTheme,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  TableContainer,
   Table,
+  TableHead,
   TableBody,
   TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
+  TableRow
 } from "@mui/material";
-import TableRow from "@mui/material/TableRow";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import TablePagination from "@mui/material/TablePagination";
 import { County, State } from "@/services/types/billing.type";
-
 import { scannerService } from "@/services/scanners";
 import { Scanner } from "@/services/types/scanner.type";
 import { SubEnum, subInfo } from "@/lib/constants";
-
-const StyledTableRow = styled(TableRow)(() => ({
-  td: { backgroundColor: "white" },
-  th: { backgroundColor: "white" },
-  // "&:last-child td, &:last-child th": { borderBottom: "unset" },
-}));
-
-const StyledTableHeaderRow = styled(TableRow)(() => ({
-  th: {
-    fontSize: ".8rem",
-    fontWeight: "bold",
-  },
-}));
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialogContent-root": {
@@ -68,7 +64,7 @@ const MenuProps = {
   PaperProps: {
     style: {
       maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 200,
+      width: 250,
     },
   },
 };
@@ -92,6 +88,9 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
   const [errMsg, setErrMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   useEffect(() => {
     fetchStates();
     fetchSelectedScanners();
@@ -99,14 +98,14 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
 
   useEffect(() => {
     let countyArr: County[] = [];
-    selectedStates.map((id) => {
+    selectedStates.forEach((id) => {
       if (stateObject[id]) {
         countyArr.push(...stateObject[id].county_list);
       }
     });
 
     const obj: Record<string, County> = {};
-    countyArr.map((item) => (obj[item.county_id] = item));
+    countyArr.forEach((item) => (obj[item.county_id] = item));
 
     setCounties(countyArr);
     setCountiesObject(obj);
@@ -126,32 +125,29 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
     const res = await billingService.getStateList();
     setStates(res);
     const obj: Record<string, State> = {};
-    res.map((item) => {
+    res.forEach((item) => {
       obj[item.state_id] = item;
     });
     setStateObject(obj);
   };
+
   const fetchSelectedScanners = async () => {
     const scanners = await billingService.getSelectedList();
     const _selectedStates: string[] = [];
     const _selectedCounties: string[] = [];
     const _selectedScanners: number[] = [];
-    scanners.map((scanner) => {
-      _selectedStates.push(scanner.state_id)
-      _selectedCounties.push(scanner.county_id)
-      _selectedScanners.push(scanner.scanner_id)
+    scanners.forEach((scanner) => {
+      _selectedStates.push(scanner.state_id);
+      _selectedCounties.push(scanner.county_id);
+      _selectedScanners.push(scanner.scanner_id);
     });
 
-
-    setSelectedStates(Array.from(new Set(_selectedStates)))
-    setSelectedCounties(Array.from(new Set(_selectedCounties)))
-    setSelectedScanners(Array.from(new Set(_selectedScanners)))
-    console.log(_selectedScanners)
-    console.log(Array.from(new Set(_selectedScanners)).length)
-
+    setSelectedStates(Array.from(new Set(_selectedStates)));
+    setSelectedCounties(Array.from(new Set(_selectedCounties)));
+    setSelectedScanners(Array.from(new Set(_selectedScanners)));
   };
 
-  const handleStateChange = (e: SelectChangeEvent<typeof selectedStates>) => {
+  const handleStateChange = (e: SelectChangeEvent<string[]>) => {
     const value = e.target.value;
     const valueArr = typeof value === "string" ? value.split(",") : value;
     if (valueArr.length > subInfo[type].state) {
@@ -161,13 +157,11 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
     }
   };
 
-  const handleCountiesChange = (
-    e: SelectChangeEvent<typeof selectedCounties>
-  ) => {
+  const handleCountiesChange = (e: SelectChangeEvent<string[]>) => {
     const value = e.target.value;
     const valueArr = typeof value === "string" ? value.split(",") : value;
     if (valueArr.length > subInfo[type].county) {
-      setErrMsg(`Cannot select morethan ${subInfo[type].county} counties!`);
+      setErrMsg(`Cannot select more than ${subInfo[type].county} counties!`);
     } else {
       setSelectedCounties(valueArr);
     }
@@ -232,23 +226,23 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
         fullWidth
       >
         <DialogTitle
-          sx={{ m: 0, p: 2, textAlign: "center" }}
+          sx={{ m: 0, p: 2, textAlign: "center", margin: 'auto' }}
           id="customized-dialog-title"
         >
           Billing
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={handleClose}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-            color: (theme) => theme.palette.grey[500],
-          }}
-        >
-          <CloseIcon />
-        </IconButton>
 
         <DialogContent
           dividers
@@ -257,202 +251,261 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
             height: "100%",
           }}
         >
-          <div className="flex gap-4">
-            <div>
-              <FormControl sx={{ width: 250 }}>
-                <InputLabel id="demo-multiple-checkbox-label">
-                  Select state
-                </InputLabel>
-                <Select
-                  labelId="demo-multiple-checkbox-label"
-                  id="demo-multiple-checkbox"
-                  multiple
-                  value={selectedStates}
-                  onChange={handleStateChange}
-                  input={<OutlinedInput label="Tag" />}
-                  renderValue={(selected) =>
-                    selected
-                      .map((item) => stateObject[item]?.state_name)
-                      .join(", ")
-                  }
-                  MenuProps={MenuProps}
-                >
-                  {states.map((state) => (
-                    <MenuItem key={state.state_id} value={state.state_id}>
-                      <Checkbox
-                        checked={selectedStates.some(
-                          (id) => id === state.state_id
-                        )}
-                      />
-                      <ListItemText primary={state.state_name} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-
-            <div>
-              <FormControl sx={{ width: 250 }}>
-                <InputLabel id="demo-multiple-checkbox-label">
-                  Select county
-                </InputLabel>
-                <Select
-                  labelId="demo-multiple-checkbox-label"
-                  id="demo-multiple-checkbox"
-                  multiple
-                  value={selectedCounties}
-                  onChange={handleCountiesChange}
-                  input={<OutlinedInput label="Tag" />}
-                  renderValue={(selected) =>
-                    selected
-                      .map((item) => {
-                        return countiesObject[item]?.county_name})
-                      .join(", ")
-                  }
-                  MenuProps={MenuProps}
-                  disabled={!counties.length}
-                >
-                  {counties.map((county) => (
-                    <MenuItem key={county.county_id} value={county.county_id}>
-                      <Checkbox
-                        checked={selectedCounties.some(
-                          (id) => id == county.county_id
-                        )}
-                      />
-                      <ListItemText primary={county.county_name} />
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </div>
-          </div>
+          {isMobile ? (
+            <Accordion sx={{marginBottom: "8px"}}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography>Filters</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  {/* State Selector */}
+                  <Grid item xs={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="state-select-label">Select State</InputLabel>
+                      <Select
+                        labelId="state-select-label"
+                        id="state-select"
+                        multiple
+                        value={selectedStates}
+                        onChange={handleStateChange}
+                        input={<OutlinedInput label="Select State" />}
+                        renderValue={(selected) =>
+                          selected
+                            .map((id) => stateObject[id]?.state_name)
+                            .join(", ")
+                        }
+                        MenuProps={MenuProps}
+                      >
+                        {states.map((state) => (
+                          <MenuItem key={state.state_id} value={state.state_id}>
+                            <Checkbox
+                              checked={selectedStates.includes(state.state_id)}
+                            />
+                            <ListItemText primary={state.state_name} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  {/* County Selector */}
+                  <Grid item xs={12}>
+                    <FormControl fullWidth>
+                      <InputLabel id="county-select-label">Select County</InputLabel>
+                      <Select
+                        labelId="county-select-label"
+                        id="county-select"
+                        multiple
+                        value={selectedCounties}
+                        onChange={handleCountiesChange}
+                        input={<OutlinedInput label="Select County" />}
+                        renderValue={(selected) =>
+                          selected
+                            .map((id) => countiesObject[id]?.county_name)
+                            .join(", ")
+                        }
+                        MenuProps={MenuProps}
+                        disabled={!counties.length}
+                      >
+                        {counties.map((county) => (
+                          <MenuItem
+                            key={county.county_id}
+                            value={county.county_id}
+                          >
+                            <Checkbox
+                              checked={selectedCounties.includes(county.county_id)}
+                            />
+                            <ListItemText primary={county.county_name} />
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+          ) : (
+            // Desktop Filters
+            <Grid container spacing={2} mb={2}>
+              {/* State Selector */}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="state-select-label">Select State</InputLabel>
+                  <Select
+                    labelId="state-select-label"
+                    id="state-select"
+                    multiple
+                    value={selectedStates}
+                    onChange={handleStateChange}
+                    input={<OutlinedInput label="Select State" />}
+                    renderValue={(selected) =>
+                      selected
+                        .map((id) => stateObject[id]?.state_name)
+                        .join(", ")
+                    }
+                    MenuProps={MenuProps}
+                  >
+                    {states.map((state) => (
+                      <MenuItem key={state.state_id} value={state.state_id}>
+                        <Checkbox
+                          checked={selectedStates.includes(state.state_id)}
+                        />
+                        <ListItemText primary={state.state_name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              {/* County Selector */}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel id="county-select-label">Select County</InputLabel>
+                  <Select
+                    labelId="county-select-label"
+                    id="county-select"
+                    multiple
+                    value={selectedCounties}
+                    onChange={handleCountiesChange}
+                    input={<OutlinedInput label="Select County" />}
+                    renderValue={(selected) =>
+                      selected
+                        .map((id) => countiesObject[id]?.county_name)
+                        .join(", ")
+                    }
+                    MenuProps={MenuProps}
+                    disabled={!counties.length}
+                  >
+                    {counties.map((county) => (
+                      <MenuItem key={county.county_id} value={county.county_id}>
+                        <Checkbox
+                          checked={selectedCounties.includes(county.county_id)}
+                        />
+                        <ListItemText primary={county.county_name} />
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          )}
 
           {data.length ? (
-            <Paper
-              sx={{
-                width: "100%",
-                boxShadow:
-                  "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)",
-              }}
-              className="mt-8"
-            >
-              <TableContainer sx={{ maxHeight: "50vh" }}>
-                <Table
-                  sx={{
-                    // minWidth: 1450,
-                    overflowX: "scroll",
-                    marginBottom: "20px",
-                  }}
-                  aria-label="simple table"
-                >
-                  <TableHead>
-                    <StyledTableHeaderRow>
-                      <TableCell
-                        className="uppercase"
-                        sx={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 1000,
-                          bgcolor: "white",
-                        }}
-                      >
-                        <div className="font-bold">Receiver</div>
-                      </TableCell>
-                      <TableCell
-                        className="uppercase"
-                        sx={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 1000,
-                          bgcolor: "white",
-                        }}
-                      >
-                        <div className="font-bold">Listeners</div>
-                      </TableCell>
-                      <TableCell
-                        className="uppercase"
-                        sx={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 1000,
-                          bgcolor: "white",
-                        }}
-                      >
-                        <div className="font-bold">State</div>
-                      </TableCell>
-                      <TableCell
-                        align="center"
-                        className="uppercase"
-                        sx={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 1000,
-                          bgcolor: "white",
-                        }}
-                      >
-                        <div className="font-bold">County</div>
-                      </TableCell>
-                      <TableCell
-                        sx={{
-                          position: "sticky",
-                          top: 0,
-                          zIndex: 1000,
-                          bgcolor: "white",
-                        }}
-                      ></TableCell>
-                    </StyledTableHeaderRow>
-                  </TableHead>
-
-                  <TableBody
-                    sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
+            isMobile ? (
+              <Grid container spacing={2}>
+                {data.map((item) => (
+                  <Grid item xs={12} key={item.scanner_id}>
+                    <Card variant="outlined">
+                      <CardContent sx={{ padding: '8px', paddingBottom: "0px" }}>
+                        <Typography variant="h6">{item.scanner_title}</Typography>
+                        <Typography variant="body2">
+                          Listeners: {item.listeners_count}
+                        </Typography>
+                        <Typography variant="body2">
+                          State: {item.state_name}
+                        </Typography>
+                        <Typography variant="body2">
+                          County: {item.county_name}
+                        </Typography>
+                      </CardContent>
+                      <CardActions disableSpacing>
+                        <Checkbox
+                          checked={selectedScanners.includes(item.scanner_id)}
+                          onChange={(e, checked) =>
+                            handleSelectScanner(item.scanner_id, checked)
+                          }
+                          color="primary"
+                        />
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                ))}
+                <Grid item xs={12}>
+                  <TablePagination
+                    component="div"
+                    count={totalPage}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
+                  />
+                </Grid>
+              </Grid>
+            ) : (
+              // Desktop Table View
+              <Paper
+                sx={{
+                  width: "100%",
+                  boxShadow:
+                    "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)",
+                }}
+                className="mt-4"
+              >
+                <TableContainer sx={{ maxHeight: "50vh" }}>
+                  <Table
+                    sx={{
+                      overflowX: "auto",
+                      marginBottom: "20px",
+                    }}
+                    aria-label="scanners table"
                   >
-                    {data.map((item) => (
-                      <StyledTableRow key={item.id} className="cursor-pointer">
-                        <TableCell>{item.scanner_title}</TableCell>
-                        <TableCell scope="row">
-                          {item.listeners_count}
-                        </TableCell>
-                        <TableCell>{item.state_name}</TableCell>
-                        <TableCell align="center">
-                          <div className="font-bold">{item.county_name}</div>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Checkbox
-                            checked={selectedScanners.includes(item.scanner_id)}
-                            onChange={(e, checked) =>
-                              handleSelectScanner(item.scanner_id, checked)
-                            }
-                            sx={{ p: 0 }}
-                          />
-                        </TableCell>
-                      </StyledTableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Receiver</TableCell>
+                        <TableCell>Listeners</TableCell>
+                        <TableCell>State</TableCell>
+                        <TableCell>County</TableCell>
+                        <TableCell>Select</TableCell>
+                      </TableRow>
+                    </TableHead>
 
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
-                component="div"
-                count={totalPage}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </Paper>
+                    <TableBody>
+                      {data.map((item) => (
+                        <TableRow key={item.scanner_id}>
+                          <TableCell>{item.scanner_title}</TableCell>
+                          <TableCell>{item.listeners_count}</TableCell>
+                          <TableCell>{item.state_name}</TableCell>
+                          <TableCell>{item.county_name}</TableCell>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedScanners.includes(item.scanner_id)}
+                              onChange={(e, checked) =>
+                                handleSelectScanner(item.scanner_id, checked)
+                              }
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+
+                <TablePagination
+                  component="div"
+                  count={totalPage}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
+                />
+              </Paper>
+            )
           ) : null}
         </DialogContent>
 
         <DialogActions>
-          <div>
-            <button
-              className="w-full bg-gray-700 hover:bg-gray-600 py-2 px-4 text-white rounded-md"
-              onClick={handlePurchase}
-            >
-              Subscribe
-            </button>
-          </div>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handlePurchase}
+            fullWidth
+            sx={{
+              backgroundColor: "gray",
+              "&:hover": { backgroundColor: "darkgray" },
+            }}
+          >
+            Subscribe
+          </Button>
         </DialogActions>
       </BootstrapDialog>
 

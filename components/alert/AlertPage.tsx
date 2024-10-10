@@ -146,7 +146,7 @@ export function AlertPage({
   return (
     <>
       <div className="mb-4 p-4 bg-white rounded">
-        <div className="font-semibold text-xl text-coolGray-800">Alerts</div>
+        <div className="font-semibold text-xl text-coolGray-800 text-center">Alerts</div>
         {isMobile ? (
           <Accordion>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>

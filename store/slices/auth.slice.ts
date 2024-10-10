@@ -5,6 +5,7 @@ interface IAuthSlice {
         email: string;
         first_name: string;
         last_name: string;
+        tier: number;
     }
 }
 
@@ -14,7 +15,8 @@ const initialState: IAuthSlice = {
     user: user ? JSON.parse(user) : {
         email: '',
         first_name: '',
-        last_name: ''
+        last_name: '',
+        tier: 0
     }
 }
 

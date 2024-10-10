@@ -9,15 +9,30 @@ import {
   Paper,
   Typography,
   Collapse,
-  Box 
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  IconButton,
+  useMediaQuery,
+  useTheme,
+  Button,
+  Rating,
 } from "@mui/material";
 import { useParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import { alertService } from "@/services/alerts";
 import OpenMapButton from "@/components/googlemap/openMapButton";
-import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material"; // Import the icon
+import {
+  ExpandMore as ExpandMoreIcon,
+  ThumbUp,
+  ThumbDown,
+  Star,
+  StarBorder,
+  PlayArrow,
+} from "@mui/icons-material";
 import { transcriptService } from "@/services/transcript";
-import { LoadingButton } from "@mui/lab";
 import ModalComponent from "@/components/alert/TranscribeModal";
 
 interface ContactInfo {
@@ -46,14 +61,15 @@ interface ResidentInfo {
   current_address: string;
 }
 
-const starCount = 5;  
-const stars = Array(starCount).fill(0); 
+const starCount = 5;
 
 export default function Page() {
   const { id, aid } = useParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [alert, setAlert] = useState<any>(null);
-  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<AddressData[]>([]);
   const [scanner, setScanner] = useState<any>();
   const [audio, setAudio] = useState<any>({});
   const [audioUrl, setAudioUrl] = useState<string>("");
@@ -61,19 +77,19 @@ export default function Page() {
   const [expandedRows, setExpandedRows] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [isModalOpen, setModalOpen] = useState(false);  
-  const [whisperTranscript, setWhisperTranscript] = useState("");  
-  const [assemblyTranscript, setAssemblyTranscript] = useState("");  
-  const [clearedTranscript, setClearedTranscript] = useState("");  
-  const [prompt, setPrompt] = useState('');  
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [whisperTranscript, setWhisperTranscript] = useState("");
+  const [assemblyTranscript, setAssemblyTranscript] = useState("");
+  const [clearedTranscript, setClearedTranscript] = useState("");
+  const [prompt, setPrompt] = useState("");
 
-  const handleOpenModal = () => {  
-    setModalOpen(true);  
-  };  
+  const handleOpenModal = () => {
+    setModalOpen(true);
+  };
 
-  const handleCloseModal = () => {  
-    setModalOpen(false);  
-  };  
+  const handleCloseModal = () => {
+    setModalOpen(false);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -87,10 +103,10 @@ export default function Page() {
 
   const unlockContactInfo = async (address_id: number) => {
     setLoading(true);
-    const res = await alertService.unlockContactInfo({address_id: address_id});
+    await alertService.unlockContactInfo({ address_id: address_id });
     await fetchAlertsData();
     setLoading(false);
-  }
+  };
 
   useEffect(() => {
     fetchAlertsData();
@@ -114,25 +130,19 @@ export default function Page() {
     setAddresses(res.addresses);
     setScanner(res.scanner);
 
-    // const junkRegex = /Speaker [A-Z]:\s*Silence of\.*\s*(Speaker [A-Z]:\s*)?(More than \d+ minute|Than \d+ minute|[0-9]+ seconds|xx seconds)\.?\n?|Speaker [A-Z]:\s*Silence of more\.?\s*(Speaker [A-Z]:\s*)?(Than \d+ minute|More than \d+ minute|[0-9]+ seconds|xx seconds)\.?\n?|Speaker [A-Z]:\s*Silence\.*\s*(more than \d+ minute)?\.?\n?/gi;
-    // let transcript = res.audio.context.replace(junkRegex, '');
-    // transcript = transcript.replace(/(Speaker [A-Z]:)/g, '<br>$1');
-    // transcript = transcript.replace(/\s+/g, ' ').replace(/\n\s+/g, '\n').trim();
-
-    // res.audio.context = transcript;
     setAudio(res.audio);
 
-    setWhisperTranscript(res.audio.context)
-    setAssemblyTranscript(res.audio.assembly_transcript)
-    setClearedTranscript(res.audio.cleared_context)
+    setWhisperTranscript(res.audio.context);
+    setAssemblyTranscript(res.audio.assembly_transcript);
+    setClearedTranscript(res.audio.cleared_context);
   };
 
   const fetchPrompt = async () => {
-    setLoading(true)
+    setLoading(true);
     const data = await transcriptService.getTranscriptPrompt();
     setPrompt(data);
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const setPlaybackRate = (rate: number) => {
     if (audioRef.current) {
@@ -141,99 +151,105 @@ export default function Page() {
   };
 
   const handleRerun = async (event: any, model: string) => {
-    setLoading(true)
+    setLoading(true);
     const formData = new FormData();
 
-    formData.append('model', model);
-    formData.append('file_name', audio.file_name);
+    formData.append("model", model);
+    formData.append("file_name", audio.file_name);
     const data = await transcriptService.getTranscriptByModels(formData);
-    console.log(data)
-    if(model == 'whisper') setWhisperTranscript(data);
+    if (model === "whisper") setWhisperTranscript(data);
     else setAssemblyTranscript(data);
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
-  const handleGPTRerun = async() => {
-    setLoading(true)
+  const handleGPTRerun = async () => {
+    setLoading(true);
     const formData = new FormData();
-    formData.append('file_name', audio.file_name);
-    formData.append('whisper_transcript', whisperTranscript);
-    formData.append('assembly_transcript', assemblyTranscript);
-    formData.append('prompt', prompt);
+    formData.append("file_name", audio.file_name);
+    formData.append("whisper_transcript", whisperTranscript);
+    formData.append("assembly_transcript", assemblyTranscript);
+    formData.append("prompt", prompt);
 
     const data = await transcriptService.getTranscriptByGPT(formData);
-    setClearedTranscript(data)
-    setLoading(false)
-  }
+    setClearedTranscript(data);
+    setLoading(false);
+  };
 
   const handleSavePrompt = async () => {
     const formData = new FormData();
-    formData.append('prompt', prompt);
-    await transcriptService.setTranscriptPrompt(formData)
-  }
+    formData.append("prompt", prompt);
+    await transcriptService.setTranscriptPrompt(formData);
+  };
 
-  const handlePromptChange = (e: any) => {
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPrompt(e.target.value);
-  }
+  };
 
-  
+  const renderStars = (rating: number) => {
+    // return Array.from({ length: starCount }, (_, index) =>
+    //   index < rating ? (
+    //     <Star key={index} color="info" />
+    //   ) : (
+    //     <StarBorder key={index} color="disabled" />
+    //   )
+    // );
+    return (
+      <Grid item xs={12}>
+        <Rating
+          name="alert-rating"
+          value={rating}
+          max={starCount}
+        />
+      </Grid>
+    )
+  };
+
   return (
     <>
       <div>
-        <p className="text-xl font-semibold">Alert #{aid}</p>
-        <p className="text-gray-700 text-[13px]">
+        <Typography variant="h6" component="p">
+          Alert #{aid}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
           {scanner &&
             `${scanner.county_name}, ${scanner.state_name} (${scanner.scanner_title})`}
-        </p>
-        <div className="mt-7 grid grid-cols-3 gap-10">
-          <div className="col-span-1">
-            <div className="tooltip-container">  
-              <p className="text-xl font-bold mb-[2px]" style={{ marginRight: '10px' }}>  
-                Dispatch Website  
-              </p>  
-              {stars.map((_, index) => (  
-                index < alert?.rating ? (  
-                  <img key={index} src={'/star-yellow.png'} alt="Star" className="w-6 h-6" style={{ marginBottom: '5px' }} />  
-                ) : (  
-                  <img key={index} src={'/star-gray.png'} alt="Star" className="w-6 h-6" style={{ marginBottom: '5px', opacity: 0.5 }} />  
-                )  
-              ))}  
-              <span className="tooltip-text"> 
-                {alert?.rating_title}
-                <hr />
-                {alert?.rating_criteria}
-              </span>  
+        </Typography>
+
+        <Grid container spacing={2} mt={2}>
+          {/* Left Column */}
+          <Grid item xs={12} md={4}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="h6" component="p" style={{ flexGrow: 1 }}>
+                Dispatch Website
+              </Typography>
+              <div>{alert && renderStars(alert.rating)}</div>
             </div>
             <Divider />
 
-            <div className="mt-3 bg-white rounded-md px-4 py-7 shadow-md">
+            <Paper
+              elevation={3}
+              sx={{ mt: 2, p: 2 }}
+              style={{ position: "relative" }}
+            >
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                <strong>Headline:</strong> {alert?.headline}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                <strong>Description:</strong> {alert?.description}
+              </Typography>
 
-              <p className="text-sm text-gray-600 mt-2">
-                <span className="font-bold mt-2">Headline: </span>
-                {alert?.headline}
-              </p>
+              <Divider sx={{ my: 2 }} />
 
-              <p className="text-sm text-gray-600 mt-1">
-                <span className="font-bold">Desc: </span>
-                {alert?.description}
-              </p>
-
-              <Divider sx={{ margin: "18px 0px" }} />
-
-              <p
-                className="text-[13px] text-gray-700"
-                style={{ maxHeight: "200px", overflow: "auto"}}
-              >
-                <span className="font-bold">Transcript: </span>
-                <button  
-                  onClick={handleOpenModal}  
-                  className="p-1 bg-blue-500 text-white rounded ml-4"  
-                >  
-                  <span role="img" aria-label="open modal">  
-                    🔍
-                  </span>  
-                </button>  
-
+              <Typography variant="body2" color="textSecondary" gutterBottom>
+                <strong>Transcript:</strong>
+                <IconButton
+                  onClick={handleOpenModal}
+                  color="primary"
+                  size="small"
+                  sx={{ ml: 1 }}
+                >
+                  <ExpandMoreIcon />
+                </IconButton>
                 <ModalComponent
                   isOpen={isModalOpen}
                   onClose={handleCloseModal}
@@ -250,260 +266,516 @@ export default function Page() {
                   setPlaybackRate={setPlaybackRate}
                   handlePromptChange={handlePromptChange}
                 />
-                {isMounted ? (
-                  <pre style={{"textWrap": "wrap"}}>
-                    {clearedTranscript || whisperTranscript}
-                  </pre>
-                ) : (
-                  <pre>Loading...</pre> // Fallback content during server-side rendering
-                )}
-              </p>
+              </Typography>
 
-              <Divider sx={{ margin: "18px 0px" }} />
+              {isMounted ? (
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{ maxHeight: "200px", overflow: "auto", whiteSpace: "pre-wrap" }}
+                >
+                  {clearedTranscript || whisperTranscript}
+                </Typography>
+              ) : (
+                <Typography variant="body2">Loading...</Typography>
+              )}
+
+              <Divider sx={{ my: 2 }} />
 
               <div>
                 <audio
                   ref={audioRef}
                   controls
+                  style={{ width: "100%" }}
                   onLoadedData={() => console.log("Audio loaded")}
                 >
                   {audioUrl && <source src={audioUrl} type="audio/mpeg" />}
                 </audio>
-                <div className="mt-4 flex space-x-2">
-                  <button
+                <Box mt={2} display="flex" justifyContent="space-between">
+                  <Button
+                    variant="contained"
+                    color="primary"
                     onClick={() => setPlaybackRate(0.25)}
-                    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
+                    size="small"
                   >
-                    1/4
-                  </button>
-                  <button
+                    1/4x
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
                     onClick={() => setPlaybackRate(0.5)}
-                    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
+                    size="small"
                   >
-                    1/2
-                  </button>
-                  <button
+                    1/2x
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
                     onClick={() => setPlaybackRate(1)}
-                    className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
+                    size="small"
                   >
                     Normal
-                  </button>
-                </div>
+                  </Button>
+                </Box>
               </div>
 
-              <Divider sx={{ margin: "18px 0px" }} />
-              <p className="text-[13px] text-gray-700">
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="body2" color="textSecondary">
                 {new Date(alert?.dateTime).toLocaleString()}
-              </p>
-              <Divider sx={{ margin: "18px 0px" }} />
+              </Typography>
 
-              <div>
-                <p className="text-[12px] text-gray-600">
-                  This data is a realtime snapshot from the city&#39;s fire
-                  dispatch website/channels.
-                </p>
+              <Divider sx={{ my: 2 }} />
 
-                <p className="text-[12px] text-gray-600 mt-6">
-                  When the city reports engines being dispatched to a structure
-                  fire, we monitor how long they are on scene. If they are there
-                  long enough to indicate a real fire, we create this alert.
-                </p>
-              </div>
-            </div>
-          </div>
+              <Typography variant="caption" color="textSecondary" component="div">
+                This data is a realtime snapshot from the city's fire dispatch
+                website/channels.
+              </Typography>
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                component="div"
+                mt={2}
+              >
+                When the city reports engines being dispatched to a structure
+                fire, we monitor how long they are on scene. If they are there
+                long enough to indicate a real fire, we create this alert.
+              </Typography>
+            </Paper>
+          </Grid>
 
-          <div className="col-span-2">
-            <p className="text-xl font-bold mb-[2px]">Location</p>
+          {/* Right Column */}
+          <Grid item xs={12} md={8}>
+            <Typography variant="h6" component="p">
+              <span>Location</span>
+              <IconButton color="primary">
+                <img src='/Approved not pushed.png' className="mb-1" height={24} width={24}></img>
+              </IconButton>
+              <IconButton color="primary" sx={{marginLeft: "auto"}}>
+              <img src='/Disapproved not pushed.png' className="mb-1" height={24} width={24}></img>
+              </IconButton>
+            </Typography>
+
             <Divider />
 
-            <p className="text-[17px] mb-[2px] mt-4 flex">
-              {" "}
-              <span className="font-bold mr-4"> Known Address: </span>{" "}
-              <span style={{ fontStyle: "italic", marginRight: "auto" }}>{alert?.address}</span>
-              <img src={'/thumb_up.png'} alt="thumbup" className="w-10 h-10 mx-2" />
-              <img src={'/thumb_down.png'} alt="thumbdown" className="w-10 h-10 mx-2" />
-            </p>
-            <p className="text-[17px] font-bold mb-[2px] mt-4">
-              Possible Addresses:{" "}
-            </p>
+            <Box mt={2} display="flex" alignItems="center" flexWrap="wrap">
+              <Typography variant="body1" component="span" sx={{ mr: 1 }}>
+                <strong>Known Address:</strong>
+              </Typography>
+              <Typography
+                variant="body1"
+                component="span"
+                sx={{ fontStyle: "italic", flexGrow: 1 }}
+              >
+                {alert?.address}
+              </Typography>
+            </Box>
 
-            <Paper className="mt-2 p-2" style={{ maxHeight: "70vh", overflow: "auto" }}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      align="center"
-                      style={{ fontSize: "16px", fontWeight: "bold" }}
-                    >
-                      ID
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      style={{ fontSize: "16px", fontWeight: "bold" }}
-                    >
-                      Address
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      style={{ fontSize: "16px", fontWeight: "bold" }}
-                    >
-                      Accuracy Score
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      style={{ fontSize: "16px", fontWeight: "bold" }}
-                    >
-                      Map
-                    </TableCell>
-                    <TableCell
-                      align="center"
-                      style={{ fontSize: "16px", fontWeight: "bold" }}
-                    ></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {addresses.map((addr: AddressData, index: number) => (
-                    <React.Fragment key={index}>
-                      {/* Original row styling */}
-                      <TableRow style={{ backgroundColor: expandedRows.includes(index) ? '#f5f5f5' : 'white' }}>
-                        <TableCell align="center">{index + 1}</TableCell>
-                        <TableCell align="center">{addr.address}</TableCell>
-                        <TableCell align="center">{(addr.score * 100).toFixed(2)} %</TableCell>
-                        <TableCell>
-                          <OpenMapButton address={addr.address} />
-                        </TableCell>
-                        <TableCell align="center">
-                          {/* <ExpandMoreIcon
-                            style={{
-                              transition: "transform 0.3s",
-                              transform: expandedRows.includes(index) ? "rotate(180deg)" : "rotate(0deg)",
-                              cursor: "pointer",
-                            }}
-                          /> */}
-                          { addr.score == 1 && (
-                            !loading ? (
-                              addr.spokeo_status ? (
-                                <img
-                                  src="/completed.png"
-                                  alt="Icon"
-                                  width={27}
-                                  height={27}
-                                  style={{cursor: "pointer"}}
-                                  onClick={() => handleRowClick(index)}
-                                />
+            <Typography variant="body1" component="p" mt={2}>
+              <strong>Possible Addresses:</strong>
+            </Typography>
+
+            {addresses.length ? (
+              <Box mt={2}>
+                {isMobile ? (
+                  <Grid container spacing={2}>
+                    {addresses.map((addr, index) => (
+                      <Grid item xs={12} key={index}>
+                        <Card variant="outlined">
+                          <CardContent>
+                            <Typography variant="body2" color="textSecondary">
+                              <strong>ID:</strong> {index + 1}
+                            </Typography>
+                            <Typography variant="body2" display="flex" color="textSecondary">
+                              <strong>Address: </strong> {addr.address}
+                              <Box sx={{marginTop: "-12px", marginLeft: "-50px"}}>
+                                <OpenMapButton address={addr.address}/>
+                              </Box>
+                            </Typography>
+                            <Typography variant="body2" color="textSecondary">
+                              <strong>Accuracy Score:</strong>{" "}
+                              {(addr.score * 100).toFixed(2)}%
+                            </Typography>
+                            {/* <Box mt={1}>
+                            </Box> */}
+                          </CardContent>
+                          <CardActions disableSpacing>
+                            {addr.score === 1 && (
+                              !loading ? (
+                                addr.spokeo_status ? (
+                                  <IconButton
+                                    onClick={() => handleRowClick(index)}
+                                    color="primary"
+                                  >
+                                    <ExpandMoreIcon />
+                                  </IconButton>
+                                ) : (
+                                  <IconButton
+                                    onClick={() => unlockContactInfo(addr.id)}
+                                    color="primary"
+                                  >
+                                    <img
+                                      src="/unlock.png"
+                                      alt="Unlock"
+                                      width={24}
+                                      height={24}
+                                    />
+                                  </IconButton>
+                                )
                               ) : (
-                                <img
-                                  src="/unlock.png"
-                                  alt="Icon"
-                                  width={25}
-                                  height={25}
-                                  style={{cursor: "pointer"}}
-                                  onClick={() => unlockContactInfo(addr.id)}
-                                />
+                                <IconButton disabled>
+                                  <img
+                                    src="/loading.png"
+                                    alt="Loading"
+                                    width={24}
+                                    height={24}
+                                  />
+                                </IconButton>
                               )
-                            ) : (
-                              <img
-                                src="/loading.png"
-                                alt="Icon"
-                                width={27}
-                                height={27}
-                                style={{cursor: "pointer"}}
-                              />
-                            )
-                          )}
-
-                        </TableCell>
-                      </TableRow>
-
-                      <TableRow>
-                        <TableCell colSpan={5} style={{ padding: "0" }}>
-                          <Collapse in={expandedRows.includes(index)} timeout="auto" unmountOnExit>
-                            <Box style={{ backgroundColor: '#f0f0f0', padding: "10px", border: "1px solid #ccc" }}>
+                            )}
+                          </CardActions>
+                          <Collapse in={expandedRows.includes(index)}>
+                            <Box p={2}>
                               {/* Owner Info Section */}
                               {addr.contact_info?.owner_info?.length > 0 && (
-                                <Table size="small">
-                                  <TableHead>
-                                    <TableRow>
-                                      <TableCell align="center" style={{ fontWeight: 'bold', backgroundColor: '#e0e0e0' }}>Owners</TableCell>
-                                    </TableRow>
-                                  </TableHead>
-                                  <TableBody>
-                                    {addr.contact_info.owner_info.map((info: ResidentInfo | null, idx: number) => (
+                                <Box mb={2}>
+                                  <Typography
+                                    variant="subtitle2"
+                                    gutterBottom
+                                    sx={{ fontWeight: "bold" }}
+                                  >
+                                    Owners
+                                  </Typography>
+                                  {addr.contact_info.owner_info.map(
+                                    (info, idx) =>
                                       info && (
-                                        <TableRow key={idx}>
-                                          <TableCell>
-                                            <strong>Name:</strong> {info.name} <br />
-                                            <strong>Past Address:</strong> {info.past_address} <br />
-                                            <strong>Phone Number:</strong> {info.phone_number} <br />
-                                            <strong>Email Address:</strong> {info.email_address} <br />
-                                            <strong>Current Address:</strong> {info.current_address}
-                                          </TableCell>
-                                        </TableRow>
+                                        <Typography
+                                          variant="body2"
+                                          key={idx}
+                                          sx={{ mb: 1 }}
+                                        >
+                                          <strong>Name:</strong> {info.name} <br />
+                                          <strong>Past Address:</strong>{" "}
+                                          {info.past_address} <br />
+                                          <strong>Phone Number:</strong>{" "}
+                                          {info.phone_number} <br />
+                                          <strong>Email Address:</strong>{" "}
+                                          {info.email_address} <br />
+                                          <strong>Current Address:</strong>{" "}
+                                          {info.current_address}
+                                        </Typography>
                                       )
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                  )}
+                                </Box>
                               )}
 
                               {/* Current Info Section */}
                               {addr.contact_info?.current_info?.length > 0 && (
-                                <Table size="small">
-                                  <TableHead>
-                                    <TableRow>
-                                      <TableCell align="center" style={{ fontWeight: 'bold', backgroundColor: '#e0e0e0' }}>Current Residents</TableCell>
-                                    </TableRow>
-                                  </TableHead>
-                                  <TableBody>
-                                    {addr.contact_info.current_info.map((info: ResidentInfo, idx: number) => (
-                                      <TableRow key={idx}>
-                                        <TableCell>
-                                          <strong>Name:</strong> {info.name} <br />
-                                          <strong>Past Address:</strong> {info.past_address} <br />
-                                          <strong>Phone Number:</strong> {info.phone_number} <br />
-                                          <strong>Email Address:</strong> {info.email_address} <br />
-                                          <strong>Current Address:</strong> {info.current_address}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                <Box mb={2}>
+                                  <Typography
+                                    variant="subtitle2"
+                                    gutterBottom
+                                    sx={{ fontWeight: "bold" }}
+                                  >
+                                    Current Residents
+                                  </Typography>
+                                  {addr.contact_info.current_info.map(
+                                    (info, idx) => (
+                                      <Typography
+                                        variant="body2"
+                                        key={idx}
+                                        sx={{ mb: 1 }}
+                                      >
+                                        <strong>Name:</strong> {info.name} <br />
+                                        <strong>Past Address:</strong>{" "}
+                                        {info.past_address} <br />
+                                        <strong>Phone Number:</strong>{" "}
+                                        {info.phone_number} <br />
+                                        <strong>Email Address:</strong>{" "}
+                                        {info.email_address} <br />
+                                        <strong>Current Address:</strong>{" "}
+                                        {info.current_address}
+                                      </Typography>
+                                    )
+                                  )}
+                                </Box>
                               )}
 
                               {/* Past Info Section */}
                               {addr.contact_info?.past_info?.length > 0 && (
-                                <Table size="small">
-                                  <TableHead>
-                                    <TableRow>
-                                      <TableCell align="center" style={{ fontWeight: 'bold', backgroundColor: '#e0e0e0' }}>Past Residents</TableCell>
-                                    </TableRow>
-                                  </TableHead>
-                                  <TableBody>
-                                    {addr.contact_info.past_info.map((info: ResidentInfo, idx: number) => (
-                                      <TableRow key={idx}>
-                                        <TableCell>
-                                          <strong>Name:</strong> {info.name} <br />
-                                          <strong>Past Address:</strong> {info.past_address} <br />
-                                          <strong>Phone Number:</strong> {info.phone_number} <br />
-                                          <strong>Email Address:</strong> {info.email_address} <br />
-                                          <strong>Current Address:</strong> {info.current_address}
-                                        </TableCell>
-                                      </TableRow>
-                                    ))}
-                                  </TableBody>
-                                </Table>
+                                <Box mb={2}>
+                                  <Typography
+                                    variant="subtitle2"
+                                    gutterBottom
+                                    sx={{ fontWeight: "bold" }}
+                                  >
+                                    Past Residents
+                                  </Typography>
+                                  {addr.contact_info.past_info.map(
+                                    (info, idx) => (
+                                      <Typography
+                                        variant="body2"
+                                        key={idx}
+                                        sx={{ mb: 1 }}
+                                      >
+                                        <strong>Name:</strong> {info.name} <br />
+                                        <strong>Past Address:</strong>{" "}
+                                        {info.past_address} <br />
+                                        <strong>Phone Number:</strong>{" "}
+                                        {info.phone_number} <br />
+                                        <strong>Email Address:</strong>{" "}
+                                        {info.email_address} <br />
+                                        <strong>Current Address:</strong>{" "}
+                                        {info.current_address}
+                                      </Typography>
+                                    )
+                                  )}
+                                </Box>
                               )}
                             </Box>
                           </Collapse>
-                        </TableCell>
-                      </TableRow>
-                    </React.Fragment>
-                  ))}
-                </TableBody>
-              </Table>
-            </Paper>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  // Desktop Table View
+                  <Paper
+                    className="mt-2 p-2"
+                    style={{ maxHeight: "70vh", overflow: "auto" }}
+                  >
+                    <Table stickyHeader>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="center">
+                            <strong>ID</strong>
+                          </TableCell>
+                          <TableCell align="center">
+                            <strong>Address</strong>
+                          </TableCell>
+                          <TableCell align="center">
+                            <strong>Accuracy Score</strong>
+                          </TableCell>
+                          <TableCell align="center">
+                            <strong>Map</strong>
+                          </TableCell>
+                          <TableCell align="center"></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {addresses.map((addr, index) => (
+                          <React.Fragment key={index}>
+                            <TableRow
+                              style={{
+                                backgroundColor: expandedRows.includes(index)
+                                  ? "#f5f5f5"
+                                  : "white",
+                              }}
+                            >
+                              <TableCell align="center">{index + 1}</TableCell>
+                              <TableCell align="center">{addr.address}</TableCell>
+                              <TableCell align="center">
+                                {(addr.score * 100).toFixed(2)} %
+                              </TableCell>
+                              <TableCell align="center">
+                                <OpenMapButton address={addr.address} />
+                              </TableCell>
+                              <TableCell align="center">
+                                {addr.score === 1 && (
+                                  !loading ? (
+                                    addr.spokeo_status ? (
+                                      <IconButton
+                                        onClick={() => handleRowClick(index)}
+                                        color="primary"
+                                      >
+                                        <ExpandMoreIcon
+                                          style={{
+                                            transform: expandedRows.includes(index)
+                                              ? "rotate(180deg)"
+                                              : "rotate(0deg)",
+                                            transition: "transform 0.3s",
+                                          }}
+                                        />
+                                      </IconButton>
+                                    ) : (
+                                      <IconButton
+                                        onClick={() => unlockContactInfo(addr.id)}
+                                        color="primary"
+                                      >
+                                        <img
+                                          src="/unlock.png"
+                                          alt="Unlock"
+                                          width={24}
+                                          height={24}
+                                        />
+                                      </IconButton>
+                                    )
+                                  ) : (
+                                    <IconButton disabled>
+                                      <img
+                                        src="/loading.png"
+                                        alt="Loading"
+                                        width={24}
+                                        height={24}
+                                      />
+                                    </IconButton>
+                                  )
+                                )}
+                              </TableCell>
+                            </TableRow>
 
-          </div>
-        </div>
+                            <TableRow>
+                              <TableCell
+                                colSpan={5}
+                                style={{ padding: 0, borderBottom: "none" }}
+                              >
+                                <Collapse
+                                  in={expandedRows.includes(index)}
+                                  timeout="auto"
+                                  unmountOnExit
+                                >
+                                  <Box
+                                    style={{
+                                      backgroundColor: "#f0f0f0",
+                                      padding: "10px",
+                                      border: "1px solid #ccc",
+                                    }}
+                                  >
+                                    {/* Owner Info Section */}
+                                    {addr.contact_info?.owner_info?.length > 0 && (
+                                      <Table size="small">
+                                        <TableHead>
+                                          <TableRow>
+                                            <TableCell
+                                              align="center"
+                                              style={{
+                                                fontWeight: "bold",
+                                                backgroundColor: "#e0e0e0",
+                                              }}
+                                            >
+                                              Owners
+                                            </TableCell>
+                                          </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                          {addr.contact_info.owner_info.map(
+                                            (info, idx) =>
+                                              info && (
+                                                <TableRow key={idx}>
+                                                  <TableCell>
+                                                    <strong>Name:</strong>{" "}
+                                                    {info.name} <br />
+                                                    <strong>Past Address:</strong>{" "}
+                                                    {info.past_address} <br />
+                                                    <strong>Phone Number:</strong>{" "}
+                                                    {info.phone_number} <br />
+                                                    <strong>Email Address:</strong>{" "}
+                                                    {info.email_address} <br />
+                                                    <strong>Current Address:</strong>{" "}
+                                                    {info.current_address}
+                                                  </TableCell>
+                                                </TableRow>
+                                              )
+                                          )}
+                                        </TableBody>
+                                      </Table>
+                                    )}
+
+                                    {/* Current Info Section */}
+                                    {addr.contact_info?.current_info?.length > 0 && (
+                                      <Table size="small">
+                                        <TableHead>
+                                          <TableRow>
+                                            <TableCell
+                                              align="center"
+                                              style={{
+                                                fontWeight: "bold",
+                                                backgroundColor: "#e0e0e0",
+                                              }}
+                                            >
+                                              Current Residents
+                                            </TableCell>
+                                          </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                          {addr.contact_info.current_info.map(
+                                            (info, idx) => (
+                                              <TableRow key={idx}>
+                                                <TableCell>
+                                                  <strong>Name:</strong> {info.name}{" "}
+                                                  <br />
+                                                  <strong>Past Address:</strong>{" "}
+                                                  {info.past_address} <br />
+                                                  <strong>Phone Number:</strong>{" "}
+                                                  {info.phone_number} <br />
+                                                  <strong>Email Address:</strong>{" "}
+                                                  {info.email_address} <br />
+                                                  <strong>Current Address:</strong>{" "}
+                                                  {info.current_address}
+                                                </TableCell>
+                                              </TableRow>
+                                            )
+                                          )}
+                                        </TableBody>
+                                      </Table>
+                                    )}
+
+                                    {/* Past Info Section */}
+                                    {addr.contact_info?.past_info?.length > 0 && (
+                                      <Table size="small">
+                                        <TableHead>
+                                          <TableRow>
+                                            <TableCell
+                                              align="center"
+                                              style={{
+                                                fontWeight: "bold",
+                                                backgroundColor: "#e0e0e0",
+                                              }}
+                                            >
+                                              Past Residents
+                                            </TableCell>
+                                          </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                          {addr.contact_info.past_info.map(
+                                            (info, idx) => (
+                                              <TableRow key={idx}>
+                                                <TableCell>
+                                                  <strong>Name:</strong> {info.name}{" "}
+                                                  <br />
+                                                  <strong>Past Address:</strong>{" "}
+                                                  {info.past_address} <br />
+                                                  <strong>Phone Number:</strong>{" "}
+                                                  {info.phone_number} <br />
+                                                  <strong>Email Address:</strong>{" "}
+                                                  {info.email_address} <br />
+                                                  <strong>Current Address:</strong>{" "}
+                                                  {info.current_address}
+                                                </TableCell>
+                                              </TableRow>
+                                            )
+                                          )}
+                                        </TableBody>
+                                      </Table>
+                                    )}
+                                  </Box>
+                                </Collapse>
+                              </TableCell>
+                            </TableRow>
+                          </React.Fragment>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </Paper>
+                )}
+              </Box>
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No addresses available.
+                </Typography>
+              )}
+          </Grid>
+        </Grid>
       </div>
     </>
   );

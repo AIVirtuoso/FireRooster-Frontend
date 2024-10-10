@@ -58,7 +58,33 @@ export interface IGetAlertsResponse {
 }
 export interface IGetAlertByIdResponse {
   alert: Alert;
-  addresses: string[];
+  addresses: AddressData[];
   scanner: Scanner;
   audio: any;
+}
+
+export interface ContactInfo {
+  past_info: ResidentInfo[];
+  owner_info: (ResidentInfo | null)[];
+  current_info: ResidentInfo[];
+}
+
+export interface AddressData {
+  address: string;
+  score: number;
+  type: string | null;
+  dateTime: string | null;
+  id: number;
+  alert_id: number;
+  scanner_id: number | null;
+  contact_info: ContactInfo;
+  spokeo_status: number;
+}
+
+export interface ResidentInfo {
+  name: string;
+  past_address: string;
+  phone_number: string;
+  email_address: string;
+  current_address: string;
 }

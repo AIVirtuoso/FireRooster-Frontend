@@ -15,18 +15,30 @@ import {
   Tabs,
   TextField,
   styled,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Card,
+  CardContent,
+  Typography,
+  IconButton,
+  Grid,
+  useMediaQuery,
+  useTheme,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableCell,
+  TableRow
 } from "@mui/material";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
+import {
+  ExpandMore as ExpandMoreIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useState } from "react";
-import IconButton from "@mui/material/IconButton";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { useAppDispatch, useAppSelector } from "@/hooks/store.hooks";
 import { setPageInfo } from "@/store/slices/scanner.slice";
 import { useStore } from "@/store/StoreProvider";
@@ -34,7 +46,6 @@ import { useStore } from "@/store/StoreProvider";
 const StyledTableRow = styled(TableRow)(() => ({
   td: { backgroundColor: "white" },
   th: { backgroundColor: "white" },
-  // "&:last-child td, &:last-child th": { borderBottom: "unset" },
 }));
 
 const StyledTableHeaderRow = styled(TableRow)(() => ({
@@ -62,7 +73,7 @@ export default function Page() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [data, setData] = useState<Scanner[]>([]);
   const [value, setValue] = useState<"allscanners" | "myscanners">(
-    pageInfo ? "myscanners" : "allscanners"
+    pageInfo?.pageName === "myscanners" ? "myscanners" : "allscanners"
   );
   const [search, setSearch] = useState("");
   const [states, setStates] = useState<State[]>([]);
@@ -72,8 +83,11 @@ export default function Page() {
 
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { currentStateName, setCurrentStateName } = useStore();
-  const { currentScanners, setCurrentScanners } = useStore();
+  const { setCurrentStateName } = useStore();
+  const { setCurrentScanners } = useStore();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     if (value === "allscanners") {
@@ -110,8 +124,6 @@ export default function Page() {
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
-    console.log("newPage: ", newPage);
-
     setPage(newPage);
     dispatch(
       setPageInfo({ pageName: pageInfo?.pageName || "", pageNo: newPage })
@@ -171,13 +183,16 @@ export default function Page() {
   };
 
   const handleDelete = async (scanner_id: number) => {
-    const res = await scannerService.deletePurchasedScanner({
+    await scannerService.deletePurchasedScanner({
       scanner_id: scanner_id,
     });
     fetchMyScanners();
   };
 
-  const handleClickRow = async (scanner_id: number, curStateName: string) => {
+  const handleClickRow = (
+    scanner_id: number,
+    curStateName: string
+  ) => {
     setCurrentStateName(curStateName);
     setCurrentScanners(value);
     router.push(`/dashboard/scanners/${scanner_id}/settings`);
@@ -185,68 +200,143 @@ export default function Page() {
 
   return (
     <>
-      <div className=" mb-4 p-4 bg-white rounded">
-        <div className="font-semibold text-xl text-coolGray-800">Scanners</div>
+      <div className="mb-4 p-4 bg-white rounded">
+        <div className="font-semibold text-xl text-coolGray-800 text-center">Scanners</div>
 
-        <div className="flex mt-6 gap-2">
-          <div className="w-48">
-            <FormControl size="small" fullWidth>
-              <TextField
-                size="small"
-                onChange={handleSearchChange}
-                value={search}
-                name="search"
-                label="Search scanners"
-              />
-            </FormControl>
-          </div>
+        {isMobile ? (
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>Filters</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Grid container spacing={2}>
+                {/* Search */}
+                <Grid item xs={12}>
+                  <FormControl size="small" fullWidth>
+                    <TextField
+                      size="small"
+                      onChange={handleSearchChange}
+                      value={search}
+                      name="search"
+                      label="Search scanners"
+                    />
+                  </FormControl>
+                </Grid>
+                {/* State Select */}
+                <Grid item xs={12}>
+                  <FormControl size="small" fullWidth>
+                    <InputLabel id="state-filter-label">Select state</InputLabel>
+                    <Select
+                      labelId="state-filter-label"
+                      id="state-filter"
+                      label="Select state"
+                      name="state"
+                      value={selectedState ? selectedState.state_id : ""}
+                      onChange={handleStateChange}
+                      MenuProps={MenuProps}
+                    >
+                      <MenuItem value={""}>All states</MenuItem>
+                      {states.map((state) => (
+                        <MenuItem key={state.state_id} value={state.state_id}>
+                          {state.state_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+                {/* County Select */}
+                <Grid item xs={12}>
+                  <FormControl size="small" fullWidth>
+                    <InputLabel id="county-filter-label">
+                      Select county
+                    </InputLabel>
+                    <Select
+                      labelId="county-filter-label"
+                      id="county-filter"
+                      label="Select county"
+                      value={selectedCounty}
+                      onChange={handleCountyChange}
+                      MenuProps={MenuProps}
+                      name="county"
+                      disabled={!selectedState}
+                    >
+                      <MenuItem value={""}>All counties</MenuItem>
+                      {selectedState &&
+                        selectedState.county_list.map((county) => (
+                          <MenuItem
+                            key={county.county_id}
+                            value={county.county_id}
+                          >
+                            {county.county_name}
+                          </MenuItem>
+                        ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </AccordionDetails>
+          </Accordion>
+        ) : (
+          <div className="flex mt-6 gap-2">
+            <div className="w-48">
+              <FormControl size="small" fullWidth>
+                <TextField
+                  size="small"
+                  onChange={handleSearchChange}
+                  value={search}
+                  name="search"
+                  label="Search scanners"
+                />
+              </FormControl>
+            </div>
 
-          <div className="w-48">
-            <FormControl size="small" fullWidth>
-              <InputLabel id="state-filter-label">Select state</InputLabel>
-              <Select
-                labelId="state-filter-label"
-                id="state-filter"
-                label="Select state"
-                name="state"
-                value={selectedState && selectedState.state_id}
-                onChange={handleStateChange}
-                MenuProps={MenuProps}
-              >
-                <MenuItem value={""}>All states</MenuItem>
-                {states.map((state) => (
-                  <MenuItem key={state.state_id} value={state.state_id}>
-                    {state.state_name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
-
-          <div className="w-48">
-            <FormControl size="small" fullWidth>
-              <InputLabel id="state-filter-label">Select county</InputLabel>
-              <Select
-                labelId="state-filter-label"
-                id="state-filter"
-                label="Select county"
-                value={selectedCounty && selectedCounty}
-                onChange={handleCountyChange}
-                MenuProps={MenuProps}
-                name="county"
-                disabled={!selectedState}
-              >
-                <MenuItem value={""}>All county</MenuItem>
-                {selectedState &&
-                  selectedState.county_list.map((county) => (
-                    <MenuItem key={county.county_id} value={county.county_id}>
-                      {county.county_name}
+            <div className="w-48">
+              <FormControl size="small" fullWidth>
+                <InputLabel id="state-filter-label">Select state</InputLabel>
+                <Select
+                  labelId="state-filter-label"
+                  id="state-filter"
+                  label="Select state"
+                  name="state"
+                  value={selectedState ? selectedState.state_id : ""}
+                  onChange={handleStateChange}
+                  MenuProps={MenuProps}
+                >
+                  <MenuItem value={""}>All states</MenuItem>
+                  {states.map((state) => (
+                    <MenuItem key={state.state_id} value={state.state_id}>
+                      {state.state_name}
                     </MenuItem>
                   ))}
-              </Select>
-            </FormControl>
+                </Select>
+              </FormControl>
+            </div>
+
+            <div className="w-48">
+              <FormControl size="small" fullWidth>
+                <InputLabel id="county-filter-label">Select county</InputLabel>
+                <Select
+                  labelId="county-filter-label"
+                  id="county-filter"
+                  label="Select county"
+                  value={selectedCounty}
+                  onChange={handleCountyChange}
+                  MenuProps={MenuProps}
+                  name="county"
+                  disabled={!selectedState}
+                >
+                  <MenuItem value={""}>All counties</MenuItem>
+                  {selectedState &&
+                    selectedState.county_list.map((county) => (
+                      <MenuItem key={county.county_id} value={county.county_id}>
+                        {county.county_name}
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <Box>
@@ -254,6 +344,8 @@ export default function Page() {
           value={value}
           onChange={handleChange}
           textColor="inherit"
+          variant={isMobile ? "scrollable" : "standard"}
+          scrollButtons={isMobile ? "auto" : false} // Use false instead of "off"  
           sx={{
             "& .MuiTabs-indicator": {
               backgroundColor: "black",
@@ -272,167 +364,217 @@ export default function Page() {
       </Box>
 
       <Divider />
-      <Paper
-        sx={{
-          width: "100%",
-          boxShadow:
-            "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)",
-        }}
-        className="mt-8"
-      >
-        <TableContainer sx={{ maxHeight: "60vh" }}>
-          <Table
-            sx={{
-              // minWidth: 1450,
-              overflowX: "scroll",
-              marginBottom: "20px",
-            }}
-            aria-label="simple table"
-          >
-            <TableHead>
-              <StyledTableHeaderRow>
-                <TableCell
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                >
-                  <div className="font-bold">Receiver</div>
-                </TableCell>
-                <TableCell
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                >
-                  <div className="font-bold">Listeners</div>
-                </TableCell>
-                <TableCell
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                >
-                  <div className="font-bold">State</div>
-                </TableCell>
-                <TableCell
-                  align="center"
-                  className="uppercase"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                >
-                  <div className="font-bold">County</div>
-                </TableCell>
-                <TableCell
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    bgcolor: "white",
-                  }}
-                ></TableCell>
-              </StyledTableHeaderRow>
-            </TableHead>
-            <TableBody
-              sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
+
+      {isMobile ? (
+        <div>
+          {data.map((item) => (
+            <Card
+              key={item.id}
+              sx={{ mb: 2 }}
+              onClick={() => handleClickRow(item.scanner_id, item.state_name)}
             >
-              {data.map((item) => (
-                <StyledTableRow key={item.id} className="cursor-pointer">
-                  <TableCell
-                    onClick={() =>
-                      handleClickRow(item.scanner_id, item.state_name)
-                    }
+              <CardContent>
+                <Typography variant="h6">{item.scanner_title}</Typography>
+                <Typography variant="body2">
+                  Listeners: {item.listeners_count}
+                </Typography>
+                <Typography variant="body2">
+                  State: {item.state_name}
+                </Typography>
+                <Typography variant="body2">
+                  County: {item.county_name}
+                </Typography>
+                {value === "myscanners" && (
+                  <IconButton
+                    aria-label="delete"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (deleteRow === item.id) {
+                        handleDelete(item.scanner_id);
+                        setDeleteRow(null);
+                      } else {
+                        setDeleteRow(item.id);
+                      }
+                    }}
                   >
-                    {item.scanner_title}
+                    <DeleteIcon
+                      sx={{
+                        color: deleteRow === item.id ? "red" : "black",
+                      }}
+                    />
+                  </IconButton>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
+            component="div"
+            count={totalPage}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </div>
+      ) : (
+        <Paper
+          sx={{
+            width: "100%",
+            boxShadow:
+              "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 1px rgba(0, 0, 0, 0)",
+          }}
+          className="mt-8"
+        >
+          <TableContainer sx={{ maxHeight: "60vh" }}>
+            <Table
+              sx={{
+                overflowX: "scroll",
+                marginBottom: "20px",
+              }}
+              aria-label="simple table"
+            >
+              <TableHead>
+                <StyledTableHeaderRow>
+                  <TableCell
+                    className="uppercase"
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1000,
+                      bgcolor: "white",
+                    }}
+                  >
+                    <div className="font-bold">Receiver</div>
                   </TableCell>
                   <TableCell
-                    scope="row"
-                    onClick={() =>
-                      handleClickRow(item.scanner_id, item.state_name)
-                    }
+                    className="uppercase"
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1000,
+                      bgcolor: "white",
+                    }}
                   >
-                    {item.listeners_count}
+                    <div className="font-bold">Listeners</div>
                   </TableCell>
                   <TableCell
-                    onClick={() =>
-                      handleClickRow(item.scanner_id, item.state_name)
-                    }
+                    className="uppercase"
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1000,
+                      bgcolor: "white",
+                    }}
                   >
-                    {item.state_name}
+                    <div className="font-bold">State</div>
                   </TableCell>
                   <TableCell
                     align="center"
-                    onClick={() =>
-                      handleClickRow(item.scanner_id, item.state_name)
-                    }
+                    className="uppercase"
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1000,
+                      bgcolor: "white",
+                    }}
                   >
-                    <div className="font-bold">{item.county_name}</div>
+                    <div className="font-bold">County</div>
                   </TableCell>
                   <TableCell
-                    align="center"
-                    style={{ width: "100px" }}
-                    onClick={() =>
-                      handleClickRow(item.scanner_id, item.state_name)
-                    }
-                  >
-                    {value === "allscanners" && (
-                      <span
-                        onClick={() =>
-                          handleClickRow(item.scanner_id, item.state_name)
-                        }
-                      >
-                        Details
-                      </span>
-                    )}
-                    {value === "myscanners" && (
-                      <IconButton
-                        aria-label="delete"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (deleteRow === item.id) {
-                            handleDelete(item.scanner_id);
-                            setDeleteRow(null);
-                          } else {
-                            setDeleteRow(item.id);
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 1000,
+                      bgcolor: "white",
+                    }}
+                  ></TableCell>
+                </StyledTableHeaderRow>
+              </TableHead>
+              <TableBody
+                sx={{ maxHeight: "calc(50vh - 56px)", overflowY: "auto" }}
+              >
+                {data.map((item) => (
+                  <StyledTableRow key={item.id} className="cursor-pointer">
+                    <TableCell
+                      onClick={() =>
+                        handleClickRow(item.scanner_id, item.state_name)
+                      }
+                    >
+                      {item.scanner_title}
+                    </TableCell>
+                    <TableCell
+                      onClick={() =>
+                        handleClickRow(item.scanner_id, item.state_name)
+                      }
+                    >
+                      {item.listeners_count}
+                    </TableCell>
+                    <TableCell
+                      onClick={() =>
+                        handleClickRow(item.scanner_id, item.state_name)
+                      }
+                    >
+                      {item.state_name}
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      onClick={() =>
+                        handleClickRow(item.scanner_id, item.state_name)
+                      }
+                    >
+                      <div className="font-bold">{item.county_name}</div>
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      style={{ width: "100px" }}
+                    >
+                      {value === "allscanners" && (
+                        <span
+                          onClick={() =>
+                            handleClickRow(item.scanner_id, item.state_name)
                           }
-                        }}
-                      >
-                        <DeleteIcon
-                          sx={{
-                            color: deleteRow === item.id ? "red" : "black",
+                        >
+                          Details
+                        </span>
+                      )}
+                      {value === "myscanners" && (
+                        <IconButton
+                          aria-label="delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (deleteRow === item.id) {
+                              handleDelete(item.scanner_id);
+                              setDeleteRow(null);
+                            } else {
+                              setDeleteRow(item.id);
+                            }
                           }}
-                        />
-                      </IconButton>
-                    )}
-                  </TableCell>
-                </StyledTableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
-          component="div"
-          count={totalPage}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Paper>
+                        >
+                          <DeleteIcon
+                            sx={{
+                              color: deleteRow === item.id ? "red" : "black",
+                            }}
+                          />
+                        </IconButton>
+                      )}
+                    </TableCell>
+                  </StyledTableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 15, 25, 50, 100]}
+            component="div"
+            count={totalPage}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+      )}
     </>
   );
 }
