@@ -2,6 +2,7 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import variables from "./variables.module.scss";
 import { redirect } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   redirect("/auth/login");

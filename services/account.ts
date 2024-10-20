@@ -11,6 +11,7 @@ const accountService = {
     const userApi = "/api/auth/user";
     try {
       const response = await apiClient.get<GetUserResponse>(`${userApi}`);
+      console.log("hh: ", response.status)
       return response.data;
     } catch (error) {
       throw error;
