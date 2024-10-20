@@ -84,6 +84,8 @@ export default function Page() {
   const [deleteRow, setDeleteRow] = useState<null | number>(null);
   const [scraperStatus, setScraperStatus ] = useState<boolean>(false);
 
+  const user = useAppSelector(state => state.auth?.user);
+  console.log("user.tier: ", user.tier)
 
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -112,11 +114,11 @@ export default function Page() {
 
   useEffect(() => {
     fetchScraperStatus();
-  })
+  }, [scraperStatus])
 
   const fetchScraperStatus = async () => {
     const res = await scannerService.getScraperStatus()
-    console.log("status: ", res.scraper_status)
+    setScraperStatus(res.scraper_status);
   };
 
   const fetchStates = async () => {
@@ -353,19 +355,22 @@ export default function Page() {
                 </Select>
               </FormControl>
             </div>
-
-            <div>
-              <Grid item xs={12}>  
-                  <Button
-                    variant="contained"  
-                    color="primary"  
-                    onClick={handleSetScraperStatus}
-                    style={{ marginLeft: 16}} // Adjust the margin as needed  
-                    >  
-                    {scraperStatus ? "Turn Off Scraper" : "Turn On Scraper"}
-                  </Button>
-              </Grid>  
-            </div>
+            {
+              user.tier == 5 && (
+                <div>
+                  <Grid item xs={12}>  
+                      <Button
+                        variant="contained"  
+                        color="primary"  
+                        onClick={handleSetScraperStatus}
+                        style={{ marginLeft: 16}} // Adjust the margin as needed  
+                        >  
+                        {scraperStatus ? "Turn Off Scraper" : "Turn On Scraper"}
+                      </Button>
+                  </Grid>  
+                </div>
+              )
+            }
           </div>
         )}
       </div>
