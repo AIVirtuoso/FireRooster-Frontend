@@ -41,3 +41,15 @@ export interface IDeleteScannerResponse {
   status: boolean;
   message: string;
 }
+
+export interface SetScraperResponse {
+  status: boolean;
+  message: string;
+}
+
+export interface GetScraperResponse {
+  scraper_status: boolean;
+}
+export interface SetScraperRequest {
+  scraper_status: boolean;
+}

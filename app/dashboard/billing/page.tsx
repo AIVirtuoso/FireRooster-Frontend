@@ -220,8 +220,8 @@ export default function Page() {
                       color="primary"
                       onClick={() => handleOpenModal(plan.tier as SubEnum)}
                       sx={{
-                        backgroundColor: "gray",
-                        "&:hover": { backgroundColor: "darkgray" },
+                        backgroundColor: "darkgreen",
+                        "&:hover": { backgroundColor: "green" },
                       }}
                     >
                       Choose Scanners
@@ -236,8 +236,8 @@ export default function Page() {
                           handleCheckoutSubscription(plan.planId)
                         }
                         sx={{
-                          backgroundColor: "gray",
-                          "&:hover": { backgroundColor: "darkgray" },
+                          backgroundColor: "darkgreen",
+                          "&:hover": { backgroundColor: "green" },
                         }}
                       >
                         Subscribe

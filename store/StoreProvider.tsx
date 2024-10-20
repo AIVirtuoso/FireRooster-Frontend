@@ -12,6 +12,16 @@ interface StoreContextProps {
   setCurrentCategory: (category: string) => void;
   currentStars: number;
   setCurrentStars: (stars: number) => void;
+  headSearch: string;
+  setHeadSearch: (headSearch: string) => void;
+  decSearch: string;
+  setDecSearch: (decSearch: string) => void;
+  alertIdSearch: number,
+  setAlertIdSearch: (alertIdSearch: number) => void;
+  selectedFrom: Date | null,
+  setSelectedFrom: (selectedFrom: Date | null) => void;
+  selectedTo: Date | null,
+  setSelectedTo: (selectedTo: Date | null) => void;
 }
 
 const StoreContext = createContext<StoreContextProps | undefined>(undefined);
@@ -25,7 +35,12 @@ export default function StoreProvider({
   const [currentStateName, setCurrentStateName] = useState<string>("");
   const [currentScanners, setCurrentScanners] = useState<string>("");
   const [currentCategory, setCurrentCategory] = useState<string>("ALL");
-  const [currentStars, setCurrentStars] = useState<number>(1);
+  const [currentStars, setCurrentStars] = useState<number>(0);
+  const [headSearch, setHeadSearch] = useState("");
+  const [decSearch, setDecSearch] = useState("");
+  const [alertIdSearch, setAlertIdSearch] = useState(0);
+  const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
+  const [selectedTo, setSelectedTo] = useState<Date | null>(null);
   const storeRef = useRef<AppStoreType>();
 
   if (!storeRef.current) {
@@ -43,7 +58,17 @@ export default function StoreProvider({
           currentCategory,
           setCurrentCategory,
           currentStars,
-          setCurrentStars
+          setCurrentStars,
+          decSearch,
+          setDecSearch,
+          headSearch,
+          setHeadSearch,
+          alertIdSearch,
+          setAlertIdSearch,
+          selectedFrom,
+          setSelectedFrom,
+          selectedTo,
+          setSelectedTo
         }}
       >
         {children}

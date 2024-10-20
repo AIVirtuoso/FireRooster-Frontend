@@ -61,6 +61,14 @@ interface ResidentInfo {
   current_address: string;
 }
 
+const playbackRates = [  
+  { rate: 0.25, label: '0.25x' },  
+  { rate: 0.5, label: '0.5x' },  
+  { rate: 1, label: '1x' },  
+  { rate: 1.5, label: '1.5x' },  
+  { rate: 2, label: '2x' },  
+];  
+
 const starCount = 5;
 
 export default function Page() {
@@ -265,6 +273,7 @@ export default function Page() {
                   handleSavePrompt={handleSavePrompt}
                   setPlaybackRate={setPlaybackRate}
                   handlePromptChange={handlePromptChange}
+                  playbackRates={playbackRates}
                 />
               </Typography>
 
@@ -282,42 +291,31 @@ export default function Page() {
 
               <Divider sx={{ my: 2 }} />
 
-              <div>
-                <audio
-                  ref={audioRef}
-                  controls
-                  style={{ width: "100%" }}
-                  onLoadedData={() => console.log("Audio loaded")}
-                >
-                  {audioUrl && <source src={audioUrl} type="audio/mpeg" />}
-                </audio>
-                <Box mt={2} display="flex" justifyContent="space-between">
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setPlaybackRate(0.25)}
-                    size="small"
-                  >
-                    1/4x
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setPlaybackRate(0.5)}
-                    size="small"
-                  >
-                    1/2x
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => setPlaybackRate(1)}
-                    size="small"
-                  >
-                    Normal
-                  </Button>
-                </Box>
-              </div>
+              <div>  
+                <audio  
+                  ref={audioRef}  
+                  controls  
+                  style={{ width: '100%' }}  
+                  onLoadedData={() => console.log('Audio loaded')}  
+                >  
+                  {audioUrl && <source src={audioUrl} type="audio/mpeg" />}  
+                </audio>  
+                <Box mt={2} display="flex" justifyContent="space-between">  
+                  {playbackRates.map(({ rate, label }) => (  
+                    <Button  
+                      key={rate}  
+                      variant="contained"  
+                      color="primary"  
+                      onClick={() => setPlaybackRate(rate)}  
+                      size="small"  
+                      sx={{ minWidth: "50px", padding: "unset"}}  
+                    >  
+                      {label}  
+                    </Button>  
+                  ))}  
+                </Box>  
+              </div>  
+
 
               <Divider sx={{ my: 2 }} />
 
@@ -328,7 +326,7 @@ export default function Page() {
               <Divider sx={{ my: 2 }} />
 
               <Typography variant="caption" color="textSecondary" component="div">
-                This data is a realtime snapshot from the city's fire dispatch
+                This data is a realtime snapshot from the city&#39;s fire dispatch
                 website/channels.
               </Typography>
               <Typography

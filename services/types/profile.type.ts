@@ -10,5 +10,6 @@ export interface SetProfileResponse {
     message: string;
 }
 export interface GetProfileResponse {
-    prompt: string
+    prompt: string;
+    phone_number: string;
 }

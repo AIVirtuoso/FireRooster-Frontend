@@ -14,11 +14,24 @@ export default function Page() {
   const [page, setPage] = useState(pageInfo?.pageNo || 0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-  const [headSearch, setHeadSearch] = useState("");
-  const [decSearch, setDecSearch] = useState("");
-  const { currentCategory, setCurrentCategory, currentStars, setCurrentStars } = useStore();
-  const [selectedFrom, setSelectedFrom] = useState<Date | null>(null);
-  const [selectedTo, setSelectedTo] = useState<Date | null>(null);
+
+  const {
+    headSearch,
+    setHeadSearch,
+    decSearch,
+    setDecSearch,
+    currentCategory,
+    setCurrentCategory,
+    currentStars,
+    setCurrentStars,
+    alertIdSearch,
+    setAlertIdSearch,
+    selectedFrom,
+    setSelectedFrom,
+    selectedTo,
+    setSelectedTo
+  } = useStore();
+  
 
   const dispatch = useAppDispatch();
 
@@ -34,6 +47,7 @@ export default function Page() {
     selectedFrom,
     selectedTo,
     currentStars,
+    alertIdSearch
   ]);
 
   const fetchAlertsData = async () => {
@@ -42,6 +56,7 @@ export default function Page() {
       page: page + 1,
       headSearch,
       decSearch,
+      alertIdSearch,
       category: String(currentCategory == "ALL" ? "" : currentCategory),
       selected_from: selectedFrom,
       selected_to: selectedTo,
@@ -78,6 +93,12 @@ export default function Page() {
     const value = event.target.value;
     setDecSearch(value);
   };
+  const handleAlertIdSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    if (value === '' || /^\d+$/.test(value)) {  
+      setAlertIdSearch(value === '' ? 0 : parseInt(value, 10)); // Convert to a number  
+    }  
+  };
 
   const handleDateChange = (
     event: unknown,
@@ -100,8 +121,10 @@ export default function Page() {
         page={page}
         headSearch={headSearch}
         decSearch={decSearch}
+        alertIdSearch={alertIdSearch}
         handleHeadSearchChange={handleHeadSearchChange}
         handleDecSearchChange={handleDecSearchChange}
+        handleAlertIdSearchChange={handleAlertIdSearchChange}
         filterAlert={currentCategory}
         handleInfoChange={handleInfoChange}
         handleClickStars={handleClickStars}

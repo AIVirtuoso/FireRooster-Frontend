@@ -192,6 +192,7 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
   };
 
   const handleSelectScanner = (id: number, checked: boolean) => {
+    console.log("id: ", id);
     const scannersArr = checked
       ? [...selectedScanners, id]
       : selectedScanners.filter((item) => item !== id);
@@ -500,8 +501,8 @@ export function BillingModal({ handleClose, type }: IBillingModal) {
             onClick={handlePurchase}
             fullWidth
             sx={{
-              backgroundColor: "gray",
-              "&:hover": { backgroundColor: "darkgray" },
+              backgroundColor: "darkgreen",
+              "&:hover": { backgroundColor: "green" },
             }}
           >
             Subscribe

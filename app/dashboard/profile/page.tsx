@@ -1,8 +1,10 @@
 "use client";
 import {
   Box,
+  Checkbox,
   Divider,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
@@ -82,11 +84,17 @@ export default function Page() {
     setStates(res);
   };
 
-  const handleStateChange = (e: SelectChangeEvent) => {
-    const id = e.target.value;
-    const state = states.find((item) => item.state_id === id) || "";
-    if (state === "") setSelectedCounty("");
-    setSelectedState(state);
+  const handleStateChange = (e: SelectChangeEvent) => {  
+    const id = e.target.value;  
+    const state = states.find((item) => item.state_id === id);  
+  
+    // If state is undefined, setSelectedCounty to "" and provide a default value for setSelectedState  
+    if (!state) {  
+      setSelectedCounty("");  
+      setSelectedState(""); // Or handle this scenario as needed  
+    } else {  
+      setSelectedState(state);  
+    }  
   };
 
   const handleCountyChange = (e: SelectChangeEvent) => {
@@ -134,7 +142,7 @@ export default function Page() {
       console.error("Error saving data:", error);
     }
   };
-  console.log(user)
+  
   return (
     <>
       <div className="flex justify-between mb-4 items-center p-4 bg-white rounded">
@@ -149,7 +157,7 @@ export default function Page() {
         >
           <TextField
             {...register("first_name", {
-              value: getValues("first_name" || ""),
+              value: getValues("first_name"),
             })}
             className="sm:w-1/2 sm:mb-0 mb-8"
             error={Boolean(errors?.first_name?.message)}
@@ -159,7 +167,7 @@ export default function Page() {
             onChange={(e) => setValue("first_name", e.target.value)}
           />
           <TextField
-            {...register("last_name", { value: getValues("last_name" || "") })}
+            {...register("last_name", { value: getValues("last_name") })}
             sx={{ marginTop: isMobileWidth ? "2rem !important" : "0px" }}
             className="sm:w-1/2"
             error={Boolean(errors?.last_name?.message)}
@@ -170,7 +178,7 @@ export default function Page() {
           />
         </Stack>
         <TextField
-          {...register("email", { value: getValues("email" || "") })}
+          {...register("email", { value: getValues("email") })}
           className="w-full"
           error={Boolean(errors?.email?.message)}
           variant="outlined"
@@ -179,30 +187,37 @@ export default function Page() {
           onChange={(e) => setValue("email", e.target.value)}
         />
 
-        <Controller
-          name="phone_number"
-          control={control}
-          defaultValue={getValues("phone_number" || "")}
-          render={({ field }: { field: ControllerRenderProps<TProfileSchema, "phone_number"> }) => (
-            <div style={{ marginTop: '1rem' }}>
-              <PhoneInput
-                country={'us'}
-                value={field.value || ""}
-                onChange={(value) => field.onChange({ target: { name: field.name, value } })}
-                onBlur={field.onBlur}
-                inputProps={{
-                  name: field.name,
-                  ref: field.ref,
-                  required: true,
-                }}
-                inputStyle={{ width: '100%' }}
-              />
-              {errors.phone_number && (
-                <p style={{ color: 'red' }}>{errors.phone_number.message}</p>
-              )}
-            </div>
-          )}
-        />
+        <Stack direction="row" alignItems="center" spacing={2} style={{ marginTop: '1rem' }}>  
+          <Controller  
+            name="phone_number"  
+            control={control}  
+            defaultValue={getValues("phone_number")}  
+            render={({ field }: { field: ControllerRenderProps<TProfileSchema, "phone_number"> }) => (  
+              <div style={{ flexGrow: 1 }}>  
+                <PhoneInput  
+                  country={'us'}
+                  value={field.value}
+                  onChange={(value) => field.onChange({ target: { name: field.name, value } })}  
+                  onBlur={field.onBlur}  
+                  inputProps={{  
+                    name: field.name,  
+                    ref: field.ref,  
+                    required: true,  
+                  }}  
+                  inputStyle={{ width: '100%' }}  
+                />  
+                {errors.phone_number && (  
+                  <p style={{ color: 'red' }}>{errors.phone_number.message}</p>  
+                )}  
+              </div>  
+            )}  
+          />  
+          <FormControlLabel
+            control={<Checkbox />}
+            label="Opt In"
+            style={{marginRight: "16px", marginLeft: "0px"}}
+          />  
+        </Stack>  
 
         {
           user.tier == 6 && (

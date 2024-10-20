@@ -10,6 +10,7 @@ export interface IGetAlertsPayload extends Pagination {
   sub_category?: string;
   headSearch: string;
   decSearch: string;
+  alertIdSearch: number;
   category?: string;
   selected_from?: Date | null;
   selected_to?: Date | null;
@@ -47,7 +48,7 @@ export interface Alert {
 
 export interface AlertObject {
   alert: Alert;
-  addresses: string[];
+  scanner: Scanner;
 }
 
 export interface IGetAlertsResponse {

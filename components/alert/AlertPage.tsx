@@ -36,6 +36,7 @@ import {
   TableBody,
   TableCell,
   TableRow,
+  Tooltip,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/navigation";
@@ -43,16 +44,19 @@ import React, { useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { z } from "zod";
+import Json2CSV from "./Json2CSV";
 
 interface AlertPageProps {
   data: AlertObject[];
   page: number;
   headSearch: string;
   decSearch: string;
+  alertIdSearch: number;
   handleHeadSearchChange: (
     event: React.ChangeEvent<HTMLInputElement>
   ) => void;
   handleDecSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleAlertIdSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   filterAlert: string;
   handleInfoChange?: (event: SelectChangeEvent) => void;
   handleClickStars: (value: number) => void;
@@ -78,8 +82,10 @@ export function AlertPage({
   page,
   headSearch,
   decSearch,
+  alertIdSearch,
   handleHeadSearchChange,
   handleDecSearchChange,
+  handleAlertIdSearchChange,
   filterAlert,
   handleInfoChange,
   handleClickStars,
@@ -273,6 +279,10 @@ export function AlertPage({
                     max={starCount}
                   />
                 </Grid>
+                <Json2CSV 
+                  isMobile={isMobile}
+                  data={data}
+                />
               </Grid>
             </AccordionDetails>
           </Accordion>
@@ -349,6 +359,20 @@ export function AlertPage({
               </Grid>
             )}
             {/* Date Pickers */}
+            <Grid item xs={12} sm={6} md={4} lg={3}>  
+              <FormControl size="small" fullWidth>  
+                <TextField  
+                  size="small"  
+                  onChange={handleAlertIdSearchChange}  
+                  value={alertIdSearch.toString()} // Convert number to string for display   
+                  name="alertIdSearch"  
+                  label="Search Alert ID"
+                  InputProps={{  
+                    inputProps: { pattern: "[0-9]*", inputMode: "numeric"  } // This pattern limits the input to numbers  
+                  }}  
+                />  
+              </FormControl>  
+            </Grid>  
             <Grid item xs={12} sm={6} md={4} lg={3}>
               <DatePicker
                 selected={selectedFrom}
@@ -394,8 +418,13 @@ export function AlertPage({
                   handleClickStars(newValue || 0);
                 }}
                 max={starCount}
+                sx={{marginTop: "8px"}}
               />
             </Grid>
+            <Json2CSV 
+              isMobile={isMobile}
+              data={data}
+            />
           </Grid>
         )}
       </div>
@@ -453,7 +482,7 @@ export function AlertPage({
         </div>
       ) : (
         <Paper sx={{ width: "100%" }} className="mt-6">
-          <TableContainer sx={{ maxHeight: "70vh" }}>
+          <TableContainer sx={{ maxHeight: "65vh" }}>
             <Table
               sx={{
                 overflowX: "scroll",
@@ -532,7 +561,7 @@ export function AlertPage({
                   >
                     <div className="font-bold">Address</div>
                   </TableCell>
-                  <TableCell
+                  {/* <TableCell
                     align="center"
                     className="uppercase"
                     sx={{
@@ -543,7 +572,7 @@ export function AlertPage({
                     }}
                   >
                     <div className="font-bold">Type</div>
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell
                     align="center"
                     className="uppercase"
@@ -601,27 +630,36 @@ export function AlertPage({
                       </div>
                     </TableCell>
                     <TableCell align="center" >
-                      <div className="flex">
-                        {stars.map((_, index) => (  
-                          index < row.alert?.rating ? (  
-                            <img key={index} src={'/star-yellow.png'} alt="Star" className="w-6 h-6" style={{ marginBottom: '5px' }} />  
-                          ) : (  
-                            <img key={index} src={'/star-gray.png'} alt="Star" className="w-6 h-6" style={{ marginBottom: '5px', opacity: 0.5 }} />  
-                          )  
-                        ))}
-                      </div>
+                      <Grid item xs={10}>
+                        <Rating
+                          name="alert-rating"
+                          value={row.alert.rating}
+                          max={starCount}
+                        />
+                      </Grid>
                     </TableCell>
                     <TableCell align="center" onClick={() => handleRowClick(row)}>
                       <div className="font-bold">{row.alert.address}</div>
                     </TableCell>
-                    <TableCell align="center" onClick={() => handleRowClick(row)}>
+                    {/* <TableCell align="center" onClick={() => handleRowClick(row)}>
                       <House />
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell
                       align="center"
                       onClick={() => router.push('/dashboard/scanners')}
                     >
-                      <Radio />
+                      <Tooltip
+                        title={(  
+                          <div>
+                            <Typography variant="body1" component="div">{row.scanner.scanner_title}</Typography>
+                            <Divider style={{marginTop: "0px", marginBottom: "8px", backgroundColor: 'white' }} />  
+                            <Typography variant="body2" component="div"><span style={{fontWeight: "bold"}}>State: </span> {row.scanner.state_name}</Typography>  
+                            <Typography variant="body2" component="div"><span style={{fontWeight: "bold"}}>County: </span> {row.scanner.county_name}</Typography>  
+                          </div>  
+                        )}
+                      >    
+                        <Radio />  
+                      </Tooltip> 
                     </TableCell>
                   </StyledTableRow>
                 ))}

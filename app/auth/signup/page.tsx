@@ -70,7 +70,7 @@ export default function Page() {
       <div className="text-3xl font-bold mb-6">Sign up</div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <TextField
-          {...register("first_name", { value: getValues("first_name" || "") })}
+          {...register("first_name", { value: getValues("first_name") })}
           error={Boolean(errors?.first_name?.message)}
           variant="outlined"
           label="First name"
@@ -78,7 +78,7 @@ export default function Page() {
           onChange={(e) => setValue("first_name", e.target.value)}
         />
         <TextField
-          {...register("last_name", { value: getValues("last_name" || "") })}
+          {...register("last_name", { value: getValues("last_name") })}
           error={Boolean(errors?.last_name?.message)}
           variant="outlined"
           label="Last name"
@@ -86,7 +86,7 @@ export default function Page() {
           onChange={(e) => setValue("last_name", e.target.value)}
         />
         <TextField
-          {...register("email", { value: getValues("email") || "" })}
+          {...register("email", { value: getValues("email") })}
           error={Boolean(errors?.email?.message)}
           variant="outlined"
           label="Email"
@@ -94,7 +94,7 @@ export default function Page() {
           onChange={(e) => setValue("email", e.target.value)}
         />
         <TextField
-          {...register("password", { value: getValues("password") || "" })}
+          {...register("password", { value: getValues("password") })}
           error={Boolean(errors?.password?.message)}
           variant="outlined"
           label="Password"
@@ -104,7 +104,7 @@ export default function Page() {
         />
         <TextField
           {...register("password2", {
-            value: getValues("password2") || "",
+            value: getValues("password2"),
           })}
           error={Boolean(errors?.password2?.message)}
           variant="outlined"

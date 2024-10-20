@@ -5,6 +5,9 @@ import {
   IDeleteScanner,
   IDeleteScannerResponse,
   IGetScannersResponse,
+  SetScraperResponse,
+  SetScraperRequest,
+  GetScraperResponse
 } from "./types/scanner.type";
 
 export const scannerService = {
@@ -42,6 +45,28 @@ export const scannerService = {
         `${endPoint}`,
         payload
       );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+  async setScraperStatus(payload: SetScraperRequest) {
+    const endPoint = "/api/scanners/set-scraper-status";
+    try {
+      const response = await apiClient.post<SetScraperResponse>(
+        `${endPoint}`,
+        payload
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getScraperStatus() {
+    const endPoint = "/api/scanners/get-scraper-status";
+    try {
+      const response = await apiClient.get<GetScraperResponse>(`${endPoint}`);
       return response.data;
     } catch (error) {
       throw error;

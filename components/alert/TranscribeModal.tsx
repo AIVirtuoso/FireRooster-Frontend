@@ -2,6 +2,7 @@
 import React from "react";
 import { LoadingButton } from "@mui/lab";
 import './style.css';
+import { Box, Button } from "@mui/material";
 
 interface ModalComponentProps {
   isOpen: boolean;
@@ -21,7 +22,9 @@ interface ModalComponentProps {
   handleSavePrompt: () => void;
   setPlaybackRate: (rate: number) => void;
   handlePromptChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  playbackRates: ({rate: number; label: string;}[])
 }
+
 
 const ModalComponent: React.FC<ModalComponentProps> = ({
   isOpen,
@@ -38,6 +41,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   handleSavePrompt,
   setPlaybackRate,
   handlePromptChange,
+  playbackRates
 }) => {
   if (!isOpen) return null; // Do not render the modal if it's not open
 
@@ -121,34 +125,28 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
 
         {/* Audio Player and Controls */}
         <div className="flex flex-col md:flex-row items-center mb-4">
-          <audio
-            ref={audioRef}
+          <audio  
+            ref={audioRef}  
             controls
-            className="w-full md:w-auto"
-            onLoadedData={() => console.log("Audio loaded")}
-          >
-            {audioUrl && <source src={audioUrl} type="audio/mpeg" />}
+            style={{marginBottom: "8px"}} // Adjust the numeric value, default uses 'spacing' unit  
+            onLoadedData={() => console.log('Audio loaded')}  
+          >  
+            {audioUrl && <source src={audioUrl} type="audio/mpeg" />}  
           </audio>
-          <div className="flex space-x-2 mt-2 md:mt-0 md:ml-4">
-            <button
-              onClick={() => setPlaybackRate(0.25)}
-              className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
-            >
-              1/4
-            </button>
-            <button
-              onClick={() => setPlaybackRate(0.5)}
-              className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
-            >
-              1/2
-            </button>
-            <button
-              onClick={() => setPlaybackRate(1)}
-              className="px-4 py-2 bg-blue-500 text-white font-semibold rounded hover:bg-blue-600"
-            >
-              Normal
-            </button>
-          </div>
+          <Box display="flex" justifyContent="space-between" marginTop={0}>  
+            {playbackRates.map(({ rate, label }) => (  
+              <Button  
+                key={rate}  
+                variant="contained"  
+                color="primary"  
+                onClick={() => setPlaybackRate(rate)}  
+                size="small"  
+                sx={{ minWidth: "50px", padding: "unset", margin: "4px"}}  
+              >  
+                {label}  
+              </Button>  
+            ))}  
+          </Box>
         </div>
 
         {/* Prompt Textarea */}
