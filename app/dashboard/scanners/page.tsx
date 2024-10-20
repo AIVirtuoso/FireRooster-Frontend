@@ -44,6 +44,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/store.hooks";
 import { setPageInfo } from "@/store/slices/scanner.slice";
 import { useStore } from "@/store/StoreProvider";
 import { boolean } from "zod";
+import { LoadingButton } from "@mui/lab";
 
 const StyledTableRow = styled(TableRow)(() => ({
   td: { backgroundColor: "white" },
@@ -75,7 +76,7 @@ export default function Page() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [data, setData] = useState<Scanner[]>([]);
   const [value, setValue] = useState<"allscanners" | "myscanners">(
-    pageInfo?.pageName === "myscanners" ? "myscanners" : "allscanners"
+    pageInfo?.pageName === "allscanners" ? "allscanners" : "myscanners"
   );
   const [search, setSearch] = useState("");
   const [states, setStates] = useState<State[]>([]);
@@ -83,6 +84,7 @@ export default function Page() {
   const [selectedCounty, setSelectedCounty] = useState<string | "">("");
   const [deleteRow, setDeleteRow] = useState<null | number>(null);
   const [scraperStatus, setScraperStatus ] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const user = useAppSelector(state => state.auth?.user);
   console.log("user.tier: ", user.tier)
@@ -114,7 +116,7 @@ export default function Page() {
 
   useEffect(() => {
     fetchScraperStatus();
-  }, [scraperStatus])
+  }, [])
 
   const fetchScraperStatus = async () => {
     const res = await scannerService.getScraperStatus()
@@ -214,8 +216,10 @@ export default function Page() {
   };
 
   const handleSetScraperStatus = async () => {
+    setLoading(true)
     const response = await scannerService.setScraperStatus({scraper_status: scraperStatus});
     if (response.status == true) setScraperStatus(!scraperStatus)
+    setLoading(false)
   }
 
   return (
@@ -293,6 +297,23 @@ export default function Page() {
                     </Select>
                   </FormControl>
                 </Grid>
+                {
+                  user.tier == 6 && (
+                    <Grid item xs={12}>  
+                        <LoadingButton
+                          sx={{
+                            [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },
+                            background: "primary",
+                          }}
+                          loading={loading}
+                          variant="contained"
+                          onClick = {handleSetScraperStatus}
+                        >
+                          {scraperStatus ? "Turn Off Scraper" : "Turn On Scraper"}
+                        </LoadingButton>
+                    </Grid>  
+                  )
+                }
               </Grid>
             </AccordionDetails>
           </Accordion>
@@ -356,19 +377,20 @@ export default function Page() {
               </FormControl>
             </div>
             {
-              user.tier == 5 && (
-                <div>
-                  <Grid item xs={12}>  
-                      <Button
-                        variant="contained"  
-                        color="primary"  
-                        onClick={handleSetScraperStatus}
-                        style={{ marginLeft: 16}} // Adjust the margin as needed  
-                        >  
-                        {scraperStatus ? "Turn Off Scraper" : "Turn On Scraper"}
-                      </Button>
-                  </Grid>  
-                </div>
+              user.tier == 6 && (
+                <Grid item xs={12}>  
+                    <LoadingButton
+                      sx={{
+                        [`&:hover`]: { background: "rgba(30, 41, 59, 0.8)" },
+                        background: "primary",
+                      }}
+                      loading={loading}
+                      variant="contained"
+                      onClick = {handleSetScraperStatus}
+                    >
+                      {scraperStatus ? "Turn Off Scraper" : "Turn On Scraper"}
+                    </LoadingButton>
+                </Grid>  
               )
             }
           </div>
